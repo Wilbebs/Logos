@@ -1,0 +1,594 @@
+{
+  "cbs": {
+    "display_name": "Certificado en Estudios Bíblicos",
+    "level": "institute",
+    "budget_tier": "low",
+    "monthly_cost_approx_usd": 25,
+    "credit_hours": 45,
+    "duration": null,
+    "required_prior_level": "none",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Open enrollment — no prior education requirement",
+      "Life experience credit not applicable at institute level",
+      "Recommended for applicants with ~$25/month budget"
+    ],
+    "auto_approve_if": { "forms_complete": true },
+    "flag_for_review_if": [],
+    "auto_reject_if": {}
+  },
+
+  "liderazgo_espiritual": {
+    "display_name": "Liderazgo Espiritual / Diplomado",
+    "level": "certificate",
+    "budget_tier": "low",
+    "monthly_cost_approx_usd": 25,
+    "credit_hours": 24,
+    "duration": null,
+    "required_prior_level": "none",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Open enrollment — no prior education requirement"
+    ],
+    "auto_approve_if": { "forms_complete": true },
+    "flag_for_review_if": [],
+    "auto_reject_if": {}
+  },
+
+  "programa_acelerado": {
+    "display_name": "Programa Acelerado Ministerial",
+    "level": "certificate",
+    "budget_tier": "low",
+    "monthly_cost_approx_usd": 25,
+    "credit_hours": 15,
+    "duration": null,
+    "required_prior_level": "none",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Open enrollment — no prior education requirement"
+    ],
+    "auto_approve_if": { "forms_complete": true },
+    "flag_for_review_if": [],
+    "auto_reject_if": {}
+  },
+
+  "capellania": {
+    "display_name": "Capellanía",
+    "level": "certificate",
+    "budget_tier": "low",
+    "monthly_cost_approx_usd": 25,
+    "credit_hours": null,
+    "duration": "8 months",
+    "required_prior_level": "none",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Open enrollment — no prior education requirement"
+    ],
+    "auto_approve_if": { "forms_complete": true },
+    "flag_for_review_if": [],
+    "auto_reject_if": {}
+  },
+
+  "pastores": {
+    "display_name": "Pastores",
+    "level": "certificate",
+    "budget_tier": "low",
+    "monthly_cost_approx_usd": 25,
+    "credit_hours": null,
+    "duration": "5 courses",
+    "required_prior_level": "none",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Open enrollment — no prior education requirement"
+    ],
+    "auto_approve_if": { "forms_complete": true },
+    "flag_for_review_if": [],
+    "auto_reject_if": {}
+  },
+
+  "coaching_liderazgo": {
+    "display_name": "Coaching / Liderazgo Sistémico",
+    "level": "certificate",
+    "budget_tier": "low",
+    "monthly_cost_approx_usd": 25,
+    "credit_hours": null,
+    "duration": "1 year",
+    "required_prior_level": "none",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Open enrollment — no prior education requirement"
+    ],
+    "auto_approve_if": { "forms_complete": true },
+    "flag_for_review_if": [],
+    "auto_reject_if": {}
+  },
+
+  "abs": {
+    "display_name": "Associate of Biblical Studies",
+    "level": "associate",
+    "budget_tier": "medium",
+    "monthly_cost_approx_usd": 50,
+    "credit_hours": 60,
+    "duration": null,
+    "required_prior_level": "none",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Open enrollment — no prior education requirement",
+      "Up to 30 credits may be awarded via Life Experience with documented evidence",
+      "Up to 15 credits may be awarded via Ministerial Internship with documented evidence",
+      "Life experience and ministerial internship credits require human review — not auto-approved",
+      "Recommended first step for applicants who want a Bachelor's but have no prior college (two-step approach)"
+    ],
+    "auto_approve_if": { "forms_complete": true },
+    "flag_for_review_if": [
+      "Applicant claims life experience or ministerial internship credits — verify documentation"
+    ],
+    "auto_reject_if": {}
+  },
+
+  "ats": {
+    "display_name": "Associate of Theological Studies",
+    "level": "associate",
+    "budget_tier": "medium",
+    "monthly_cost_approx_usd": 50,
+    "credit_hours": 60,
+    "duration": null,
+    "required_prior_level": "none",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Open enrollment — no prior education requirement",
+      "Up to 30 credits may be awarded via Life Experience with documented evidence",
+      "Up to 15 credits may be awarded via Ministerial Internship with documented evidence",
+      "Life experience and ministerial internship credits require human review — not auto-approved",
+      "Recommended for ministry-practical track; pairs well with two-step Bachelor's pathway"
+    ],
+    "auto_approve_if": { "forms_complete": true },
+    "flag_for_review_if": [
+      "Applicant claims life experience or ministerial internship credits — verify documentation"
+    ],
+    "auto_reject_if": {}
+  },
+
+  "acc": {
+    "display_name": "Associate of Christian Counseling",
+    "level": "associate",
+    "budget_tier": "medium",
+    "monthly_cost_approx_usd": 50,
+    "credit_hours": 60,
+    "duration": null,
+    "required_prior_level": "none",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Open enrollment — no prior education requirement",
+      "Up to 30 credits may be awarded via Life Experience with documented evidence",
+      "Up to 15 credits may be awarded via Ministerial Internship with documented evidence",
+      "Life experience and ministerial internship credits require human review — not auto-approved"
+    ],
+    "auto_approve_if": { "forms_complete": true },
+    "flag_for_review_if": [
+      "Applicant claims life experience or ministerial internship credits — verify documentation"
+    ],
+    "auto_reject_if": {}
+  },
+
+  "aps": {
+    "display_name": "Associate of Pastoral Studies",
+    "level": "associate",
+    "budget_tier": "medium",
+    "monthly_cost_approx_usd": 50,
+    "credit_hours": 60,
+    "duration": null,
+    "required_prior_level": "none",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Open enrollment — no prior education requirement",
+      "Up to 30 credits may be awarded via Life Experience with documented evidence",
+      "Up to 15 credits may be awarded via Ministerial Internship with documented evidence",
+      "Life experience and ministerial internship credits require human review — not auto-approved"
+    ],
+    "auto_approve_if": { "forms_complete": true },
+    "flag_for_review_if": [
+      "Applicant claims life experience or ministerial internship credits — verify documentation"
+    ],
+    "auto_reject_if": {}
+  },
+
+  "bbs": {
+    "display_name": "Bachelor of Biblical Studies",
+    "level": "bachelors",
+    "budget_tier": "medium",
+    "monthly_cost_approx_usd": 100,
+    "credit_hours": 120,
+    "duration": null,
+    "required_prior_level": "associate",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Applicants with high school diploma or less may qualify via Life Experience Credit (max 30 credits) — requires documented evidence and human review",
+      "Up to 15 credits via Ministerial Internship with documented evidence",
+      "Up to 60 transfer credits from secular education accepted",
+      "Two-step approach recommended: complete Associate first, then Bachelor's"
+    ],
+    "auto_approve_if": { "highest_education_min": "some_college" },
+    "flag_for_review_if": [
+      "highest_education is 'high_school' or 'none' — possible life experience credit candidate, requires human review"
+    ],
+    "auto_reject_if": {}
+  },
+
+  "bts": {
+    "display_name": "Bachelor of Theological Studies",
+    "level": "bachelors",
+    "budget_tier": "medium",
+    "monthly_cost_approx_usd": 100,
+    "credit_hours": 120,
+    "duration": null,
+    "required_prior_level": "associate",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Applicants with high school diploma or less may qualify via Life Experience Credit (max 30 credits) — requires documented evidence and human review",
+      "Up to 15 credits via Ministerial Internship with documented evidence",
+      "Up to 60 transfer credits from secular education accepted"
+    ],
+    "auto_approve_if": { "highest_education_min": "some_college" },
+    "flag_for_review_if": [
+      "highest_education is 'high_school' or 'none' — possible life experience credit candidate, requires human review"
+    ],
+    "auto_reject_if": {}
+  },
+
+  "bth": {
+    "display_name": "Bachelor of Theology (B.Th)",
+    "level": "bachelors",
+    "budget_tier": "medium",
+    "monthly_cost_approx_usd": 100,
+    "credit_hours": 120,
+    "duration": null,
+    "required_prior_level": "associate",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Requires Greek and Hebrew in addition to biblical foundation courses",
+      "Applicants with high school diploma or less may qualify via Life Experience Credit (max 30 credits) — requires documented evidence and human review",
+      "Up to 60 transfer credits from secular education accepted"
+    ],
+    "auto_approve_if": { "highest_education_min": "some_college" },
+    "flag_for_review_if": [
+      "highest_education is 'high_school' or 'none' — possible life experience credit candidate, requires human review"
+    ],
+    "auto_reject_if": {}
+  },
+
+  "bce": {
+    "display_name": "Bachelor of Christian Education",
+    "level": "bachelors",
+    "budget_tier": "medium",
+    "monthly_cost_approx_usd": 100,
+    "credit_hours": 120,
+    "duration": null,
+    "required_prior_level": "associate",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Applicants with high school diploma or less may qualify via Life Experience Credit (max 30 credits) — requires documented evidence and human review",
+      "Up to 60 transfer credits from secular education accepted"
+    ],
+    "auto_approve_if": { "highest_education_min": "some_college" },
+    "flag_for_review_if": [
+      "highest_education is 'high_school' or 'none' — possible life experience credit candidate, requires human review"
+    ],
+    "auto_reject_if": {}
+  },
+
+  "bcc": {
+    "display_name": "Bachelor of Christian Counseling",
+    "level": "bachelors",
+    "budget_tier": "medium",
+    "monthly_cost_approx_usd": 100,
+    "credit_hours": 120,
+    "duration": null,
+    "required_prior_level": "associate",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Applicants with secular Psychology degree must complete at least one year of biblical foundation training before counseling coursework",
+      "Required biblical foundation: Hermeneutics, Homiletics, Apologetics, Christian Ethics, Biblical Foundations, Genesis, Gospel of John",
+      "Up to 60 transfer credits from secular education accepted"
+    ],
+    "auto_approve_if": { "highest_education_min": "some_college" },
+    "flag_for_review_if": [
+      "highest_education is 'high_school' or 'none' — possible life experience credit candidate, requires human review",
+      "Applicant has secular Psychology degree — verify biblical foundation requirement"
+    ],
+    "auto_reject_if": {}
+  },
+
+  "bps": {
+    "display_name": "Bachelor of Pastoral Studies",
+    "level": "bachelors",
+    "budget_tier": "medium",
+    "monthly_cost_approx_usd": 100,
+    "credit_hours": 120,
+    "duration": null,
+    "required_prior_level": "associate",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Applicants with high school diploma or less may qualify via Life Experience Credit (max 30 credits) — requires documented evidence and human review",
+      "Up to 60 transfer credits from secular education accepted"
+    ],
+    "auto_approve_if": { "highest_education_min": "some_college" },
+    "flag_for_review_if": [
+      "highest_education is 'high_school' or 'none' — possible life experience credit candidate, requires human review"
+    ],
+    "auto_reject_if": {}
+  },
+
+  "mcc": {
+    "display_name": "Master of Christian Counseling",
+    "level": "masters",
+    "budget_tier": "high",
+    "monthly_cost_approx_usd": 150,
+    "credit_hours": null,
+    "duration": "36-60 credits",
+    "required_prior_level": "bachelors",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Requires bachelor's degree; exceptional ministerial experience cases may be reviewed",
+      "Life experience credit not applicable at graduate level",
+      "Financial capacity is a key placement factor — applicants with budget constraints may be directed to undergraduate path first"
+    ],
+    "auto_approve_if": { "highest_education_min": "bachelors" },
+    "flag_for_review_if": [
+      "highest_education is 'associate' or 'some_college' with 5+ years full-time ministerial experience — exceptional case for review",
+      "highest_education is 'associate' or 'some_college' with 10+ years associated ministerial experience — exceptional case for review"
+    ],
+    "auto_reject_if": {
+      "highest_education_below_bachelors_and_low_experience": "Highest education below bachelor's level and fewer than 5 years full-time ministerial experience"
+    }
+  },
+
+  "mce": {
+    "display_name": "Master of Christian Education",
+    "level": "masters",
+    "budget_tier": "high",
+    "monthly_cost_approx_usd": 150,
+    "credit_hours": 36,
+    "duration": null,
+    "required_prior_level": "bachelors",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Requires bachelor's degree; exceptional ministerial experience cases may be reviewed",
+      "Life experience credit not applicable at graduate level",
+      "Financial capacity is a key placement factor"
+    ],
+    "auto_approve_if": { "highest_education_min": "bachelors" },
+    "flag_for_review_if": [
+      "highest_education is 'associate' or 'some_college' with 5+ years full-time ministerial experience — exceptional case for review"
+    ],
+    "auto_reject_if": {
+      "highest_education_below_bachelors_and_low_experience": "Highest education below bachelor's level and fewer than 5 years full-time ministerial experience"
+    }
+  },
+
+  "mths": {
+    "display_name": "Master of Theological Studies (M.Ths)",
+    "level": "masters",
+    "budget_tier": "high",
+    "monthly_cost_approx_usd": 150,
+    "credit_hours": null,
+    "duration": "36-60 credits",
+    "required_prior_level": "bachelors",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Requires bachelor's degree; exceptional ministerial experience cases may be reviewed",
+      "Life experience credit not applicable at graduate level",
+      "Financial capacity is a key placement factor"
+    ],
+    "auto_approve_if": { "highest_education_min": "bachelors" },
+    "flag_for_review_if": [
+      "highest_education is 'associate' or 'some_college' with 5+ years full-time ministerial experience — exceptional case for review"
+    ],
+    "auto_reject_if": {
+      "highest_education_below_bachelors_and_low_experience": "Highest education below bachelor's level and fewer than 5 years full-time ministerial experience"
+    }
+  },
+
+  "mth": {
+    "display_name": "Master of Theology (M.Th)",
+    "level": "masters",
+    "budget_tier": "high",
+    "monthly_cost_approx_usd": 150,
+    "credit_hours": 60,
+    "duration": null,
+    "required_prior_level": "bachelors",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Requires bachelor's degree; exceptional ministerial experience cases may be reviewed",
+      "Life experience credit not applicable at graduate level",
+      "Financial capacity is a key placement factor"
+    ],
+    "auto_approve_if": { "highest_education_min": "bachelors" },
+    "flag_for_review_if": [
+      "highest_education is 'associate' or 'some_college' with 5+ years full-time ministerial experience — exceptional case for review"
+    ],
+    "auto_reject_if": {
+      "highest_education_below_bachelors_and_low_experience": "Highest education below bachelor's level and fewer than 5 years full-time ministerial experience"
+    }
+  },
+
+  "mdiv": {
+    "display_name": "Master of Divinity (M.Div)",
+    "level": "masters",
+    "budget_tier": "high",
+    "monthly_cost_approx_usd": 150,
+    "credit_hours": 90,
+    "duration": null,
+    "required_prior_level": "bachelors",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Requires bachelor's degree; exceptional ministerial experience cases may be reviewed",
+      "Life experience credit not applicable at graduate level",
+      "Financial capacity is a key placement factor"
+    ],
+    "auto_approve_if": { "highest_education_min": "bachelors" },
+    "flag_for_review_if": [
+      "highest_education is 'associate' or 'some_college' with 5+ years full-time ministerial experience — exceptional case for review"
+    ],
+    "auto_reject_if": {
+      "highest_education_below_bachelors_and_low_experience": "Highest education below bachelor's level and fewer than 5 years full-time ministerial experience"
+    }
+  },
+
+  "mlo": {
+    "display_name": "Master of Leadership & Organization",
+    "level": "masters",
+    "budget_tier": "high",
+    "monthly_cost_approx_usd": 150,
+    "credit_hours": 36,
+    "duration": null,
+    "required_prior_level": "bachelors",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Requires bachelor's degree; exceptional ministerial experience cases may be reviewed",
+      "Life experience credit not applicable at graduate level",
+      "Financial capacity is a key placement factor"
+    ],
+    "auto_approve_if": { "highest_education_min": "bachelors" },
+    "flag_for_review_if": [
+      "highest_education is 'associate' or 'some_college' with 5+ years full-time ministerial experience — exceptional case for review"
+    ],
+    "auto_reject_if": {
+      "highest_education_below_bachelors_and_low_experience": "Highest education below bachelor's level and fewer than 5 years full-time ministerial experience"
+    }
+  },
+
+  "dmin": {
+    "display_name": "Doctor of Ministry (D.Min)",
+    "level": "doctorate",
+    "budget_tier": "high",
+    "monthly_cost_approx_usd": 200,
+    "credit_hours": null,
+    "duration": "36-60 credits",
+    "required_prior_level": "masters",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Requires master's degree; exceptional ministerial experience cases may be reviewed",
+      "Life experience credit not applicable at doctoral level",
+      "Financial capacity is a key placement factor at graduate level"
+    ],
+    "auto_approve_if": { "highest_education_min": "masters" },
+    "flag_for_review_if": [
+      "highest_education is 'bachelors' with 10+ years full-time ministerial experience — exceptional case for review",
+      "highest_education is 'bachelors' with 20+ years associated ministerial experience — exceptional case for review"
+    ],
+    "auto_reject_if": {
+      "highest_education_below_masters_and_low_experience": "Highest education below master's level and fewer than 10 years ministerial experience"
+    }
+  },
+
+  "dmin_leadership": {
+    "display_name": "Doctor of Ministry / Leadership & Innovation",
+    "level": "doctorate",
+    "budget_tier": "high",
+    "monthly_cost_approx_usd": 200,
+    "credit_hours": null,
+    "duration": "36-60 credits",
+    "required_prior_level": "masters",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Requires master's degree; exceptional ministerial experience cases may be reviewed",
+      "Life experience credit not applicable at doctoral level",
+      "Financial capacity is a key placement factor at graduate level"
+    ],
+    "auto_approve_if": { "highest_education_min": "masters" },
+    "flag_for_review_if": [
+      "highest_education is 'bachelors' with 10+ years full-time ministerial experience — exceptional case for review"
+    ],
+    "auto_reject_if": {
+      "highest_education_below_masters_and_low_experience": "Highest education below master's level and fewer than 10 years ministerial experience"
+    }
+  },
+
+  "thd": {
+    "display_name": "Doctor of Theology (Th.D)",
+    "level": "doctorate",
+    "budget_tier": "high",
+    "monthly_cost_approx_usd": 200,
+    "credit_hours": 60,
+    "duration": null,
+    "required_prior_level": "masters",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Requires master's degree; exceptional ministerial experience cases may be reviewed",
+      "Life experience credit not applicable at doctoral level"
+    ],
+    "auto_approve_if": { "highest_education_min": "masters" },
+    "flag_for_review_if": [
+      "highest_education is 'bachelors' with 10+ years full-time ministerial experience — exceptional case for review"
+    ],
+    "auto_reject_if": {
+      "highest_education_below_masters_and_low_experience": "Highest education below master's level and fewer than 10 years ministerial experience"
+    }
+  },
+
+  "dcc": {
+    "display_name": "Doctor of Christian Counseling",
+    "level": "doctorate",
+    "budget_tier": "high",
+    "monthly_cost_approx_usd": 200,
+    "credit_hours": 60,
+    "duration": null,
+    "required_prior_level": "masters",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Requires master's degree; exceptional ministerial experience cases may be reviewed",
+      "Life experience credit not applicable at doctoral level"
+    ],
+    "auto_approve_if": { "highest_education_min": "masters" },
+    "flag_for_review_if": [
+      "highest_education is 'bachelors' with 10+ years full-time ministerial experience — exceptional case for review"
+    ],
+    "auto_reject_if": {
+      "highest_education_below_masters_and_low_experience": "Highest education below master's level and fewer than 10 years ministerial experience"
+    }
+  },
+
+  "dce": {
+    "display_name": "Doctor of Christian Education",
+    "level": "doctorate",
+    "budget_tier": "high",
+    "monthly_cost_approx_usd": 200,
+    "credit_hours": 60,
+    "duration": null,
+    "required_prior_level": "masters",
+    "required_prior_level_strict": false,
+    "special_rules": [
+      "Requires master's degree; exceptional ministerial experience cases may be reviewed",
+      "Life experience credit not applicable at doctoral level"
+    ],
+    "auto_approve_if": { "highest_education_min": "masters" },
+    "flag_for_review_if": [
+      "highest_education is 'bachelors' with 10+ years full-time ministerial experience — exceptional case for review"
+    ],
+    "auto_reject_if": {
+      "highest_education_below_masters_and_low_experience": "Highest education below master's level and fewer than 10 years ministerial experience"
+    }
+  },
+
+  "phd": {
+    "display_name": "Doctor of Religious Philosophy (Ph.D)",
+    "level": "doctorate",
+    "budget_tier": "high",
+    "monthly_cost_approx_usd": 200,
+    "credit_hours": 60,
+    "duration": null,
+    "required_prior_level": "existing_doctorate",
+    "required_prior_level_strict": true,
+    "special_rules": [
+      "STRICT: Applicant must already hold a Th.D. or D.Min. degree (has_existing_doctorate = true)",
+      "No exceptions — applicants without an existing doctorate are automatically rejected",
+      "Life experience credit not applicable at doctoral level"
+    ],
+    "auto_approve_if": { "has_existing_doctorate": true },
+    "flag_for_review_if": [],
+    "auto_reject_if": {
+      "has_existing_doctorate_false": "Applicant does not hold an existing Th.D. or D.Min. — strict prerequisite not met"
+    }
+  }
+}

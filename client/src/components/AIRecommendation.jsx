@@ -1,0 +1,177 @@
+import React from 'react';
+
+const REC_COLORS = {
+  approve:  'text-green-700 font-semibold',
+  reject:   'text-red-700 font-semibold',
+  escalate: 'text-yellow-700 font-semibold',
+};
+
+const REC_LABELS = {
+  approve:  'Approve',
+  reject:   'Reject',
+  escalate: 'Escalate to Admissions Officer',
+};
+
+function capitalize(str) {
+  if (!str) return '';
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+// ── Detection helpers ──────────────────────────────────────────────────────────
+
+function isDocumentFlag(reasoning) {
+  if (!reasoning) return false;
+  const lower = reasoning.toLowerCase();
+  return (
+    lower.includes('missing required documents') ||
+    lower.includes('missing: academic transcripts') ||
+    lower.includes('missing: undergraduate diploma') ||
+    lower.includes('cannot confirm eligibility until') ||
+    lower.includes('required documents are missing')
+  );
+}
+
+function isFinancialMismatch(reasoning) {
+  if (!reasoning) return false;
+  const lower = reasoning.toLowerCase();
+  return (
+    lower.includes('presupuesto') ||
+    lower.includes('financial mismatch') ||
+    lower.includes('budget does not support') ||
+    lower.includes('recomendado como primer paso') ||
+    lower.includes('recomendado para presupuesto') ||
+    lower.includes('suggested alternative')
+  );
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
+
+export default function AIRecommendation({ applicant }) {
+  const { ai_recommendation, ai_reasoning } = applicant;
+
+  if (!ai_recommendation) {
+    return (
+      <div className="bg-gray-50 border border-gray-200 rounded p-4">
+        <p className="text-sm text-gray-500">No AI review yet.</p>
+        <p className="text-xs text-gray-400 mt-1">
+          AI review runs automatically when all 3 forms are received.
+        </p>
+      </div>
+    );
+  }
+
+  // ── Missing documents alert ───────────────────────────────────────────────
+  if (isDocumentFlag(ai_reasoning)) {
+    // Parse out the list of missing items after "Missing:" if present
+    const text = ai_reasoning || '';
+    const missingMatch = text.match(/Missing:\s*([^.]+)\./i);
+    const missingList = missingMatch ? missingMatch[1].trim() : null;
+
+    return (
+      <div className="border border-red-300 rounded overflow-hidden">
+        <div className="px-4 py-2 bg-red-100 border-b border-red-200">
+          <p className="text-sm font-bold text-red-800">✗ Missing Required Documents</p>
+        </div>
+
+        <div className="px-4 py-3 bg-red-50 space-y-3">
+          <p className="text-sm text-red-900 leading-relaxed">{text}</p>
+
+          {missingList && (
+            <div className="bg-white border border-red-200 rounded p-3">
+              <p className="text-xs font-semibold text-red-700 uppercase tracking-wide mb-1">
+                Documents Needed
+              </p>
+              <ul className="space-y-1">
+                {missingList.split(';').map((doc, i) => (
+                  <li key={i} className="text-sm text-gray-800 flex items-start gap-1">
+                    <span className="text-red-500 mt-0.5">•</span>
+                    <span>{doc.trim()}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <p className="text-xs text-red-700">
+            Application cannot proceed until all required documents are received.
+            Use "Request Info" below to contact the applicant.
+          </p>
+        </div>
+
+        <div className="px-4 py-2 bg-red-50 border-t border-red-200">
+          <p className="text-xs text-gray-400">Evaluated by LOGOS Eligibility Engine — document check</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Financial placement alert ─────────────────────────────────────────────
+  if (isFinancialMismatch(ai_reasoning)) {
+    let mainNote = ai_reasoning || '';
+    let suggestedPath = null;
+
+    const markers = ['Suggested alternative path:', 'Suggested alternative:', 'Suggested'];
+    for (const marker of markers) {
+      const idx = mainNote.indexOf(marker);
+      if (idx !== -1) {
+        suggestedPath = mainNote.slice(idx + marker.length).trim();
+        mainNote = mainNote.slice(0, idx).trim();
+        break;
+      }
+    }
+
+    return (
+      <div className="border border-yellow-300 rounded overflow-hidden">
+        <div className="px-4 py-2 bg-yellow-100 border-b border-yellow-200">
+          <p className="text-sm font-bold text-yellow-800">⚠ Financial Placement Alert</p>
+        </div>
+
+        <div className="px-4 py-3 bg-yellow-50 space-y-3">
+          <p className="text-sm text-yellow-900 leading-relaxed">{mainNote}</p>
+
+          {suggestedPath && (
+            <div className="bg-white border border-yellow-200 rounded p-3">
+              <p className="text-xs font-semibold text-yellow-800 uppercase tracking-wide mb-1">
+                Suggested Alternative Path
+              </p>
+              <p className="text-sm text-gray-800 leading-relaxed">{suggestedPath}</p>
+            </div>
+          )}
+
+          <p className="text-xs text-yellow-700">
+            Applicant meets academic requirements but their stated budget does not cover
+            this program. Contact them to discuss an affordable starting point before
+            making a final decision.
+          </p>
+        </div>
+
+        <div className="px-4 py-2 bg-yellow-50 border-t border-yellow-200">
+          <p className="text-xs text-gray-400">Evaluated by LOGOS Eligibility Engine — financial check</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Standard AI review ────────────────────────────────────────────────────
+  const recColorClass = REC_COLORS[ai_recommendation] || 'text-gray-700 font-semibold';
+  const recLabel = REC_LABELS[ai_recommendation] || capitalize(ai_recommendation);
+
+  return (
+    <div className="bg-gray-50 border border-gray-200 rounded p-4">
+      <h3 className="text-sm font-bold text-gray-700 mb-3">AI Review</h3>
+      <div className="space-y-2">
+        <p className="text-sm">
+          <span className="font-semibold text-gray-600">Recommendation: </span>
+          <span className={recColorClass}>{recLabel}</span>
+        </p>
+        {ai_reasoning && (
+          <p className="text-sm">
+            <span className="font-semibold text-gray-600">Reasoning: </span>
+            <span className="text-gray-700">{ai_reasoning}</span>
+          </p>
+        )}
+      </div>
+      <p className="mt-3 text-xs text-gray-400">Generated by Claude claude-sonnet-4-6</p>
+    </div>
+  );
+}
