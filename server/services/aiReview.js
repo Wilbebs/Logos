@@ -8,7 +8,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 const systemPrompt = readFileSync(
-  path.join(__dirname, '../../config/system-prompt.txt'),
+  path.join(__dirname, '../config/system-prompt.txt'),
   'utf-8'
 );
 

@@ -1,7 +1,7 @@
 import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
-const programs = require('../../config/programs.json');
+const programs = require('../config/programs.json');
 
 // ─── Education level hierarchy ────────────────────────────────────────────────
 const EDUCATION_LEVELS = {
