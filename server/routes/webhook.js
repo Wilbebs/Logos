@@ -3,14 +3,11 @@ import supabase from '../db/client.js';
 import { evaluateEligibility } from '../services/eligibility.js';
 import { callAIReview } from '../services/aiReview.js';
 
-// emailService is optional — server still starts if not present
+// emailService is optional — loaded lazily on first use
 let sendEmail = null;
-try {
-  const mod = await import('../services/emailService.js');
-  sendEmail = mod.sendEmail ?? mod.default?.sendEmail ?? null;
-} catch {
-  console.warn('[webhook] emailService not found — email triggers will be skipped.');
-}
+import('../services/emailService.js')
+  .then(mod => { sendEmail = mod.sendEmail ?? mod.default?.sendEmail ?? null; })
+  .catch(() => { console.warn('[webhook] emailService not found — email triggers will be skipped.'); });
 
 const router = express.Router();
 
