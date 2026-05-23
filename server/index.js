@@ -41,6 +41,25 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// MachForm sends key-value pairs with Content-Type: text/plain
+// Parse them manually into req.body
+app.use((req, _res, next) => {
+  if (req.headers['content-type']?.startsWith('text/plain')) {
+    let data = '';
+    req.on('data', chunk => { data += chunk; });
+    req.on('end', () => {
+      try {
+        req.body = Object.fromEntries(new URLSearchParams(data));
+      } catch {
+        req.body = {};
+      }
+      next();
+    });
+  } else {
+    next();
+  }
+});
+
 // -----------------------------------------------------------------------
 // Health check
 // -----------------------------------------------------------------------
