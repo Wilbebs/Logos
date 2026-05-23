@@ -232,6 +232,8 @@ async function handleFormSubmission(req, res, formNumber) {
     }
 
     const body = req.body;
+    console.log(`[webhook] Form ${formNumber} raw body:`, JSON.stringify(body));
+    console.log(`[webhook] Content-Type:`, req.headers['content-type']);
 
     // 2. Normalize fields based on which form this is
     let email, full_name, phone, program_level, program_applied, enriched;
