@@ -259,6 +259,7 @@ async function handleFormSubmission(req, res, formNumber) {
       // All their data goes into raw_data for the admissions officer to review.
       email = pick(body,
         'EmailICorreoElectrónicoI',
+        'CorreoElectrónico',
         'email', 'Email I - Correo Electrónico I', 'email_i',
         'Email', 'correo', 'Correo Electrónico'
       );
