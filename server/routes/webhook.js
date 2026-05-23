@@ -71,34 +71,35 @@ function deriveHighestEducation(body) {
 
   // Doctorate
   const doctorado = pick(body,
-    'Doctorado *', 'Doctorado', 'doctorado',
+    'Doctorado', 'Doctorado *', 'doctorado',
     'doctorate', 'has_doctorate'
   );
   if (isYes(doctorado)) return 'doctorate';
 
   // Masters
   const maestria = pick(body,
-    'Maestría *', 'Maestria *', 'Maestría', 'maestria',
+    'Maestría', 'Maestría *', 'Maestria *', 'maestria',
     'masters', 'has_masters'
   );
   if (isYes(maestria)) return 'masters';
 
   // Bachelor
   const licenciatura = pick(body,
-    'Licenciatura *', 'Licenciatura', 'licenciatura',
+    'Licenciatura', 'Licenciatura *', 'licenciatura',
     'bachelor', 'bachelors', 'has_bachelor'
   );
   if (isYes(licenciatura)) return 'bachelors';
 
   // Associate
   const associate = pick(body,
-    'Associate *', 'Associate', 'associate',
+    'Associate', 'Associate *', 'associate',
     'tecnico', 'técnico', 'has_associate'
   );
   if (isYes(associate)) return 'associate';
 
   // High school
   const highSchool = pick(body,
+    'CompletoSuEscuelaSecundaria',
     'Completo Su Escuela Secundaria. *',
     'Completo Su Escuela Secundaria.',
     'Completo Su Escuela Secundaria',
@@ -156,6 +157,7 @@ function detectDocuments(body) {
 function normalizeForm1(body) {
   const email = pick(body,
     'email',
+    'EmailICorreoElectrónicoI',
     'Email I - Correo Electrónico I',
     'email_i_correo_electronico_i',
     'Email I',
@@ -163,21 +165,25 @@ function normalizeForm1(body) {
   );
 
   const firstName = pick(body,
+    'FirstNmeNombre',
     'first_name', 'First Name', 'First Nme / Nombre',
     'first_nme_nombre', 'nombre', 'Nombre'
   );
   const lastName = pick(body,
+    'LastNameApellido',
     'last_name', 'Last Name', 'Last Name / Apellido',
     'last_name_apellido', 'apellido', 'Apellido'
   );
   const full_name = [firstName, lastName].filter(Boolean).join(' ') || null;
 
   const phone = pick(body,
+    'PhoneMobileCelular',
     'phone', 'Phone Mobile/Celular', 'phone_mobile_celular',
     'phone_mobile', 'celular', 'Celular', 'Phone Mobile'
   );
 
   const programLevelRaw = pick(body,
+    'StudyLevelsNivelesDeEstudio',
     'program_level',
     'Study levels / Niveles de Estudio',
     'study_levels_niveles_de_estudio',
@@ -186,6 +192,7 @@ function normalizeForm1(body) {
   const program_level = mapProgramLevel(programLevelRaw);
 
   const program_applied = pick(body,
+    'DesiredProgramProramaDeseado',
     'program_applied',
     'Desired Program/Prorama Deseado',
     'desired_program_prorama_deseado',
@@ -193,6 +200,7 @@ function normalizeForm1(body) {
   );
 
   const monthly_budget = pick(body,
+    'CupónIngresarClaveDelDescuento',
     'monthly_budget',
     'Budgets / Presupuesto',
     'budgets_presupuesto',
@@ -250,6 +258,7 @@ async function handleFormSubmission(req, res, formNumber) {
       // Forms 2 & 3 — just need the email to link to the applicant.
       // All their data goes into raw_data for the admissions officer to review.
       email = pick(body,
+        'EmailICorreoElectrónicoI',
         'email', 'Email I - Correo Electrónico I', 'email_i',
         'Email', 'correo', 'Correo Electrónico'
       );
