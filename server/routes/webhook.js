@@ -229,7 +229,8 @@ async function handleFormSubmission(req, res, formNumber) {
   try {
     // 1. Authenticate
     const secret = req.headers['x-webhook-secret'];
-    if (secret !== process.env.WEBHOOK_SECRET) {
+    const expectedSecret = process.env.WEBHOOK_SECRET;
+    if (expectedSecret && secret !== expectedSecret) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
