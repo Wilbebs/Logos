@@ -13,10 +13,9 @@ let webhookRouter = null;
 try {
   const mod = await import('./routes/webhook.js');
   webhookRouter = mod.default ?? mod;
-} catch {
-  console.warn(
-    '[server] routes/webhook.js not found — /webhook will return 503 until Agent 4 delivers that file.'
-  );
+  console.log('[server] webhook router loaded successfully');
+} catch (err) {
+  console.error('[server] Failed to load webhook router:', err.message);
 }
 
 // -----------------------------------------------------------------------
