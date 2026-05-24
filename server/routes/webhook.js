@@ -200,9 +200,9 @@ function normalizeForm1(body) {
   );
 
   const monthly_budget = pick(body,
-    'CupónIngresarClaveDelDescuento',
-    'monthly_budget',
+    'BudgetsPresupuesto',
     'Budgets / Presupuesto',
+    'monthly_budget',
     'budgets_presupuesto',
     'budget', 'presupuesto',
     'Cantidad que puede pagar al mes por sus estudios'
