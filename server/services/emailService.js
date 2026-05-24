@@ -190,7 +190,7 @@ export async function sendEmail(emailType, applicant, extraData = {}) {
   try {
     const { data, error } = await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL || 'admissions@logos.edu',
-      to: applicant.email,
+      to: applicant.email?.toLowerCase(),
       subject: template.subject,
       text: template.text,
     });
