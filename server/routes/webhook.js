@@ -66,7 +66,11 @@ function deriveHighestEducation(body) {
   function isYes(val) {
     if (!val) return false;
     const s = String(val).toLowerCase().trim();
-    return s === 'yes' || s === 'sí' || s === 'si' || s === 'true' || s === '1';
+    // Exact matches
+    if (s === 'yes' || s === 'sí' || s === 'si' || s === 'true' || s === '1') return true;
+    // MachForm sends phrases like "Si tengo", "Si, complete el estudio", "Sí tengo"
+    if (s.startsWith('si ') || s.startsWith('sí ') || s.startsWith('si,') || s.startsWith('sí,')) return true;
+    return false;
   }
 
   // Doctorate
