@@ -368,6 +368,7 @@ async function handleFormSubmission(req, res, formNumber) {
       console.log(`[webhook] form_submissions fetch: count=${allSubmissions?.length ?? 'null'} error=${subFetchError?.message ?? 'none'}`);
 
       const form1Submission = (allSubmissions || []).find(s => Number(s.form_number) === 1) ?? null;
+      const form3Submission = (allSubmissions || []).find(s => Number(s.form_number) === 3) ?? null;
 
       if (!form1Submission) {
         console.warn(`[webhook] WARNING: No Form 1 submission found for applicant ${applicant.id}`);
@@ -376,7 +377,21 @@ async function handleFormSubmission(req, res, formNumber) {
         console.log(`[webhook] Form 1 found — highest_education=${form1Submission.raw_data?.highest_education}, submitted_transcripts=${form1Submission.raw_data?.submitted_transcripts}`);
       }
 
-      const eligResult = evaluateEligibility(freshApplicant, form1Submission ?? formSubmission);
+      // Merge all form raw_data so the eligibility engine has a complete picture.
+      // Form 1 is the base (academic/doc/budget fields). Form 3 adds ministerial
+      // experience fields (ministerial_years_fulltime, etc.) which Form 1 doesn't have.
+      const baseSubmission = form1Submission ?? formSubmission;
+      const mergedRawData = {
+        ...(form1Submission?.raw_data || {}),
+        ...(form3Submission?.raw_data || {}),
+      };
+      // Re-apply Form 1 fields so they always take precedence over Form 3 for academic fields
+      Object.assign(mergedRawData, form1Submission?.raw_data || {});
+      const mergedSubmission = { ...baseSubmission, raw_data: mergedRawData };
+
+      console.log(`[webhook] ministerial_years_fulltime (merged): ${mergedRawData.ministerial_years_fulltime}`);
+
+      const eligResult = evaluateEligibility(freshApplicant, mergedSubmission);
 
       if (eligResult.document_flag) {
         await supabase

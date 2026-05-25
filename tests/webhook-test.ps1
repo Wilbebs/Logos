@@ -223,11 +223,12 @@ Send-Application `
         "StudyLevelsNivelesDeEstudio"  = "Doctoral - Doctorado"
         "DesiredProgramProramaDeseado" = "Doctor of Ministry (D.Min)"
         "Licenciatura"                 = "Si tengo"
-        "ministerial_years_fulltime"   = "10"
         "MarqueLosDocumentosQueEstaIncluyen" = "Copia de la Licenciatura,Transcripts - Registros oficiales de Notas de grado"
     } `
     -Form2Fields @{} `
-    -Form3Fields @{}
+    -Form3Fields @{
+        "ministerial_years_fulltime" = "10"
+    }
 
 Send-Application `
     -TestName "AI EDGE CASE: Unrecognized program name" `

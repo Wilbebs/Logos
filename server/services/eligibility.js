@@ -299,67 +299,10 @@ export function evaluateEligibility(applicant, formData) {
     );
   }
 
-  // ── 4. DOCUMENT CHECK ─────────────────────────────────────────────────────
-  // Missing transcripts or diploma → cannot qualify. Route to needs_review so
-  // the admissions officer can request the documents. No AI call needed —
-  // the reason is clear.
-  //
-  // Rules:
-  //   • Open enrollment programs (institute/certificate/associate): no docs gated.
-  //   • Bachelor's: transcripts + diploma required when applicant reports prior education.
-  //   • Masters/Doctorate: transcripts + undergraduate (bachelor's) diploma always required.
-
-  const requiredDocs = DOCUMENT_REQUIREMENTS[program.level] || [];
-
-  if (requiredDocs.length > 0) {
-    const missingDocs = [];
-
-    if (requiredDocs.includes('transcripts') && !submitted_transcripts) {
-      missingDocs.push('transcripts');
-    }
-
-    if (requiredDocs.includes('diploma') && !submitted_diploma) {
-      // For bachelor's: only require diploma if they report having prior education
-      const hasPriorEdu = eduLevel > EDUCATION_LEVELS.none;
-      if (hasPriorEdu) missingDocs.push('diploma');
-    }
-
-    if (requiredDocs.includes('undergraduate_diploma') && !submitted_undergraduate_diploma) {
-      missingDocs.push('undergraduate_diploma');
-    }
-
-    if (missingDocs.length > 0) {
-      const missingLabels = missingDocs.map(d => DOC_LABELS[d] || d);
-      const missingList = missingLabels.join('; ');
-
-      const docNote =
-        program.level === 'masters' || program.level === 'doctorate'
-          ? `Graduate programs require both academic transcripts and an undergraduate (bachelor's) diploma before eligibility can be confirmed. ` +
-            `Missing: ${missingList}.`
-          : `Required documents are missing. Cannot confirm eligibility until the following are received: ${missingList}.`;
-
-      reasons.push(`Document check failed — missing: ${missingList}.`);
-
-      return {
-        status: 'needs_review',
-        confidence: 'high',
-        reasons,
-        recommended_action:
-          `Request missing documents from applicant — cannot qualify for ${program.display_name} without: ${missingList}. Contact applicant to submit before proceeding.`,
-        financial_flag: false,
-        suggested_alternative: null,
-        financial_note: null,
-        document_flag: true,
-        missing_documents: missingDocs,
-        document_note: docNote,
-      };
-    }
-
-    // All required docs present — note it
-    reasons.push(`Document check passed: required documents submitted (${requiredDocs.join(', ')}).`);
-  }
-
-  // ── 5. AUTO-REJECT checks (academic) ──────────────────────────────────────
+  // ── 4. AUTO-REJECT checks (academic) ──────────────────────────────────────
+  // Hard rules that disqualify regardless of documents. Must run before the
+  // document check so that academically ineligible applicants get "ineligible"
+  // rather than "needs_review" just because they also lack documents.
 
   // 4a. PhD without existing doctorate — strict hard rule
   if (programId === 'phd' && !has_existing_doctorate) {
@@ -434,7 +377,67 @@ export function evaluateEligibility(applicant, formData) {
     }
   }
 
-  // ── 5. FLAG FOR REVIEW checks (academic edge cases) ────────────────────────
+  // ── 5. DOCUMENT CHECK ─────────────────────────────────────────────────────
+  // Missing transcripts or diploma → cannot qualify. Route to needs_review so
+  // the admissions officer can request the documents. No AI call needed —
+  // the reason is clear.
+  //
+  // Rules:
+  //   • Open enrollment programs (institute/certificate/associate): no docs gated.
+  //   • Bachelor's: transcripts + diploma required when applicant reports prior education.
+  //   • Masters/Doctorate: transcripts + undergraduate (bachelor's) diploma always required.
+
+  const requiredDocs = DOCUMENT_REQUIREMENTS[program.level] || [];
+
+  if (requiredDocs.length > 0) {
+    const missingDocs = [];
+
+    if (requiredDocs.includes('transcripts') && !submitted_transcripts) {
+      missingDocs.push('transcripts');
+    }
+
+    if (requiredDocs.includes('diploma') && !submitted_diploma) {
+      // For bachelor's: only require diploma if they report having prior education
+      const hasPriorEdu = eduLevel > EDUCATION_LEVELS.none;
+      if (hasPriorEdu) missingDocs.push('diploma');
+    }
+
+    if (requiredDocs.includes('undergraduate_diploma') && !submitted_undergraduate_diploma) {
+      missingDocs.push('undergraduate_diploma');
+    }
+
+    if (missingDocs.length > 0) {
+      const missingLabels = missingDocs.map(d => DOC_LABELS[d] || d);
+      const missingList = missingLabels.join('; ');
+
+      const docNote =
+        program.level === 'masters' || program.level === 'doctorate'
+          ? `Graduate programs require both academic transcripts and an undergraduate (bachelor's) diploma before eligibility can be confirmed. ` +
+            `Missing: ${missingList}.`
+          : `Required documents are missing. Cannot confirm eligibility until the following are received: ${missingList}.`;
+
+      reasons.push(`Document check failed — missing: ${missingList}.`);
+
+      return {
+        status: 'needs_review',
+        confidence: 'high',
+        reasons,
+        recommended_action:
+          `Request missing documents from applicant — cannot qualify for ${program.display_name} without: ${missingList}. Contact applicant to submit before proceeding.`,
+        financial_flag: false,
+        suggested_alternative: null,
+        financial_note: null,
+        document_flag: true,
+        missing_documents: missingDocs,
+        document_note: docNote,
+      };
+    }
+
+    // All required docs present — note it
+    reasons.push(`Document check passed: required documents submitted (${requiredDocs.join(', ')}).`);
+  }
+
+  // ── 6. FLAG FOR REVIEW checks (academic edge cases) ────────────────────────
 
   // 5a. Bachelors — high school or no education (possible life experience credit)
   if (
