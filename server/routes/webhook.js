@@ -342,7 +342,18 @@ async function handleFormSubmission(req, res, formNumber) {
         .update({ forms_complete: true })
         .eq('id', applicant.id);
 
-      const eligResult = evaluateEligibility(freshApplicant, formSubmission);
+      // Always evaluate eligibility against Form 1 — it holds the document
+      // checklist, budget, and education fields that the engine needs.
+      const { data: form1Submission } = await supabase
+        .from('form_submissions')
+        .select('*')
+        .eq('applicant_id', applicant.id)
+        .eq('form_number', 1)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      const eligResult = evaluateEligibility(freshApplicant, form1Submission ?? formSubmission);
 
       if (eligResult.document_flag) {
         await supabase
@@ -379,7 +390,7 @@ async function handleFormSubmission(req, res, formNumber) {
           .eq('id', applicant.id);
 
         if (eligResult.confidence === 'low' || eligResult.status === 'needs_review') {
-          const aiResult = await callAIReview(freshApplicant, formSubmission);
+          const aiResult = await callAIReview(freshApplicant, form1Submission ?? formSubmission);
           await supabase
             .from('applicants')
             .update({
