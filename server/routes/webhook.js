@@ -260,6 +260,7 @@ async function handleFormSubmission(req, res, formNumber) {
       email = pick(body,
         'EmailICorreoElectrónicoI',
         'CorreoElectrónico',
+        'CorreoElectronico',
         'email', 'Email I - Correo Electrónico I', 'email_i',
         'Email', 'correo', 'Correo Electrónico'
       );
