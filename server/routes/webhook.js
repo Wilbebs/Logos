@@ -348,18 +348,21 @@ async function handleFormSubmission(req, res, formNumber) {
 
       // Always evaluate eligibility against Form 1 — it holds the document
       // checklist, budget, and education fields that the engine needs.
-      const { data: allSubmissions } = await supabase
+      const { data: allSubmissions, error: subFetchError } = await supabase
         .from('form_submissions')
         .select('*')
         .eq('applicant_id', applicant.id)
         .order('created_at', { ascending: true });
 
+      console.log(`[webhook] form_submissions fetch: count=${allSubmissions?.length ?? 'null'} error=${subFetchError?.message ?? 'none'}`);
+
       const form1Submission = (allSubmissions || []).find(s => s.form_number === 1) ?? null;
 
       if (!form1Submission) {
-        console.warn(`[webhook] WARNING: No Form 1 submission found for applicant ${applicant.id} — eligibility may be inaccurate`);
+        console.warn(`[webhook] WARNING: No Form 1 submission found for applicant ${applicant.id}`);
+        console.log(`[webhook] All submission form_numbers:`, (allSubmissions || []).map(s => s.form_number));
       } else {
-        console.log(`[webhook] Form 1 raw_data keys for ${applicant.id}:`, Object.keys(form1Submission.raw_data || {}));
+        console.log(`[webhook] Form 1 found — highest_education=${form1Submission.raw_data?.highest_education}, submitted_transcripts=${form1Submission.raw_data?.submitted_transcripts}`);
       }
 
       const eligResult = evaluateEligibility(freshApplicant, form1Submission ?? formSubmission);
