@@ -242,7 +242,65 @@ Send-Application `
     -Form3Fields @{}
 
 # =============================================================================
-# SECTION 3 - BUG VALIDATION
+# SECTION 3 - ALL CERTIFICATE / INSTITUTE PROGRAMS (open enrollment)
+# =============================================================================
+
+# Accent helpers (avoids UTF-8/Windows-1252 encoding corruption in .ps1 files)
+$i_acute = [char]237   # í
+$e_acute = [char]233   # é
+
+Send-Application `
+    -TestName "AUTO-APPROVE: Certificado en Estudios Biblicos (CBS)" `
+    -Email    "test-cert-cbs@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Certificate - Certificado"
+        "DesiredProgramProramaDeseado" = "Certificado en Estudios B${i_acute}blicos"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+Send-Application `
+    -TestName "AUTO-APPROVE: Programa Acelerado Ministerial" `
+    -Email    "test-cert-acelerado@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Certificate - Certificado"
+        "DesiredProgramProramaDeseado" = "Programa Acelerado Ministerial"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+Send-Application `
+    -TestName "AUTO-APPROVE: Capellania" `
+    -Email    "test-cert-capellania@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Certificate - Certificado"
+        "DesiredProgramProramaDeseado" = "Capellan${i_acute}a"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+Send-Application `
+    -TestName "AUTO-APPROVE: Pastores" `
+    -Email    "test-cert-pastores@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Certificate - Certificado"
+        "DesiredProgramProramaDeseado" = "Pastores"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+Send-Application `
+    -TestName "AUTO-APPROVE: Coaching / Liderazgo Sistemico" `
+    -Email    "test-cert-coaching@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Certificate - Certificado"
+        "DesiredProgramProramaDeseado" = "Coaching / Liderazgo Sist${e_acute}mico"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+# =============================================================================
+# SECTION 4 - BUG VALIDATION
 # =============================================================================
 
 Send-Application `

@@ -26,6 +26,11 @@ $expected = @{
     "test-ai-doctorate-bach@logos.edu"=@{ status = "needs_review";  ai = "any";      label = "AI EDGE: Doctorate + 10yr ministry" }
     "test-ai-unknown-prog@logos.edu" = @{ status = "needs_review";  ai = "any";      label = "AI EDGE: Unknown program" }
     "test-phd-approve@logos.edu"     = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: PhD with doctorate" }
+    "test-cert-cbs@logos.edu"        = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: CBS (Certificado)" }
+    "test-cert-acelerado@logos.edu"  = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: Programa Acelerado" }
+    "test-cert-capellania@logos.edu" = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: Capellania" }
+    "test-cert-pastores@logos.edu"   = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: Pastores" }
+    "test-cert-coaching@logos.edu"   = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: Coaching/Liderazgo" }
 }
 
 # Fetch all test applicants from Supabase
