@@ -241,6 +241,23 @@ Send-Application `
     -Form2Fields @{} `
     -Form3Fields @{}
 
+# =============================================================================
+# SECTION 3 - BUG VALIDATION
+# =============================================================================
+
+Send-Application `
+    -TestName "AUTO-APPROVE: PhD with existing doctorate" `
+    -Email    "test-phd-approve@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Doctoral - Doctorado"
+        "DesiredProgramProramaDeseado" = "Doctor of Religious Philosophy (Ph.D)"
+        "Doctorado"                    = "Si tengo"
+        "Licenciatura"                 = "Si tengo"
+        "MarqueLosDocumentosQueEstaIncluyen" = "Copia de la Licenciatura,Transcripts - Registros oficiales de Notas de grado"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
 Write-Host ""
 Write-Host "===========================================" -ForegroundColor Cyan
 Write-Host "All tests sent. Check Railway logs and Supabase for results." -ForegroundColor Green

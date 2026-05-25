@@ -221,7 +221,12 @@ export function evaluateEligibility(applicant, formData) {
   const ministerial_years_associated =
     (typeof applicant.ministerial_years_associated === 'number' ? applicant.ministerial_years_associated : null) ??
     (parseInt(rawData.ministerial_years_associated, 10) || 0);
-  const has_existing_doctorate = isTrue(rawData.has_existing_doctorate);
+  // has_existing_doctorate: true if the form explicitly says so, OR if the
+  // applicant's derived highest education is already at doctorate level
+  // (i.e., Doctorado = "Si tengo" on Form 1 → highest_education = 'doctorate').
+  const has_existing_doctorate =
+    isTrue(rawData.has_existing_doctorate) ||
+    highest_education === 'doctorate';
 
   const monthly_budget_raw =
     applicant.monthly_budget ?? rawData.monthly_budget ?? '';
