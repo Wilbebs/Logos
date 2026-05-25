@@ -98,7 +98,7 @@ Send-Application `
     -Email    "test-institute@logos.edu" `
     -Form1Fields @{
         "StudyLevelsNivelesDeEstudio"  = "Certificate - Certificado"
-        "DesiredProgramProramaDeseado" = "Certificado en Estudios Bíblicos"
+        "DesiredProgramProramaDeseado" = "Liderazgo Espiritual / Diplomado"
     } `
     -Form2Fields @{} `
     -Form3Fields @{}

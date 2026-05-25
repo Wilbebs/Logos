@@ -13,7 +13,7 @@ $headers = @{
 
 # Expected results for each test email
 $expected = @{
-    "test-institute@logos.edu"       = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: Instituto" }
+    "test-institute@logos.edu"       = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: Certificate" }
     "test-associate@logos.edu"       = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: Associate" }
     "test-bachelor-approve@logos.edu"= @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: Bachelor" }
     "test-master-approve@logos.edu"  = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: Master" }

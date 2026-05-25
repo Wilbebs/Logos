@@ -356,7 +356,7 @@ async function handleFormSubmission(req, res, formNumber) {
 
       console.log(`[webhook] form_submissions fetch: count=${allSubmissions?.length ?? 'null'} error=${subFetchError?.message ?? 'none'}`);
 
-      const form1Submission = (allSubmissions || []).find(s => s.form_number === 1) ?? null;
+      const form1Submission = (allSubmissions || []).find(s => Number(s.form_number) === 1) ?? null;
 
       if (!form1Submission) {
         console.warn(`[webhook] WARNING: No Form 1 submission found for applicant ${applicant.id}`);
