@@ -216,8 +216,10 @@ export function evaluateEligibility(applicant, formData) {
     applicant.highest_education || rawData.highest_education || 'none';
 
   const ministerial_years_fulltime =
+    (typeof applicant.ministerial_years_fulltime === 'number' ? applicant.ministerial_years_fulltime : null) ??
     parseInt(rawData.ministerial_years_fulltime, 10) || 0;
   const ministerial_years_associated =
+    (typeof applicant.ministerial_years_associated === 'number' ? applicant.ministerial_years_associated : null) ??
     parseInt(rawData.ministerial_years_associated, 10) || 0;
   const has_existing_doctorate = isTrue(rawData.has_existing_doctorate);
 

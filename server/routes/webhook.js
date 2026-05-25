@@ -296,6 +296,14 @@ async function handleFormSubmission(req, res, formNumber) {
       applicantPayload.submitted_undergraduate_diploma  = enriched.submitted_undergraduate_diploma  ?? false;
     }
 
+    // Extract ministerial experience from ANY form that includes it.
+    // MachForm sends these on the Experiencia Ministerial form (Form 3),
+    // but some test paths put them in Form 1 — so we check every submission.
+    const min_ft = parseInt(body.ministerial_years_fulltime, 10);
+    const min_as = parseInt(body.ministerial_years_associated, 10);
+    if (!isNaN(min_ft) && min_ft > 0) applicantPayload.ministerial_years_fulltime   = min_ft;
+    if (!isNaN(min_as) && min_as > 0) applicantPayload.ministerial_years_associated = min_as;
+
     const { data: applicant, error: upsertError } = await supabase
       .from('applicants')
       .upsert(applicantPayload, { onConflict: 'email', ignoreDuplicates: false })
