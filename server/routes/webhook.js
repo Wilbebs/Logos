@@ -285,6 +285,17 @@ async function handleFormSubmission(req, res, formNumber) {
     if (program_level)   applicantPayload.program_level   = program_level;
     if (program_applied) applicantPayload.program_applied = program_applied;
 
+    // For Form 1, write enriched eligibility fields directly onto the applicant
+    // so the eligibility engine can read them from freshApplicant without
+    // needing a secondary form_submissions query.
+    if (formNumber === 1 && enriched) {
+      if (enriched.highest_education)               applicantPayload.highest_education               = enriched.highest_education;
+      if (enriched.monthly_budget !== undefined)    applicantPayload.monthly_budget                  = enriched.monthly_budget;
+      applicantPayload.submitted_transcripts            = enriched.submitted_transcripts            ?? false;
+      applicantPayload.submitted_diploma                = enriched.submitted_diploma                ?? false;
+      applicantPayload.submitted_undergraduate_diploma  = enriched.submitted_undergraduate_diploma  ?? false;
+    }
+
     const { data: applicant, error: upsertError } = await supabase
       .from('applicants')
       .upsert(applicantPayload, { onConflict: 'email', ignoreDuplicates: false })

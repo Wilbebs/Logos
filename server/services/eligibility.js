@@ -206,13 +206,14 @@ export function evaluateEligibility(applicant, formData) {
 
   reasons.push(`Program identified: ${program.display_name} (${program.level} level).`);
 
-  // ── 2. Extract education, experience, and BUDGET from form data ────────────
+  // ── 2. Extract education, experience, and BUDGET ─────────────────────────
+  // Enriched fields (highest_education, submitted_*, monthly_budget) are written
+  // directly onto the applicant record when Form 1 is processed. Read them from
+  // there first; fall back to formData.raw_data for legacy compatibility.
   const rawData = formData?.raw_data ?? {};
 
-  // highest_education is either set directly (legacy) or derived by the webhook
-  // normalizer from Form 1's education section dropdowns (Associate *, Licenciatura *,
-  // Maestría *, Doctorado *, Completo Su Escuela Secundaria.).
-  const highest_education = rawData.highest_education || 'none';
+  const highest_education =
+    applicant.highest_education || rawData.highest_education || 'none';
 
   const ministerial_years_fulltime =
     parseInt(rawData.ministerial_years_fulltime, 10) || 0;
@@ -220,28 +221,18 @@ export function evaluateEligibility(applicant, formData) {
     parseInt(rawData.ministerial_years_associated, 10) || 0;
   const has_existing_doctorate = isTrue(rawData.has_existing_doctorate);
 
-  // Budget: read from "monthly_budget" (normalized by webhook from the
-  // "Budgets / Presupuesto" field). Form options:
-  //   "$25 USD - $50 USD"  → low tier  (institute / certificate only)
-  //   "$50 USD - $100 USD" → medium tier (undergraduate programs)
-  //   (not answered)       → high tier assumed (no financial constraint)
-  //
-  // Note: the form has no option above $100 — graduate applicants who can afford
-  // graduate tuition will simply leave the field blank, which correctly maps to
-  // the high tier (no constraint). Applicants who select either option and apply
-  // for a graduate program will be flagged for a financial conversation.
-  const monthly_budget_raw = rawData.monthly_budget || '';
+  const monthly_budget_raw =
+    applicant.monthly_budget ?? rawData.monthly_budget ?? '';
   const budgetTier = parseBudgetTier(monthly_budget_raw);
 
-  // Documents: detected from Form 1's document checklist checkboxes by the
-  // webhook normalizer (detectDocuments). Fields injected into raw_data:
-  //   submitted_transcripts            — checked "Transcripts - Registros oficiales"
-  //   submitted_diploma                — checked "Copia de la Licenciatura"
-  //   submitted_undergraduate_diploma  — checked "Copia de la Licenciatura" or "postgrado"
-  const submitted_transcripts = isTrue(rawData.submitted_transcripts);
-  const submitted_diploma     = isTrue(rawData.submitted_diploma);
+  const submitted_transcripts =
+    applicant.submitted_transcripts ?? isTrue(rawData.submitted_transcripts);
+  const submitted_diploma =
+    applicant.submitted_diploma ?? isTrue(rawData.submitted_diploma);
   const submitted_undergraduate_diploma =
-    isTrue(rawData.submitted_undergraduate_diploma) || isTrue(rawData.submitted_diploma);
+    applicant.submitted_undergraduate_diploma ??
+    isTrue(rawData.submitted_undergraduate_diploma) ??
+    isTrue(rawData.submitted_diploma);
 
   const eduLevel = educationLevel(highest_education);
 
