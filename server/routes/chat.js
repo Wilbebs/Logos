@@ -32,10 +32,19 @@ async function getStats() {
 
 async function searchApplicants(term) {
   if (!term || term.length < 2) return [];
+  const cols = 'id, full_name, first_name, last_name, email, program_applied, program_level, eligibility_status, ai_recommendation, ai_reasoning, decision, forms_complete, monthly_budget';
+
+  // Email — use exact ilike on the email column only (avoids @ breaking the or() parser)
+  if (term.includes('@')) {
+    const { data } = await supabase.from('applicants').select(cols).ilike('email', `%${term}%`).limit(5);
+    return data ?? [];
+  }
+
+  // Name — search name columns
   const { data } = await supabase
     .from('applicants')
-    .select('id, full_name, first_name, last_name, email, program_applied, program_level, eligibility_status, ai_recommendation, ai_reasoning, decision, forms_complete, monthly_budget')
-    .or(`full_name.ilike.%${term}%,first_name.ilike.%${term}%,last_name.ilike.%${term}%,email.ilike.%${term}%`)
+    .select(cols)
+    .or(`full_name.ilike.%${term}%,first_name.ilike.%${term}%,last_name.ilike.%${term}%`)
     .limit(5);
   return data ?? [];
 }
@@ -61,7 +70,7 @@ function extractSearchTerms(text) {
   const words = text.split(/\s+/);
   let nameBuffer = [];
   for (const word of words) {
-    const clean = word.replace(/[^a-zA-Z]/g, '');
+    const clean = word.replace(/'s$/i, '').replace(/[^a-zA-Z]/g, ''); // strip possessive before cleaning
     if (clean.length > 1 && clean[0] === clean[0].toUpperCase() && clean[0] !== clean[0].toLowerCase() && !STOP_WORDS.has(clean.toLowerCase())) {
       nameBuffer.push(clean);
     } else {
