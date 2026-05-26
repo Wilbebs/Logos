@@ -5,6 +5,7 @@ import FormChecklist from '../components/FormChecklist.jsx';
 import AIRecommendation from '../components/AIRecommendation.jsx';
 import LeadProfile from '../components/LeadProfile.jsx';
 import FileAttachments from '../components/FileAttachments.jsx';
+import AcceptanceLetter from '../components/AcceptanceLetter.jsx';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -82,9 +83,33 @@ function DecisionPanel({ applicant, onDecisionSubmitted }) {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [suggestionLoading, setSuggestionLoading] = useState(false);
+  const [suggestionError, setSuggestionError] = useState('');
 
   const isPending = applicant.decision === 'pending' || !applicant.decision;
   const notesRequired = selectedDecision === 'rejected' || selectedDecision === 'info_requested';
+  const showSuggestion = selectedDecision === 'info_requested';
+
+  async function handleGenerateSuggestion() {
+    setSuggestionError('');
+    setSuggestionLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/applicants/${applicant.id}/suggest-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `Request failed: ${res.status}`);
+      setNotes(prev => {
+        const suggestion = data.suggestion || '';
+        return prev ? `${prev}\n\n${suggestion}` : suggestion;
+      });
+    } catch (err) {
+      setSuggestionError(err.message || 'Failed to generate suggestion.');
+    } finally {
+      setSuggestionLoading(false);
+    }
+  }
 
   async function handleSubmit() {
     setError('');
@@ -167,16 +192,39 @@ function DecisionPanel({ applicant, onDecisionSubmitted }) {
       </div>
 
       <div className="mb-3">
-        <label className="block text-xs font-medium text-gray-600 mb-1">
-          Notes{notesRequired ? ' (required)' : ''}
-        </label>
+        <div className="flex items-center justify-between mb-1">
+          <label className="block text-xs font-medium text-gray-600">
+            Notes{notesRequired ? ' (required)' : ''}
+          </label>
+          {showSuggestion && (
+            <button
+              type="button"
+              onClick={handleGenerateSuggestion}
+              disabled={suggestionLoading}
+              className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 disabled:text-blue-300 font-medium"
+              title="AI will draft a message explaining what the applicant needs to provide"
+            >
+              {suggestionLoading ? (
+                <>
+                  <span className="animate-spin inline-block w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full" />
+                  Generating…
+                </>
+              ) : (
+                <>✦ Generate Suggestion</>
+              )}
+            </button>
+          )}
+        </div>
         <textarea
           value={notes}
           onChange={e => setNotes(e.target.value)}
-          rows={3}
+          rows={4}
           className="w-full border border-gray-300 rounded px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-blue-400"
-          placeholder="Enter notes…"
+          placeholder={showSuggestion ? 'Click "Generate Suggestion" for an AI-drafted message, or type your own…' : 'Enter notes…'}
         />
+        {suggestionError && (
+          <p className="mt-1 text-xs text-red-600">{suggestionError}</p>
+        )}
       </div>
 
       <div className="mb-4">
@@ -308,6 +356,11 @@ export default function ApplicantDetail() {
 
           {/* Decision */}
           <DecisionPanel applicant={applicant} onDecisionSubmitted={loadApplicant} />
+
+          {/* Acceptance Letter — only shown after approval */}
+          {applicant.decision === 'approved' && (
+            <AcceptanceLetter applicant={applicant} />
+          )}
         </div>
       </div>
     </div>

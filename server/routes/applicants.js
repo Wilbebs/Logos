@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 import supabase from '../db/client.js';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // File uploads — stored in memory, then forwarded to Supabase Storage.
 // Max file size: 20 MB. Accepted MIME types are checked at the route level.
@@ -411,6 +412,131 @@ router.delete('/:id/files/:fileId', async (req, res) => {
   } catch (err) {
     console.error('[DELETE /api/applicants/:id/files/:fileId] Unexpected error:', err);
     return res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
+// ------------------------------------------------------------------
+// POST /api/applicants/:id/acceptance-letter
+// AI-generates a draft acceptance letter for an approved applicant.
+// ------------------------------------------------------------------
+router.post('/:id/acceptance-letter', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { data: applicant, error } = await supabase
+      .from('applicants')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error || !applicant) {
+      return res.status(404).json({ error: 'Applicant not found.' });
+    }
+
+    if (applicant.decision !== 'approved') {
+      return res.status(400).json({ error: 'Acceptance letters can only be generated for approved applicants.' });
+    }
+
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(503).json({ error: 'AI service not configured.' });
+    }
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-lite' });
+
+    const firstName = (applicant.first_name || applicant.full_name?.split(' ')[0] || 'Applicant');
+    const fullName  = applicant.full_name || `${applicant.first_name || ''} ${applicant.last_name || ''}`.trim();
+    const program   = applicant.program_applied || 'your chosen program';
+    const level     = applicant.program_level   || '';
+
+    const prompt = `You are the admissions office of Logos Christian University, a Spanish-English bilingual Christian seminary.
+
+Write a warm, professional acceptance letter for the following admitted student. Write it in English but include the Spanish greeting "Estimado/a" as appropriate. Use a formal but warm pastoral tone.
+
+Student: ${fullName}
+Program: ${program}
+Level: ${level}
+Decision date: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+
+The letter should:
+1. Open with congratulations
+2. Confirm acceptance into the specific program
+3. Briefly mention what an exciting journey awaits them at Logos
+4. Include a placeholder for next steps: [NEXT STEPS PLACEHOLDER]
+5. Close with a warm, faith-affirming sign-off
+6. Be signed: Admissions Office, Logos Christian University
+
+Return only the letter text, no extra commentary.`;
+
+    const result = await model.generateContent(prompt);
+    const letter = result.response.text().trim();
+
+    return res.json({ letter });
+  } catch (err) {
+    console.error('[POST /api/applicants/:id/acceptance-letter] Error:', err);
+    return res.status(500).json({ error: 'Failed to generate acceptance letter.' });
+  }
+});
+
+// ------------------------------------------------------------------
+// POST /api/applicants/:id/suggest-email
+// AI-generates a suggestion message for an info_requested decision,
+// explaining what the applicant needs to provide.
+// ------------------------------------------------------------------
+router.post('/:id/suggest-email', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { data: applicant, error: aErr } = await supabase
+      .from('applicants')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (aErr || !applicant) {
+      return res.status(404).json({ error: 'Applicant not found.' });
+    }
+
+    // Fetch form submissions to understand what's missing
+    const { data: forms } = await supabase
+      .from('form_submissions')
+      .select('form_number, raw_data')
+      .eq('applicant_id', id)
+      .order('form_number', { ascending: true });
+
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(503).json({ error: 'AI service not configured.' });
+    }
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-lite' });
+
+    const fullName = applicant.full_name || `${applicant.first_name || ''} ${applicant.last_name || ''}`.trim();
+    const program  = applicant.program_applied || 'their chosen program';
+    const level    = applicant.program_level   || '';
+    const aiReason = applicant.ai_reasoning    || '';
+    const formsReceived = forms?.length ?? 0;
+
+    const prompt = `You are an admissions coordinator at Logos Christian University.
+
+Write a short, warm, professional email suggestion to send to an applicant requesting more information. This is NOT a rejection — it is a friendly request to help complete their application.
+
+Applicant: ${fullName}
+Program: ${program} (${level})
+Forms received: ${formsReceived} of 3
+AI review notes: ${aiReason || 'No specific AI notes.'}
+Missing docs: transcripts=${applicant.submitted_transcripts ? 'yes' : 'no'}, diploma=${applicant.submitted_diploma ? 'yes' : 'no'}
+
+Write 3-5 short sentences. Be specific about what they need to provide based on the information above. Warm, encouraging, faith-based tone.
+Do not include a subject line. Start directly with the salutation.`;
+
+    const result = await model.generateContent(prompt);
+    const suggestion = result.response.text().trim();
+
+    return res.json({ suggestion });
+  } catch (err) {
+    console.error('[POST /api/applicants/:id/suggest-email] Error:', err);
+    return res.status(500).json({ error: 'Failed to generate email suggestion.' });
   }
 });
 

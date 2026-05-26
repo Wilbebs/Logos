@@ -4,6 +4,7 @@ import cors from 'cors';
 
 import applicantsRouter from './routes/applicants.js';
 import emailRouter from './routes/email.js';
+import chatRouter from './routes/chat.js';
 
 // -----------------------------------------------------------------------
 // Webhook router is built by Agent 4.  Import conditionally so the server
@@ -72,6 +73,7 @@ app.get('/health', (_req, res) => {
 // -----------------------------------------------------------------------
 app.use('/api/applicants', applicantsRouter);
 app.use('/api/email', emailRouter);
+app.use('/api/chat', chatRouter);
 
 if (webhookRouter) {
   app.use('/webhook', webhookRouter);
