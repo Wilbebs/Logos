@@ -442,7 +442,7 @@ router.post('/:id/acceptance-letter', async (req, res) => {
     }
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     const firstName = (applicant.first_name || applicant.full_name?.split(' ')[0] || 'Applicant');
     const fullName  = applicant.full_name || `${applicant.first_name || ''} ${applicant.last_name || ''}`.trim();
@@ -509,7 +509,7 @@ router.post('/:id/suggest-email', async (req, res) => {
     }
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     const fullName = applicant.full_name || `${applicant.first_name || ''} ${applicant.last_name || ''}`.trim();
     const program  = applicant.program_applied || 'their chosen program';
