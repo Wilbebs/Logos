@@ -162,6 +162,7 @@ function normalizeForm1(body) {
   const email = pick(body,
     'email',
     'EmailICorreoElectrónicoI',
+    'EmailICorreoElectronico',       // ASCII fallback (test scripts, encoding-safe)
     'Email I - Correo Electrónico I',
     'email_i_correo_electronico_i',
     'Email I',
@@ -371,7 +372,7 @@ async function handleFormSubmission(req, res, formNumber) {
         .from('form_submissions')
         .select('*')
         .eq('applicant_id', applicant.id)
-        .order('created_at', { ascending: true });
+        .order('submitted_at', { ascending: true });
 
       console.log(`[webhook] form_submissions fetch: count=${allSubmissions?.length ?? 'null'} error=${subFetchError?.message ?? 'none'}`);
 
