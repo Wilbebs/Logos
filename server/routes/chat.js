@@ -40,20 +40,45 @@ async function searchApplicants(term) {
   return data ?? [];
 }
 
+// Common words to ignore so we don't search for "How", "Was", "The", etc.
+const STOP_WORDS = new Set([
+  'how','was','the','did','is','are','what','who','when','where','why','can',
+  'does','has','have','their','this','that','show','find','tell','me','about',
+  'my','your','our','its','been','they','them','then','than','will','would',
+  'could','should','make','just','also','only','any','all','new','more','for',
+  'and','but','not','with','from','into','onto','over','under','too','very',
+]);
+
 function extractSearchTerms(text) {
   const terms = [];
+
+  // Always grab emails — exact match
   const emails = text.match(/[\w.-]+@[\w.-]+\.\w+/g);
   if (emails) terms.push(...emails);
-  const patterns = [
-    /(?:show me|find|look up|search|tell me about|who is|check|open)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/gi,
-    /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)(?:'s)?\s+application/gi,
-  ];
-  for (const pat of patterns) {
-    let m;
-    while ((m = pat.exec(text)) !== null) {
-      if (m[1] && m[1].length > 2) terms.push(m[1].trim());
+
+  // Grab sequences of Title-Cased words (names) — e.g. "Wilbert Hernandez"
+  // Filter out common stop words so "How Was" doesn't become a search term
+  const words = text.split(/\s+/);
+  let nameBuffer = [];
+  for (const word of words) {
+    const clean = word.replace(/[^a-zA-Z]/g, '');
+    if (clean.length > 1 && clean[0] === clean[0].toUpperCase() && clean[0] !== clean[0].toLowerCase() && !STOP_WORDS.has(clean.toLowerCase())) {
+      nameBuffer.push(clean);
+    } else {
+      if (nameBuffer.length >= 2) terms.push(nameBuffer.join(' '));
+      nameBuffer = [];
     }
   }
+  if (nameBuffer.length >= 2) terms.push(nameBuffer.join(' '));
+
+  // Also grab single capitalized words after explicit trigger verbs (e.g. "find Maria")
+  const triggerPattern = /(?:show me|find|look up|search for|tell me about|who is|check|open|navigate to)\s+([A-Za-z][\w\s'-]{1,40}?)(?:\s*[;,?]|$)/gi;
+  let m;
+  while ((m = triggerPattern.exec(text)) !== null) {
+    const candidate = m[1].trim();
+    if (candidate.length > 2) terms.push(candidate);
+  }
+
   return [...new Set(terms)];
 }
 
