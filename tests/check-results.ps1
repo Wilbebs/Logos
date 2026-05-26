@@ -31,6 +31,45 @@ $expected = @{
     "test-cert-capellania@logos.edu" = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: Capellania" }
     "test-cert-pastores@logos.edu"   = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: Pastores" }
     "test-cert-coaching@logos.edu"   = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: Coaching/Liderazgo" }
+    # Associate programs
+    "test-assoc-ats@logos.edu"       = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: ATS" }
+    "test-assoc-acc@logos.edu"       = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: ACC" }
+    "test-assoc-aps@logos.edu"       = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: APS" }
+    # Bachelor programs
+    "test-bach-bbs@logos.edu"        = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: BBS" }
+    "test-bach-bts@logos.edu"        = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: BTS" }
+    "test-bach-bce@logos.edu"        = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: BCE" }
+    "test-bach-bcc@logos.edu"        = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: BCC" }
+    "test-bach-bps@logos.edu"        = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: BPS" }
+    # Master programs
+    "test-mast-mcc@logos.edu"        = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: MCC" }
+    "test-mast-mce@logos.edu"        = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: MCE" }
+    "test-mast-mths@logos.edu"       = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: M.Ths" }
+    "test-mast-mth@logos.edu"        = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: M.Th" }
+    "test-mast-mlo@logos.edu"        = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: MLO" }
+    # Doctorate programs
+    "test-doc-dmin@logos.edu"        = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: D.Min (clean)" }
+    "test-doc-dmin-lead@logos.edu"   = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: D.Min/Leadership" }
+    "test-doc-thd@logos.edu"         = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: Th.D" }
+    "test-doc-dcc@logos.edu"         = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: DCC" }
+    "test-doc-dce@logos.edu"         = @{ status = "eligible";      ai = $null;      label = "AUTO-APPROVE: DCE" }
+    # Financial flags
+    "test-fin-low-assoc@logos.edu"   = @{ status = "needs_review";  ai = "escalate"; label = "FINANCIAL FLAG: Low budget + Associate" }
+    "test-fin-med-mast@logos.edu"    = @{ status = "needs_review";  ai = "escalate"; label = "FINANCIAL FLAG: Medium budget + Master" }
+    "test-fin-med-doc@logos.edu"     = @{ status = "needs_review";  ai = "escalate"; label = "FINANCIAL FLAG: Medium budget + Doctorate" }
+    # Document flags (partial)
+    "test-doc-bach-notranscripts@logos.edu" = @{ status = "needs_review"; ai = "escalate"; label = "DOC FLAG: Bachelor missing transcripts" }
+    "test-doc-mast-nodiploma@logos.edu"     = @{ status = "needs_review"; ai = "escalate"; label = "DOC FLAG: Master missing diploma" }
+    # Auto-reject boundary cases
+    "test-reject-mast-hs3yr@logos.edu"       = @{ status = "ineligible";   ai = $null;      label = "AUTO-REJECT: Master HS+3yr" }
+    "test-reject-mast-assoc4yr@logos.edu"    = @{ status = "ineligible";   ai = $null;      label = "AUTO-REJECT: Master assoc+4yr" }
+    "test-reject-mast-9yrassoc@logos.edu"    = @{ status = "ineligible";   ai = $null;      label = "AUTO-REJECT: Master assoc+9yr assoc" }
+    "test-reject-doc-hs0yr@logos.edu"        = @{ status = "ineligible";   ai = $null;      label = "AUTO-REJECT: Doctorate HS+0yr" }
+    "test-reject-doc-bach9yrassoc@logos.edu" = @{ status = "ineligible";   ai = $null;      label = "AUTO-REJECT: Doctorate bach+9yr assoc" }
+    # AI edge cases (threshold boundaries)
+    "test-edge-mast-10yrassoc@logos.edu"     = @{ status = "needs_review"; ai = "any";      label = "AI EDGE: Master assoc+10yr assoc" }
+    "test-edge-doc-bach10yrassoc@logos.edu"  = @{ status = "needs_review"; ai = "any";      label = "AI EDGE: Doctorate bach+10yr assoc" }
+    "test-edge-doc-assoc10yr@logos.edu"      = @{ status = "needs_review"; ai = "any";      label = "AI EDGE: Doctorate assoc+10yr ft" }
 }
 
 # Fetch all test applicants from Supabase

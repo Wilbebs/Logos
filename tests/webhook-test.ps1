@@ -300,7 +300,424 @@ Send-Application `
     -Form3Fields @{}
 
 # =============================================================================
-# SECTION 4 - BUG VALIDATION
+# SECTION 4 - ALL ASSOCIATE PROGRAMS (open enrollment)
+# =============================================================================
+
+Send-Application `
+    -TestName "AUTO-APPROVE: Associate of Theological Studies (ATS)" `
+    -Email    "test-assoc-ats@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Associate - Tecnico Superior"
+        "DesiredProgramProramaDeseado" = "Associate of Theological Studies"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+Send-Application `
+    -TestName "AUTO-APPROVE: Associate of Christian Counseling (ACC)" `
+    -Email    "test-assoc-acc@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Associate - Tecnico Superior"
+        "DesiredProgramProramaDeseado" = "Associate of Christian Counseling"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+Send-Application `
+    -TestName "AUTO-APPROVE: Associate of Pastoral Studies (APS)" `
+    -Email    "test-assoc-aps@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Associate - Tecnico Superior"
+        "DesiredProgramProramaDeseado" = "Associate of Pastoral Studies"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+# =============================================================================
+# SECTION 5 - ALL BACHELOR PROGRAMS (with prior college + docs)
+# =============================================================================
+
+Send-Application `
+    -TestName "AUTO-APPROVE: Bachelor of Biblical Studies (BBS)" `
+    -Email    "test-bach-bbs@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Bachelor - Licenciatura"
+        "DesiredProgramProramaDeseado" = "Bachelor of Biblical Studies"
+        "Licenciatura"                 = "Si tengo"
+        "MarqueLosDocumentosQueEstaIncluyen" = "Copia de la Licenciatura,Transcripts - Registros oficiales de Notas de grado"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+Send-Application `
+    -TestName "AUTO-APPROVE: Bachelor of Theological Studies (BTS)" `
+    -Email    "test-bach-bts@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Bachelor - Licenciatura"
+        "DesiredProgramProramaDeseado" = "Bachelor of Theological Studies"
+        "Licenciatura"                 = "Si tengo"
+        "MarqueLosDocumentosQueEstaIncluyen" = "Copia de la Licenciatura,Transcripts - Registros oficiales de Notas de grado"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+Send-Application `
+    -TestName "AUTO-APPROVE: Bachelor of Christian Education (BCE)" `
+    -Email    "test-bach-bce@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Bachelor - Licenciatura"
+        "DesiredProgramProramaDeseado" = "Bachelor of Christian Education"
+        "Licenciatura"                 = "Si tengo"
+        "MarqueLosDocumentosQueEstaIncluyen" = "Copia de la Licenciatura,Transcripts - Registros oficiales de Notas de grado"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+Send-Application `
+    -TestName "AUTO-APPROVE: Bachelor of Christian Counseling (BCC)" `
+    -Email    "test-bach-bcc@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Bachelor - Licenciatura"
+        "DesiredProgramProramaDeseado" = "Bachelor of Christian Counseling"
+        "Licenciatura"                 = "Si tengo"
+        "MarqueLosDocumentosQueEstaIncluyen" = "Copia de la Licenciatura,Transcripts - Registros oficiales de Notas de grado"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+Send-Application `
+    -TestName "AUTO-APPROVE: Bachelor of Pastoral Studies (BPS)" `
+    -Email    "test-bach-bps@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Bachelor - Licenciatura"
+        "DesiredProgramProramaDeseado" = "Bachelor of Pastoral Studies"
+        "Licenciatura"                 = "Si tengo"
+        "MarqueLosDocumentosQueEstaIncluyen" = "Copia de la Licenciatura,Transcripts - Registros oficiales de Notas de grado"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+# =============================================================================
+# SECTION 6 - ALL MASTER PROGRAMS (bachelor + docs)
+# =============================================================================
+
+Send-Application `
+    -TestName "AUTO-APPROVE: Master of Christian Counseling (MCC)" `
+    -Email    "test-mast-mcc@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Master - Maestria"
+        "DesiredProgramProramaDeseado" = "Master of Christian Counseling"
+        "Licenciatura"                 = "Si tengo"
+        "MarqueLosDocumentosQueEstaIncluyen" = "Copia de la Licenciatura,Transcripts - Registros oficiales de Notas de grado"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+Send-Application `
+    -TestName "AUTO-APPROVE: Master of Christian Education (MCE)" `
+    -Email    "test-mast-mce@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Master - Maestria"
+        "DesiredProgramProramaDeseado" = "Master of Christian Education"
+        "Licenciatura"                 = "Si tengo"
+        "MarqueLosDocumentosQueEstaIncluyen" = "Copia de la Licenciatura,Transcripts - Registros oficiales de Notas de grado"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+Send-Application `
+    -TestName "AUTO-APPROVE: Master of Theological Studies (M.Ths)" `
+    -Email    "test-mast-mths@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Master - Maestria"
+        "DesiredProgramProramaDeseado" = "Master of Theological Studies (M.Ths)"
+        "Licenciatura"                 = "Si tengo"
+        "MarqueLosDocumentosQueEstaIncluyen" = "Copia de la Licenciatura,Transcripts - Registros oficiales de Notas de grado"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+Send-Application `
+    -TestName "AUTO-APPROVE: Master of Theology (M.Th)" `
+    -Email    "test-mast-mth@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Master - Maestria"
+        "DesiredProgramProramaDeseado" = "Master of Theology (M.Th)"
+        "Licenciatura"                 = "Si tengo"
+        "MarqueLosDocumentosQueEstaIncluyen" = "Copia de la Licenciatura,Transcripts - Registros oficiales de Notas de grado"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+Send-Application `
+    -TestName "AUTO-APPROVE: Master of Leadership and Organization (MLO)" `
+    -Email    "test-mast-mlo@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Master - Maestria"
+        "DesiredProgramProramaDeseado" = "Master of Leadership & Organization"
+        "Licenciatura"                 = "Si tengo"
+        "MarqueLosDocumentosQueEstaIncluyen" = "Copia de la Licenciatura,Transcripts - Registros oficiales de Notas de grado"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+# =============================================================================
+# SECTION 7 - ALL DOCTORATE PROGRAMS (masters + docs)
+# =============================================================================
+
+Send-Application `
+    -TestName "AUTO-APPROVE: Doctor of Ministry (D.Min) — clean path" `
+    -Email    "test-doc-dmin@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Doctoral - Doctorado"
+        "DesiredProgramProramaDeseado" = "Doctor of Ministry (D.Min)"
+        "Maestria"                     = "Si tengo"
+        "Licenciatura"                 = "Si tengo"
+        "MarqueLosDocumentosQueEstaIncluyen" = "Copia de la Licenciatura,Transcripts - Registros oficiales de Notas de grado"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+Send-Application `
+    -TestName "AUTO-APPROVE: Doctor of Ministry / Leadership and Innovation" `
+    -Email    "test-doc-dmin-lead@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Doctoral - Doctorado"
+        "DesiredProgramProramaDeseado" = "Doctor of Ministry / Leadership & Innovation"
+        "Maestria"                     = "Si tengo"
+        "Licenciatura"                 = "Si tengo"
+        "MarqueLosDocumentosQueEstaIncluyen" = "Copia de la Licenciatura,Transcripts - Registros oficiales de Notas de grado"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+Send-Application `
+    -TestName "AUTO-APPROVE: Doctor of Theology (Th.D)" `
+    -Email    "test-doc-thd@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Doctoral - Doctorado"
+        "DesiredProgramProramaDeseado" = "Doctor of Theology (Th.D)"
+        "Maestria"                     = "Si tengo"
+        "Licenciatura"                 = "Si tengo"
+        "MarqueLosDocumentosQueEstaIncluyen" = "Copia de la Licenciatura,Transcripts - Registros oficiales de Notas de grado"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+Send-Application `
+    -TestName "AUTO-APPROVE: Doctor of Christian Counseling (DCC)" `
+    -Email    "test-doc-dcc@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Doctoral - Doctorado"
+        "DesiredProgramProramaDeseado" = "Doctor of Christian Counseling"
+        "Maestria"                     = "Si tengo"
+        "Licenciatura"                 = "Si tengo"
+        "MarqueLosDocumentosQueEstaIncluyen" = "Copia de la Licenciatura,Transcripts - Registros oficiales de Notas de grado"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+Send-Application `
+    -TestName "AUTO-APPROVE: Doctor of Christian Education (DCE)" `
+    -Email    "test-doc-dce@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Doctoral - Doctorado"
+        "DesiredProgramProramaDeseado" = "Doctor of Christian Education"
+        "Maestria"                     = "Si tengo"
+        "Licenciatura"                 = "Si tengo"
+        "MarqueLosDocumentosQueEstaIncluyen" = "Copia de la Licenciatura,Transcripts - Registros oficiales de Notas de grado"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+# =============================================================================
+# SECTION 8 - FINANCIAL FLAGS (additional budget mismatch scenarios)
+# =============================================================================
+
+Send-Application `
+    -TestName "FINANCIAL FLAG: Low budget applying for Associate" `
+    -Email    "test-fin-low-assoc@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Associate - Tecnico Superior"
+        "DesiredProgramProramaDeseado" = "Associate of Biblical Studies"
+        "BudgetsPresupuesto"           = "25 USD - 50 USD"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+Send-Application `
+    -TestName "FINANCIAL FLAG: Medium budget applying for Master" `
+    -Email    "test-fin-med-mast@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Master - Maestria"
+        "DesiredProgramProramaDeseado" = "Master of Divinity (M.Div)"
+        "BudgetsPresupuesto"           = "50 USD - 100 USD"
+        "Licenciatura"                 = "Si tengo"
+        "MarqueLosDocumentosQueEstaIncluyen" = "Copia de la Licenciatura,Transcripts - Registros oficiales de Notas de grado"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+Send-Application `
+    -TestName "FINANCIAL FLAG: Medium budget applying for Doctorate" `
+    -Email    "test-fin-med-doc@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Doctoral - Doctorado"
+        "DesiredProgramProramaDeseado" = "Doctor of Ministry (D.Min)"
+        "BudgetsPresupuesto"           = "50 USD - 100 USD"
+        "Maestria"                     = "Si tengo"
+        "Licenciatura"                 = "Si tengo"
+        "MarqueLosDocumentosQueEstaIncluyen" = "Copia de la Licenciatura,Transcripts - Registros oficiales de Notas de grado"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+# =============================================================================
+# SECTION 9 - DOCUMENT FLAGS (partial — one doc missing at a time)
+# =============================================================================
+
+Send-Application `
+    -TestName "DOCUMENT FLAG: Bachelor — has diploma, missing transcripts" `
+    -Email    "test-doc-bach-notranscripts@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Bachelor - Licenciatura"
+        "DesiredProgramProramaDeseado" = "Bachelor of Theology (B.Th)"
+        "Licenciatura"                 = "Si tengo"
+        "MarqueLosDocumentosQueEstaIncluyen" = "Copia de la Licenciatura"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+Send-Application `
+    -TestName "DOCUMENT FLAG: Master — has transcripts, missing undergrad diploma" `
+    -Email    "test-doc-mast-nodiploma@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Master - Maestria"
+        "DesiredProgramProramaDeseado" = "Master of Divinity (M.Div)"
+        "Licenciatura"                 = "Si tengo"
+        "MarqueLosDocumentosQueEstaIncluyen" = "Transcripts - Registros oficiales de Notas de grado"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+# =============================================================================
+# SECTION 10 - AUTO-REJECT BOUNDARY CASES
+# =============================================================================
+
+Send-Application `
+    -TestName "AUTO-REJECT: Master — high school + 3yr ministry (below 5yr threshold)" `
+    -Email    "test-reject-mast-hs3yr@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Master - Maestria"
+        "DesiredProgramProramaDeseado" = "Master of Divinity (M.Div)"
+        "CompletoSuEscuelaSecundaria"  = "SI"
+        "Licenciatura"                 = "No tengo"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{
+        "ministerial_years_fulltime" = "3"
+    }
+
+Send-Application `
+    -TestName "AUTO-REJECT: Master — associate + 4yr ministry (below 5yr threshold)" `
+    -Email    "test-reject-mast-assoc4yr@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Master - Maestria"
+        "DesiredProgramProramaDeseado" = "Master of Divinity (M.Div)"
+        "Associate"                    = "Si, complete el estudio"
+        "Licenciatura"                 = "No tengo"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{
+        "ministerial_years_fulltime" = "4"
+    }
+
+Send-Application `
+    -TestName "AUTO-REJECT: Master — associate + 9yr associated (below 10yr threshold)" `
+    -Email    "test-reject-mast-9yrassoc@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Master - Maestria"
+        "DesiredProgramProramaDeseado" = "Master of Divinity (M.Div)"
+        "Associate"                    = "Si, complete el estudio"
+        "Licenciatura"                 = "No tengo"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{
+        "ministerial_years_associated" = "9"
+    }
+
+Send-Application `
+    -TestName "AUTO-REJECT: Doctorate — high school + 0yr ministry" `
+    -Email    "test-reject-doc-hs0yr@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Doctoral - Doctorado"
+        "DesiredProgramProramaDeseado" = "Doctor of Ministry (D.Min)"
+        "CompletoSuEscuelaSecundaria"  = "SI"
+        "Licenciatura"                 = "No tengo"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{}
+
+Send-Application `
+    -TestName "AUTO-REJECT: Doctorate — bachelor + 9yr associated (below 10 total threshold)" `
+    -Email    "test-reject-doc-bach9yrassoc@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Doctoral - Doctorado"
+        "DesiredProgramProramaDeseado" = "Doctor of Ministry (D.Min)"
+        "Licenciatura"                 = "Si tengo"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{
+        "ministerial_years_associated" = "9"
+    }
+
+# =============================================================================
+# SECTION 11 - AI EDGE CASES (threshold boundaries that trigger review)
+# =============================================================================
+
+Send-Application `
+    -TestName "AI EDGE: Master — associate + 10yr associated (at threshold, no docs)" `
+    -Email    "test-edge-mast-10yrassoc@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Master - Maestria"
+        "DesiredProgramProramaDeseado" = "Master of Divinity (M.Div)"
+        "Associate"                    = "Si, complete el estudio"
+        "Licenciatura"                 = "No tengo"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{
+        "ministerial_years_associated" = "10"
+    }
+
+Send-Application `
+    -TestName "AI EDGE: Doctorate — bachelor + 10yr associated (at 10 total threshold)" `
+    -Email    "test-edge-doc-bach10yrassoc@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Doctoral - Doctorado"
+        "DesiredProgramProramaDeseado" = "Doctor of Ministry (D.Min)"
+        "Licenciatura"                 = "Si tengo"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{
+        "ministerial_years_associated" = "10"
+    }
+
+Send-Application `
+    -TestName "AI EDGE: Doctorate — associate + 10yr fulltime (below masters, exception applies)" `
+    -Email    "test-edge-doc-assoc10yr@logos.edu" `
+    -Form1Fields @{
+        "StudyLevelsNivelesDeEstudio"  = "Doctoral - Doctorado"
+        "DesiredProgramProramaDeseado" = "Doctor of Ministry (D.Min)"
+        "Associate"                    = "Si, complete el estudio"
+        "Licenciatura"                 = "No tengo"
+    } `
+    -Form2Fields @{} `
+    -Form3Fields @{
+        "ministerial_years_fulltime" = "10"
+    }
+
+# =============================================================================
+# SECTION 12 - BUG VALIDATION
 # =============================================================================
 
 Send-Application `
