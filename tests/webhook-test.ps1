@@ -1,4 +1,4 @@
-# LOGOS Admissions - Webhook Test Script
+﻿# LOGOS Admissions - Webhook Test Script
 # Run in PowerShell: powershell -ExecutionPolicy Bypass -File webhook-test.ps1
 
 $BASE_URL = "https://logos-production-c920.up.railway.app"
@@ -454,7 +454,7 @@ Send-Application `
     -Email    "test-mast-mlo@logos.edu" `
     -Form1Fields @{
         "StudyLevelsNivelesDeEstudio"  = "Master - Maestria"
-        "DesiredProgramProramaDeseado" = "Master of Leadership & Organization"
+        "DesiredProgramProramaDeseado" = "Master of Leadership $([char]38) Organization"
         "Licenciatura"                 = "Si tengo"
         "MarqueLosDocumentosQueEstaIncluyen" = "Copia de la Licenciatura,Transcripts - Registros oficiales de Notas de grado"
     } `
@@ -466,7 +466,7 @@ Send-Application `
 # =============================================================================
 
 Send-Application `
-    -TestName "AUTO-APPROVE: Doctor of Ministry (D.Min) — clean path" `
+    -TestName "AUTO-APPROVE: Doctor of Ministry (D.Min) - clean path" `
     -Email    "test-doc-dmin@logos.edu" `
     -Form1Fields @{
         "StudyLevelsNivelesDeEstudio"  = "Doctoral - Doctorado"
@@ -483,7 +483,7 @@ Send-Application `
     -Email    "test-doc-dmin-lead@logos.edu" `
     -Form1Fields @{
         "StudyLevelsNivelesDeEstudio"  = "Doctoral - Doctorado"
-        "DesiredProgramProramaDeseado" = "Doctor of Ministry / Leadership & Innovation"
+        "DesiredProgramProramaDeseado" = "Doctor of Ministry / Leadership $([char]38) Innovation"
         "Maestria"                     = "Si tengo"
         "Licenciatura"                 = "Si tengo"
         "MarqueLosDocumentosQueEstaIncluyen" = "Copia de la Licenciatura,Transcripts - Registros oficiales de Notas de grado"
@@ -573,11 +573,11 @@ Send-Application `
     -Form3Fields @{}
 
 # =============================================================================
-# SECTION 9 - DOCUMENT FLAGS (partial — one doc missing at a time)
+# SECTION 9 - DOCUMENT FLAGS (partial - one doc missing at a time)
 # =============================================================================
 
 Send-Application `
-    -TestName "DOCUMENT FLAG: Bachelor — has diploma, missing transcripts" `
+    -TestName "DOCUMENT FLAG: Bachelor - has diploma, missing transcripts" `
     -Email    "test-doc-bach-notranscripts@logos.edu" `
     -Form1Fields @{
         "StudyLevelsNivelesDeEstudio"  = "Bachelor - Licenciatura"
@@ -589,7 +589,7 @@ Send-Application `
     -Form3Fields @{}
 
 Send-Application `
-    -TestName "DOCUMENT FLAG: Master — has transcripts, missing undergrad diploma" `
+    -TestName "DOCUMENT FLAG: Master - has transcripts, missing undergrad diploma" `
     -Email    "test-doc-mast-nodiploma@logos.edu" `
     -Form1Fields @{
         "StudyLevelsNivelesDeEstudio"  = "Master - Maestria"
@@ -605,7 +605,7 @@ Send-Application `
 # =============================================================================
 
 Send-Application `
-    -TestName "AUTO-REJECT: Master — high school + 3yr ministry (below 5yr threshold)" `
+    -TestName "AUTO-REJECT: Master - high school + 3yr ministry (below 5yr threshold)" `
     -Email    "test-reject-mast-hs3yr@logos.edu" `
     -Form1Fields @{
         "StudyLevelsNivelesDeEstudio"  = "Master - Maestria"
@@ -619,7 +619,7 @@ Send-Application `
     }
 
 Send-Application `
-    -TestName "AUTO-REJECT: Master — associate + 4yr ministry (below 5yr threshold)" `
+    -TestName "AUTO-REJECT: Master - associate + 4yr ministry (below 5yr threshold)" `
     -Email    "test-reject-mast-assoc4yr@logos.edu" `
     -Form1Fields @{
         "StudyLevelsNivelesDeEstudio"  = "Master - Maestria"
@@ -633,7 +633,7 @@ Send-Application `
     }
 
 Send-Application `
-    -TestName "AUTO-REJECT: Master — associate + 9yr associated (below 10yr threshold)" `
+    -TestName "AUTO-REJECT: Master - associate + 9yr associated (below 10yr threshold)" `
     -Email    "test-reject-mast-9yrassoc@logos.edu" `
     -Form1Fields @{
         "StudyLevelsNivelesDeEstudio"  = "Master - Maestria"
@@ -647,7 +647,7 @@ Send-Application `
     }
 
 Send-Application `
-    -TestName "AUTO-REJECT: Doctorate — high school + 0yr ministry" `
+    -TestName "AUTO-REJECT: Doctorate - high school + 0yr ministry" `
     -Email    "test-reject-doc-hs0yr@logos.edu" `
     -Form1Fields @{
         "StudyLevelsNivelesDeEstudio"  = "Doctoral - Doctorado"
@@ -659,7 +659,7 @@ Send-Application `
     -Form3Fields @{}
 
 Send-Application `
-    -TestName "AUTO-REJECT: Doctorate — bachelor + 9yr associated (below 10 total threshold)" `
+    -TestName "AUTO-REJECT: Doctorate - bachelor + 9yr associated (below 10 total threshold)" `
     -Email    "test-reject-doc-bach9yrassoc@logos.edu" `
     -Form1Fields @{
         "StudyLevelsNivelesDeEstudio"  = "Doctoral - Doctorado"
@@ -676,7 +676,7 @@ Send-Application `
 # =============================================================================
 
 Send-Application `
-    -TestName "AI EDGE: Master — associate + 10yr associated (at threshold, no docs)" `
+    -TestName "AI EDGE: Master - associate + 10yr associated (at threshold, no docs)" `
     -Email    "test-edge-mast-10yrassoc@logos.edu" `
     -Form1Fields @{
         "StudyLevelsNivelesDeEstudio"  = "Master - Maestria"
@@ -690,7 +690,7 @@ Send-Application `
     }
 
 Send-Application `
-    -TestName "AI EDGE: Doctorate — bachelor + 10yr associated (at 10 total threshold)" `
+    -TestName "AI EDGE: Doctorate - bachelor + 10yr associated (at 10 total threshold)" `
     -Email    "test-edge-doc-bach10yrassoc@logos.edu" `
     -Form1Fields @{
         "StudyLevelsNivelesDeEstudio"  = "Doctoral - Doctorado"
@@ -703,7 +703,7 @@ Send-Application `
     }
 
 Send-Application `
-    -TestName "AI EDGE: Doctorate — associate + 10yr fulltime (below masters, exception applies)" `
+    -TestName "AI EDGE: Doctorate - associate + 10yr fulltime (below masters, exception applies)" `
     -Email    "test-edge-doc-assoc10yr@logos.edu" `
     -Form1Fields @{
         "StudyLevelsNivelesDeEstudio"  = "Doctoral - Doctorado"
