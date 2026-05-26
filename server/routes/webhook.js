@@ -82,7 +82,7 @@ function deriveHighestEducation(body) {
 
   // Masters
   const maestria = pick(body,
-    'Maestría', 'Maestría *', 'Maestria *', 'maestria',
+    'Maestría', 'Maestría *', 'Maestria', 'Maestria *', 'maestria',
     'masters', 'has_masters'
   );
   if (isYes(maestria)) return 'masters';
@@ -129,24 +129,41 @@ function deriveHighestEducation(body) {
  * We search the full body for any key whose value mentions the target.
  */
 function detectDocuments(body) {
-  // Gather all string values from the body into one searchable blob
-  const allValues = Object.values(body)
-    .map(v => String(v).toLowerCase())
-    .join(' | ');
+  // Prefer to read only the dedicated document checklist field to avoid false
+  // positives from other body values (e.g. an email address containing "transcript").
+  const checklistField = pick(body,
+    'MarqueLosDocumentosQueEstaIncluyen',
+    'MarqueLosDocumentosQueEstáIncluyen',
+    'Marque los documentos que está incluyendo',
+    'documents_checklist'
+  );
+
+  // Fall back to scanning all values only when no dedicated field is present
+  // (e.g. legacy or alternate MachForm configurations).
+  const searchable = checklistField
+    ? checklistField.toLowerCase()
+    : Object.values(body)
+        .filter(v => {
+          const s = String(v).toLowerCase();
+          // Exclude obvious non-document fields to prevent false positives
+          return !s.includes('@') && !s.includes('http');
+        })
+        .map(v => String(v).toLowerCase())
+        .join(' | ');
 
   const submitted_transcripts =
-    allValues.includes('transcript') ||
-    allValues.includes('registros oficiales');
+    searchable.includes('transcript') ||
+    searchable.includes('registros oficiales');
 
   const submitted_diploma =
-    allValues.includes('licenciatura') ||
-    allValues.includes('bachelor');
+    searchable.includes('licenciatura') ||
+    searchable.includes('bachelor');
 
   // Graduate programs need an undergraduate diploma specifically
   const submitted_undergraduate_diploma =
-    allValues.includes('licenciatura') ||
-    allValues.includes('postgrado') ||
-    allValues.includes('undergraduate');
+    searchable.includes('licenciatura') ||
+    searchable.includes('postgrado') ||
+    searchable.includes('undergraduate');
 
   return { submitted_transcripts, submitted_diploma, submitted_undergraduate_diploma };
 }

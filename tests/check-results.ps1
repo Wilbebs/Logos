@@ -1,4 +1,4 @@
-# LOGOS Admissions - Test Results Checker
+﻿# LOGOS Admissions - Test Results Checker
 # Run after webhook-test.ps1 to verify eligibility engine output
 # Usage: powershell -ExecutionPolicy Bypass -File tests\check-results.ps1
 
@@ -58,7 +58,7 @@ $expected = @{
     "test-fin-med-mast@logos.edu"    = @{ status = "needs_review";  ai = "escalate"; label = "FINANCIAL FLAG: Medium budget + Master" }
     "test-fin-med-doc@logos.edu"     = @{ status = "needs_review";  ai = "escalate"; label = "FINANCIAL FLAG: Medium budget + Doctorate" }
     # Document flags (partial)
-    "test-doc-bach-notranscripts@logos.edu" = @{ status = "needs_review"; ai = "escalate"; label = "DOC FLAG: Bachelor missing transcripts" }
+    "test-doc-bach-nodocs-t@logos.edu" = @{ status = "needs_review"; ai = "escalate"; label = "DOC FLAG: Bachelor missing transcripts" }
     "test-doc-mast-nodiploma@logos.edu"     = @{ status = "needs_review"; ai = "escalate"; label = "DOC FLAG: Master missing diploma" }
     # Auto-reject boundary cases
     "test-reject-mast-hs3yr@logos.edu"       = @{ status = "ineligible";   ai = $null;      label = "AUTO-REJECT: Master HS+3yr" }

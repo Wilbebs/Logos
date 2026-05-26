@@ -578,7 +578,7 @@ Send-Application `
 
 Send-Application `
     -TestName "DOCUMENT FLAG: Bachelor - has diploma, missing transcripts" `
-    -Email    "test-doc-bach-notranscripts@logos.edu" `
+    -Email    "test-doc-bach-nodocs-t@logos.edu" `
     -Form1Fields @{
         "StudyLevelsNivelesDeEstudio"  = "Bachelor - Licenciatura"
         "DesiredProgramProramaDeseado" = "Bachelor of Theology (B.Th)"
