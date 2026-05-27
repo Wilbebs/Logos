@@ -308,7 +308,7 @@ router.post('/', async (req, res) => {
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash-lite',
+      model: 'gemini-2.5-flash',
       systemInstruction: SYSTEM_INSTRUCTION,
       tools: TOOL_DECLARATIONS,
     });
@@ -357,6 +357,11 @@ router.post('/', async (req, res) => {
 
       // Feed results back to Gemini for next round
       result = await chat.sendMessage(toolResults);
+    }
+
+    // If loop ended without a text reply, try extracting text from last result
+    if (!rawReply) {
+      try { rawReply = result.response.text(); } catch { /* ignore */ }
     }
 
     // Parse optional ACTION block from reply
