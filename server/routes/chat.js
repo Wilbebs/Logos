@@ -32,7 +32,7 @@ async function getStats() {
 
 async function searchApplicants(term) {
   if (!term || term.length < 2) return [];
-  const cols = 'id, full_name, first_name, last_name, email, program_applied, program_level, eligibility_status, ai_recommendation, ai_reasoning, decision, forms_complete, monthly_budget';
+  const cols = 'id, full_name, email, program_applied, program_level, eligibility_status, ai_recommendation, ai_reasoning, decision, forms_complete, monthly_budget';
 
   // Email — use exact ilike on the email column only (avoids @ breaking the or() parser)
   if (term.includes('@')) {
