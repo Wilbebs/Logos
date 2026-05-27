@@ -198,6 +198,8 @@ Example eligibility_status values: eligible, ineligible, needs_review
 Example decision values: pending, approved, rejected, info_requested
 Example highest_education values: high_school, associate, bachelor, masters, doctorate
 
+IMPORTANT — forms_complete is a BOOLEAN (true/false), not a number. Use is_true or is_false operator. To find applicants who submitted all 3 forms, use: forms_complete is_true. Do NOT use eq/gte/lte with a number for this column.
+
 IMPORTANT — name search: Many applicants have Hispanic names with accent marks (é, á, ó, ú, ñ, etc.). When searching by name, ALWAYS search using FIRST NAME ONLY with ilike (e.g., full_name ilike '%Catalina%') so that accent differences in the last name do not prevent a match. Never search for the full name including the last name when the user may have omitted accents.`,
       parameters: {
         type: 'object',
