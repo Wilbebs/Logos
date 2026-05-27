@@ -99,15 +99,24 @@ export default function AIRecommendation({ applicant, onReviewComplete }) {
   }
 
   // Shared run/rerun button
-  // greyed = true when the result is rules-engine-determined (no AI involved)
-  const RunButton = ({ greyed = false }) => (
+  // greyed = true when AI is not applicable (rules-engine case, doc flag, etc.)
+  // alreadyRun = true when AI has already produced a result — lock it after first run
+  const alreadyRun = !!(localRec ?? applicant.ai_recommendation);
+  const RunButton = ({ greyed = false }) => {
+    const locked = greyed || alreadyRun;
+    const title = greyed
+      ? 'AI assessment is not used for this case — result is determined by the rules engine'
+      : alreadyRun
+      ? 'AI assessment has already been run for this applicant'
+      : undefined;
+    return (
     <div className="mt-3 space-y-1">
       <button
-        onClick={greyed ? undefined : handleRunAssessment}
-        disabled={running || greyed}
-        title={greyed ? 'AI assessment is not used for this case — result is determined by the rules engine' : undefined}
+        onClick={locked ? undefined : handleRunAssessment}
+        disabled={running || locked}
+        title={title}
         className={`flex items-center gap-1.5 text-xs font-medium ${
-          greyed
+          locked
             ? 'text-gray-400 cursor-not-allowed'
             : 'text-blue-600 hover:text-blue-800 disabled:text-blue-300'
         }`}
@@ -115,12 +124,13 @@ export default function AIRecommendation({ applicant, onReviewComplete }) {
         {running ? (
           <><span className="animate-spin inline-block w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full" /> Running assessment…</>
         ) : (
-          <>✦ {ai_recommendation ? 'Re-run AI Assessment' : 'Run AI Assessment'}</>
+          <>✦ {alreadyRun ? 'Assessment Complete' : 'Run AI Assessment'}</>
         )}
       </button>
       {runError && <p className="text-xs text-red-600">{runError}</p>}
     </div>
   );
+  };
 
   // ── Ineligible — hard rules-engine rejection ─────────────────────────────
   if (isIneligible) {
