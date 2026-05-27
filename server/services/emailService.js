@@ -161,7 +161,28 @@ export async function logEmail(applicantId, emailType, status) {
 // sendEmail — selects template and delivers via Resend
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Allowlist guard — only send real emails to approved addresses.
+// During development/testing, restrict to a single address so real applicants
+// are never accidentally emailed. Remove or expand this list when ready.
+// ---------------------------------------------------------------------------
+const EMAIL_ALLOWLIST = (process.env.EMAIL_ALLOWLIST || 'hernwilbwork@gmail.com')
+  .split(',')
+  .map(e => e.trim().toLowerCase());
+
 export async function sendEmail(emailType, applicant, extraData = {}) {
+  const recipientEmail = applicant.email?.toLowerCase() || '';
+
+  if (!EMAIL_ALLOWLIST.includes(recipientEmail)) {
+    console.warn(
+      `[emailService] BLOCKED — "${recipientEmail}" is not on the allowlist. ` +
+      `Email type "${emailType}" was NOT sent. ` +
+      `Add to EMAIL_ALLOWLIST env var to enable.`
+    );
+    await logEmail(applicant.id, emailType, 'blocked');
+    return { success: false, blocked: true };
+  }
+
   let template;
 
   switch (emailType) {
