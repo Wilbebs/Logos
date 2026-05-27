@@ -74,12 +74,18 @@ function applyFilters(applicants, activeFilter, dateFrom, dateTo, formsCompleteO
     result = result.filter((a) => a.forms_complete);
   }
 
-  // Date range filter on created_at — compare YYYY-MM-DD strings to avoid timezone skew
+  // Date range filter — compare in local time to match what the UI displays
   if (dateFrom) {
-    result = result.filter((a) => a.created_at && a.created_at.slice(0, 10) >= dateFrom);
+    result = result.filter((a) => {
+      if (!a.created_at) return false;
+      return new Date(a.created_at).toLocaleDateString('en-CA') >= dateFrom;
+    });
   }
   if (dateTo) {
-    result = result.filter((a) => a.created_at && a.created_at.slice(0, 10) <= dateTo);
+    result = result.filter((a) => {
+      if (!a.created_at) return false;
+      return new Date(a.created_at).toLocaleDateString('en-CA') <= dateTo;
+    });
   }
 
   return result;
