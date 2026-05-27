@@ -54,25 +54,29 @@ const FINANCIAL_ALTERNATIVE_SUGGESTIONS = {
 };
 
 // ─── Document requirements by program level ───────────────────────────────────
-// Open enrollment programs (institute / certificate / associate) have no prior
-// credential requirements, so no documents are gated here.
-// Bachelor's programs require transcripts + diploma when the applicant reports
-// any prior education.
-// Graduate programs (masters / doctorate) always require both.
+// All programs require at minimum a high school transcript and diploma.
+// Bachelor's programs require college-level transcripts + diploma.
+// Graduate programs (masters / doctorate) require transcripts + undergraduate diploma.
 const DOCUMENT_REQUIREMENTS = {
-  institute:   [],
-  certificate: [],
-  associate:   [],
+  institute:   ['transcripts', 'diploma'],
+  certificate: ['transcripts', 'diploma'],
+  associate:   ['transcripts', 'diploma'],
   bachelors:   ['transcripts', 'diploma'],
   masters:     ['transcripts', 'undergraduate_diploma'],
   doctorate:   ['transcripts', 'undergraduate_diploma'],
 };
 
-// Human-readable labels for the missing-document messages
+// Human-readable labels — used for graduate programs (bachelor's level and up)
 const DOC_LABELS = {
   transcripts:            'academic transcripts',
   diploma:                'diploma',
   undergraduate_diploma:  'undergraduate diploma (bachelor\'s degree — required for all graduate programs)',
+};
+
+// Labels used for institute / certificate / associate (high-school level baseline)
+const DOC_LABELS_LOWER = {
+  transcripts: 'high school transcript',
+  diploma:     'high school diploma',
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -412,16 +416,17 @@ export function evaluateEligibility(applicant, formData) {
   }
 
   // ── 5. DOCUMENT CHECK ─────────────────────────────────────────────────────
-  // Missing transcripts or diploma → cannot qualify. Route to needs_review so
-  // the admissions officer can request the documents. No AI call needed —
-  // the reason is clear.
+  // All programs require baseline documents. Route to needs_review when missing —
+  // the reason is clear so no AI call is needed.
   //
   // Rules:
-  //   • Open enrollment programs (institute/certificate/associate): no docs gated.
-  //   • Bachelor's: transcripts + diploma required when applicant reports prior education.
-  //   • Masters/Doctorate: transcripts + undergraduate (bachelor's) diploma always required.
+  //   • Institute / Certificate / Associate: high school transcript + diploma required.
+  //   • Bachelor's: transcripts + diploma required.
+  //   • Masters / Doctorate: transcripts + undergraduate (bachelor's) diploma required.
 
   const requiredDocs = DOCUMENT_REQUIREMENTS[program.level] || [];
+  const isLowerProgram = ['institute', 'certificate', 'associate'].includes(program.level);
+  const labelMap = isLowerProgram ? DOC_LABELS_LOWER : DOC_LABELS;
 
   if (requiredDocs.length > 0) {
     const missingDocs = [];
@@ -431,9 +436,7 @@ export function evaluateEligibility(applicant, formData) {
     }
 
     if (requiredDocs.includes('diploma') && !submitted_diploma) {
-      // For bachelor's: only require diploma if they report having prior education
-      const hasPriorEdu = eduLevel > EDUCATION_LEVELS.none;
-      if (hasPriorEdu) missingDocs.push('diploma');
+      missingDocs.push('diploma');
     }
 
     if (requiredDocs.includes('undergraduate_diploma') && !submitted_undergraduate_diploma) {
@@ -441,13 +444,13 @@ export function evaluateEligibility(applicant, formData) {
     }
 
     if (missingDocs.length > 0) {
-      const missingLabels = missingDocs.map(d => DOC_LABELS[d] || d);
+      const missingLabels = missingDocs.map(d => labelMap[d] || DOC_LABELS[d] || d);
       const missingList = missingLabels.join('; ');
 
-      const docNote =
-        program.level === 'masters' || program.level === 'doctorate'
-          ? `Graduate programs require both academic transcripts and an undergraduate (bachelor's) diploma before eligibility can be confirmed. ` +
-            `Missing: ${missingList}.`
+      const docNote = isLowerProgram
+        ? `All programs require at minimum a high school transcript and high school diploma before eligibility can be confirmed. Missing: ${missingList}.`
+        : program.level === 'masters' || program.level === 'doctorate'
+          ? `Graduate programs require both academic transcripts and an undergraduate (bachelor's) diploma before eligibility can be confirmed. Missing: ${missingList}.`
           : `Required documents are missing. Cannot confirm eligibility until the following are received: ${missingList}.`;
 
       reasons.push(`Document check failed — missing: ${missingList}.`);
