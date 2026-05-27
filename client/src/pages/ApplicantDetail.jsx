@@ -6,6 +6,7 @@ import AIRecommendation from '../components/AIRecommendation.jsx';
 import LeadProfile from '../components/LeadProfile.jsx';
 import FileAttachments from '../components/FileAttachments.jsx';
 import AcceptanceLetter from '../components/AcceptanceLetter.jsx';
+import AdmissionTimeline from '../components/AdmissionTimeline.jsx';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -326,8 +327,10 @@ export default function ApplicantDetail() {
 
   if (!applicant) return null;
 
+  const isApproved = applicant.decision === 'approved';
+
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className={`min-h-screen bg-gray-100 p-6 ${isApproved ? 'pb-20' : ''}`}>
       {/* Back */}
       <button
         onClick={() => navigate('/')}
@@ -386,11 +389,16 @@ export default function ApplicantDetail() {
           <DecisionPanel applicant={applicant} onDecisionSubmitted={loadApplicant} />
 
           {/* Acceptance Letter — only shown after approval */}
-          {applicant.decision === 'approved' && (
+          {isApproved && (
             <AcceptanceLetter applicant={applicant} />
           )}
         </div>
       </div>
+
+      {/* Sticky admission progress timeline — only when approved */}
+      {isApproved && (
+        <AdmissionTimeline applicantId={applicant.id} activeStep={0} />
+      )}
     </div>
   );
 }

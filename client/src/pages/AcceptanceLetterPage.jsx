@@ -14,42 +14,11 @@
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import AdmissionTimeline from '../components/AdmissionTimeline.jsx';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
-// ── Timeline ──────────────────────────────────────────────────────────────────
-function Timeline({ active }) {
-  const steps = ['Application', 'Acceptance Letter'];
-  return (
-    <div className="flex items-center text-xs">
-      {steps.map((step, i) => {
-        const done    = i < active;
-        const current = i === active;
-        return (
-          <React.Fragment key={step}>
-            <div className="flex flex-col items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                done    ? 'bg-green-600 text-white'
-                : current ? 'bg-blue-600 text-white ring-4 ring-blue-100'
-                : 'bg-gray-200 text-gray-500'
-              }`}>
-                {done ? '✓' : i + 1}
-              </div>
-              <span className={`mt-1 font-medium ${
-                done ? 'text-green-700' : current ? 'text-blue-700' : 'text-gray-400'
-              }`}>
-                {step}
-              </span>
-            </div>
-            {i < steps.length - 1 && (
-              <div className={`flex-1 h-0.5 mx-3 mb-4 ${done ? 'bg-green-400' : 'bg-gray-200'}`} />
-            )}
-          </React.Fragment>
-        );
-      })}
-    </div>
-  );
-}
+// (Timeline now lives in AdmissionTimeline.jsx — shared sticky component)
 
 // ── Word document shell ───────────────────────────────────────────────────────
 // Looks like a sheet of paper in a Word processor window.
@@ -268,7 +237,7 @@ export default function AcceptanceLetterPage() {
 
   // ── Compose ─────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gray-50" style={{ display: 'flex', flexDirection: 'column' }}>
+    <div className="min-h-screen bg-gray-50 pb-20" style={{ display: 'flex', flexDirection: 'column' }}>
 
       {/* Top nav */}
       <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between shrink-0">
@@ -282,11 +251,6 @@ export default function AcceptanceLetterPage() {
       </div>
 
       <div className="flex flex-col flex-1 max-w-5xl mx-auto w-full px-6 py-6 gap-4">
-
-        {/* Timeline */}
-        <div className="bg-white rounded-xl border border-gray-200 px-6 py-5 shrink-0">
-          <Timeline active={1} />
-        </div>
 
         {/* Applicant chip */}
         <div className="bg-white rounded-xl border border-gray-200 px-6 py-3 flex items-center justify-between shrink-0">
@@ -383,6 +347,9 @@ export default function AcceptanceLetterPage() {
 
         </div>
       </div>
+
+      {/* Sticky admission timeline */}
+      {applicant && <AdmissionTimeline applicantId={id} activeStep={1} />}
     </div>
   );
 }
