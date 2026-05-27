@@ -29,7 +29,16 @@ function isDocumentFlag(reasoning) {
     lower.includes('missing: academic transcripts') ||
     lower.includes('missing: undergraduate diploma') ||
     lower.includes('cannot confirm eligibility until') ||
-    lower.includes('required documents are missing')
+    lower.includes('required documents are missing') ||
+    lower.includes('have not been submitted') ||
+    lower.includes('has not been submitted') ||
+    lower.includes('not been submitted') ||
+    lower.includes('documents have not') ||
+    lower.includes('documents are missing') ||
+    lower.includes('eligibility cannot be confirmed') ||
+    lower.includes('without these required documents') ||
+    (lower.includes('missing') && lower.includes('diploma')) ||
+    (lower.includes('missing') && lower.includes('transcripts'))
   );
 }
 

@@ -567,9 +567,33 @@ router.post('/:id/ai-review', async (req, res) => {
     const mergedRaw = { ...(form1?.raw_data || {}), ...(form3?.raw_data || {}) };
     const mergedSubmission = { raw_data: mergedRaw };
 
-    // Import and call the AI reviewer
-    const { callAIReview } = await import('../services/aiReview.js');
-    const aiResult = await callAIReview(applicant, mergedSubmission);
+    // If the rules engine already flagged missing documents, preserve that
+    // determination instead of calling the AI (which would produce inconsistent
+    // natural language that doesn't match the document-flag UI card).
+    const { evaluateEligibility } = await import('../services/eligibility.js');
+    const freshEval = evaluateEligibility(applicant, mergedSubmission);
+
+    let aiResult;
+    if (freshEval.document_flag && freshEval.missing_documents?.length > 0) {
+      const { DOC_LABELS_PUBLIC } = await import('../services/eligibility.js').catch(() => ({}));
+      const missingLabels = freshEval.missing_documents.map(d =>
+        d === 'transcripts'           ? 'academic transcripts' :
+        d === 'diploma'               ? 'diploma' :
+        d === 'undergraduate_diploma' ? 'undergraduate diploma (bachelor\'s degree — required for all graduate programs)' :
+        d
+      );
+      aiResult = {
+        recommendation: 'escalate',
+        reasoning: freshEval.document_note ||
+          `Missing required documents. Missing: ${missingLabels.join('; ')}. Cannot confirm eligibility until all required documents are received.`,
+        confidence: 0.95,
+        flags: ['MISSING_DOCUMENTS'],
+      };
+    } else {
+      // Import and call the AI reviewer
+      const { callAIReview } = await import('../services/aiReview.js');
+      aiResult = await callAIReview(applicant, mergedSubmission);
+    }
 
     // Write ONLY the AI fields — never touch eligibility_status or decision
     const { data: updated, error: uErr } = await supabase
