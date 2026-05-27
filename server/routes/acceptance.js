@@ -134,7 +134,7 @@ router.post('/:id/acceptance/send', async (req, res) => {
     // Allowlist guard
     if (!EMAIL_ALLOWLIST.includes(recipientEmail)) {
       console.warn(`[acceptance/send] BLOCKED — "${recipientEmail}" not on allowlist`);
-      await logEmail(id, 'acceptance_letter', 'blocked');
+      await logEmail(id, 'acceptance_letter', 'blocked', { subject, toAddress: recipientEmail });
       return res.json({
         success: false,
         blocked: true,
@@ -164,7 +164,43 @@ router.post('/:id/acceptance/send', async (req, res) => {
 
     if (sendError) throw new Error(sendError.message || JSON.stringify(sendError));
 
-    await logEmail(id, 'acceptance_letter', 'sent');
+    // ── Save .docx to Supabase Storage under admission-documents ──────────────
+    const safeApplicantName = (applicant.full_name || 'Applicant').replace(/[^a-zA-Z0-9._-]/g, '_');
+    const docFilename   = `Acceptance_Letter_${safeApplicantName}_${Date.now()}.docx`;
+    const storagePath   = `applicants/${id}/admission_documents/${docFilename}`;
+    const STORAGE_BUCKET = 'applicant-files';
+
+    const { error: storageErr } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(storagePath, docBuffer, {
+        contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        upsert: false,
+      });
+
+    if (!storageErr) {
+      const { data: urlData } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(storagePath);
+      // Record file in applicant_files so it shows in the Files tab
+      await supabase.from('applicant_files').insert({
+        applicant_id: id,
+        file_name:    docFilename,
+        file_path:    storagePath,
+        file_url:     urlData?.publicUrl || null,
+        file_size:    docBuffer.length,
+        file_type:    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        category:     'admission_documents',
+        uploaded_by:  'system',
+      });
+    } else {
+      console.warn('[acceptance/send] Could not save .docx to storage:', storageErr.message);
+    }
+
+    // ── Log email with full content ────────────────────────────────────────────
+    await logEmail(id, 'acceptance_letter', 'sent', {
+      subject,
+      bodyText:    body,
+      fromAddress: fromAddress,
+      toAddress:   recipientEmail,
+    });
 
     return res.json({ success: true, data: sendData });
   } catch (err) {

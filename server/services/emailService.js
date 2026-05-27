@@ -141,12 +141,16 @@ LOGOS University`,
 // logEmail — writes a record to the email_log table
 // ---------------------------------------------------------------------------
 
-export async function logEmail(applicantId, emailType, status) {
+export async function logEmail(applicantId, emailType, status, extra = {}) {
   try {
     const { error } = await supabase.from('email_log').insert({
       applicant_id: applicantId,
       email_type: emailType,
       status,
+      subject:      extra.subject      || null,
+      body_text:    extra.bodyText     || null,
+      from_address: extra.fromAddress  || null,
+      to_address:   extra.toAddress    || null,
     });
 
     if (error) {
@@ -179,7 +183,7 @@ export async function sendEmail(emailType, applicant, extraData = {}) {
       `Email type "${emailType}" was NOT sent. ` +
       `Add to EMAIL_ALLOWLIST env var to enable.`
     );
-    await logEmail(applicant.id, emailType, 'blocked');
+    await logEmail(applicant.id, emailType, 'blocked', { toAddress: recipientEmail });
     return { success: false, blocked: true };
   }
 
@@ -218,7 +222,13 @@ export async function sendEmail(emailType, applicant, extraData = {}) {
 
     if (error) throw error;
 
-    await logEmail(applicant.id, emailType, 'sent');
+    const fromAddr = process.env.RESEND_FROM_EMAIL || 'admissions@logos.edu';
+    await logEmail(applicant.id, emailType, 'sent', {
+      subject:     template.subject,
+      bodyText:    template.text,
+      fromAddress: fromAddr,
+      toAddress:   applicant.email?.toLowerCase(),
+    });
     return { success: true, data };
   } catch (err) {
     console.error('[emailService] Email send failed:', err);

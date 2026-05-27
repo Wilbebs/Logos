@@ -315,9 +315,13 @@ router.post('/:id/files', upload.single('file'), async (req, res) => {
       return res.status(404).json({ error: 'Applicant not found.' });
     }
 
-    // Build a unique storage path: applicants/{applicant_id}/{timestamp}-{original_name}
+    // Category: applicant_documents | admission_documents | other
+    const category = ['applicant_documents', 'admission_documents', 'other'].includes(req.body.category)
+      ? req.body.category : 'applicant_documents';
+
+    // Build a unique storage path: applicants/{id}/{category}/{timestamp}-{name}
     const safeFilename = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const storagePath = `applicants/${id}/${Date.now()}-${safeFilename}`;
+    const storagePath = `applicants/${id}/${category}/${Date.now()}-${safeFilename}`;
 
     // Upload to Supabase Storage
     const { error: uploadError } = await supabase.storage
@@ -349,6 +353,7 @@ router.post('/:id/files', upload.single('file'), async (req, res) => {
         file_url: fileUrl,
         file_size: file.size,
         file_type: file.mimetype,
+        category,
         uploaded_by: req.body.uploaded_by || 'admissions_team',
       })
       .select()
@@ -411,6 +416,25 @@ router.delete('/:id/files/:fileId', async (req, res) => {
     return res.json({ success: true });
   } catch (err) {
     console.error('[DELETE /api/applicants/:id/files/:fileId] Unexpected error:', err);
+    return res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
+// ------------------------------------------------------------------
+// GET /api/applicants/:id/communications
+// Return email log entries for an applicant, newest first.
+// ------------------------------------------------------------------
+router.get('/:id/communications', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('email_log')
+      .select('*')
+      .eq('applicant_id', id)
+      .order('created_at', { ascending: false });
+    if (error) return res.status(500).json({ error: error.message });
+    return res.json(data ?? []);
+  } catch (err) {
     return res.status(500).json({ error: 'Internal server error.' });
   }
 });
