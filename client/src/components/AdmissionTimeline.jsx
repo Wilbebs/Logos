@@ -26,7 +26,7 @@ export default function AdmissionTimeline({ applicantId, activeStep }) {
           const done    = i < activeStep;
           const current = i === activeStep;
           const future  = i > activeStep;
-          const clickable = !future; // can go back, can't skip forward
+          const clickable = true; // all steps navigable once approved
 
           return (
             <React.Fragment key={step.key}>
@@ -34,9 +34,7 @@ export default function AdmissionTimeline({ applicantId, activeStep }) {
                 onClick={() => clickable && navigate(step.path(applicantId))}
                 disabled={!clickable}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors
-                  ${current  ? 'cursor-default'
-                  : clickable ? 'hover:bg-gray-100 cursor-pointer'
-                  : 'cursor-not-allowed opacity-40'}`}
+                  ${current ? 'cursor-default' : 'hover:bg-gray-100 cursor-pointer'}`}
               >
                 {/* Circle */}
                 <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors

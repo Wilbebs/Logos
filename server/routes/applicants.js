@@ -431,7 +431,7 @@ router.get('/:id/communications', async (req, res) => {
       .from('email_log')
       .select('*')
       .eq('applicant_id', id)
-      .order('created_at', { ascending: false });
+      .order('id', { ascending: false });
     if (error) return res.status(500).json({ error: error.message });
     return res.json(data ?? []);
   } catch (err) {
