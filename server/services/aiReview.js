@@ -70,7 +70,13 @@ Respond ONLY with a JSON object in this exact format:
       systemInstruction: systemPrompt,
     });
 
-    const result = await model.generateContent(userMessage);
+    // temperature: 0 makes the model deterministic — same input always produces
+    // the same recommendation. Without this, LLM randomness causes the decision
+    // to flip between runs even when nothing about the applicant changed.
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: userMessage }] }],
+      generationConfig: { temperature: 0 },
+    });
     const rawText = result.response.text().trim();
 
     let parsed;
