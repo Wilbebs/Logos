@@ -155,11 +155,15 @@ function detectDocuments(body) {
     searchable.includes('transcript') ||
     searchable.includes('registros oficiales');
 
+  // Matches any diploma: high school diploma, bachelor's/licenciatura, etc.
   const submitted_diploma =
     searchable.includes('licenciatura') ||
-    searchable.includes('bachelor');
+    searchable.includes('bachelor') ||
+    searchable.includes('diploma de escuela secundaria') ||
+    searchable.includes('high school diploma') ||
+    searchable.includes('diploma');
 
-  // Graduate programs need an undergraduate diploma specifically
+  // Graduate programs need an undergraduate (bachelor's) diploma specifically
   const submitted_undergraduate_diploma =
     searchable.includes('licenciatura') ||
     searchable.includes('postgrado') ||
