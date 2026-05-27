@@ -452,14 +452,31 @@ async function handleFormSubmission(req, res, formNumber) {
         console.log(`[webhook] Financial flag for ${applicant.id}:`, eligResult.suggested_alternative);
 
       } else {
-        // For ineligible applicants, save the rejection reason so the dashboard
-        // can display it without running an AI review (which would be misleading).
+        // For ineligible applicants, save a detailed rejection reason so the
+        // dashboard can explain exactly which requirement was not met.
         const baseUpdate = { eligibility_status: eligResult.status };
         if (eligResult.status === 'ineligible') {
-          baseUpdate.ai_reasoning =
-            eligResult.recommended_action ||
+          // The last entry in reasons[] is always the specific auto-reject message
+          const coreReason =
             eligResult.reasons?.[eligResult.reasons.length - 1] ||
+            eligResult.recommended_action ||
             'Application does not meet eligibility requirements.';
+
+          // Separately note any missing documents (the doc check never runs for
+          // hard-ineligible applicants because the engine returns early).
+          const programLevel = (freshApplicant.program_level || '').toLowerCase();
+          const missingDocs = [];
+          if (!freshApplicant.submitted_transcripts) missingDocs.push('transcripts');
+          if (programLevel === 'masters' || programLevel === 'doctorate') {
+            if (!freshApplicant.submitted_undergraduate_diploma) missingDocs.push('undergraduate diploma');
+          } else {
+            if (!freshApplicant.submitted_diploma) missingDocs.push('diploma');
+          }
+          const docNote = missingDocs.length > 0
+            ? ` Additionally, required documents have not been submitted: ${missingDocs.join(', ')}.`
+            : '';
+
+          baseUpdate.ai_reasoning = coreReason + docNote;
         }
         await supabase
           .from('applicants')

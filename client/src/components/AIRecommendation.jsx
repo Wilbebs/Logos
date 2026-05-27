@@ -125,17 +125,19 @@ export default function AIRecommendation({ applicant, onReviewComplete }) {
   // ── Ineligible — hard rules-engine rejection ─────────────────────────────
   if (isIneligible) {
     return (
-      <div className="border border-gray-300 rounded overflow-hidden">
-        <div className="px-4 py-2 bg-gray-100 border-b border-gray-200">
-          <p className="text-sm font-bold text-gray-700">✗ Ineligible — Rules Engine</p>
+      <div className="border border-red-300 rounded overflow-hidden">
+        <div className="px-4 py-2 bg-red-100 border-b border-red-200">
+          <p className="text-sm font-bold text-red-800">✗ Does Not Meet Eligibility Requirements</p>
         </div>
-        <div className="px-4 py-3 bg-gray-50 space-y-2">
-          <p className="text-sm text-gray-700 leading-relaxed">
-            {ai_reasoning || 'This applicant does not meet the eligibility requirements for their selected program.'}
+        <div className="px-4 py-3 bg-red-50 space-y-2">
+          <p className="text-sm text-red-900 leading-relaxed">
+            {ai_reasoning || 'This applicant does not meet the minimum requirements for their selected program. Re-submit the application through MachForm once requirements are met to re-evaluate.'}
           </p>
-          <p className="text-xs text-gray-400">AI assessment is not applicable for hard-rejected applications.</p>
+          <p className="text-xs text-red-700 font-medium">
+            A final decision has not been made — this is the eligibility assessment only. The admissions team must review and submit a decision below.
+          </p>
         </div>
-        <div className="px-4 py-2 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+        <div className="px-4 py-2 bg-red-50 border-t border-red-200 flex items-center justify-between">
           <p className="text-xs text-gray-400">{aiSourceLabel}</p>
           <RunButton greyed />
         </div>
