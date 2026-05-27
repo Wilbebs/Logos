@@ -11,6 +11,7 @@
     "@google/generative-ai": "latest",
     "@supabase/supabase-js": "latest",
     "cors": "latest",
+    "docx": "^9.7.1",
     "dotenv": "latest",
     "express": "latest",
     "multer": "^2.1.1",
