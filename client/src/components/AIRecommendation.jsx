@@ -55,6 +55,94 @@ function isFinancialMismatch(reasoning) {
   );
 }
 
+// ── Requirements checklist ────────────────────────────────────────────────────
+
+const EDU_LEVELS = {
+  none: 0, high_school: 1, some_college: 2, associate: 3,
+  bachelors: 4, masters: 5, doctorate: 6,
+};
+
+const EDU_LABELS = {
+  none: 'None', high_school: 'High School', some_college: 'Some College',
+  associate: 'Associate Degree', bachelors: "Bachelor's Degree",
+  masters: "Master's Degree", doctorate: 'Doctorate',
+};
+
+function buildChecklist(applicant) {
+  const level  = (applicant.program_level || '').toLowerCase();
+  const edu    = applicant.highest_education || 'none';
+  const eduVal = EDU_LEVELS[edu] ?? 0;
+  const ftYrs  = applicant.ministerial_years_fulltime  ?? 0;
+  const asYrs  = applicant.ministerial_years_associated ?? 0;
+  const items  = [];
+
+  // ── Documents ──────────────────────────────────────────────────────────────
+  items.push({ label: 'Academic transcripts', passed: !!applicant.submitted_transcripts });
+  if (level === 'masters' || level === 'doctorate') {
+    items.push({ label: "Undergraduate diploma (bachelor's)", passed: !!applicant.submitted_undergraduate_diploma });
+  } else {
+    items.push({ label: 'Diploma', passed: !!applicant.submitted_diploma });
+  }
+
+  // ── Education / experience ─────────────────────────────────────────────────
+  if (level === 'bachelors') {
+    const ok = eduVal >= EDU_LEVELS.some_college;
+    items.push({ label: 'Education: some college or higher', passed: ok,
+      note: !ok ? `Currently: ${EDU_LABELS[edu] || edu}` : null });
+  } else if (level === 'masters') {
+    const ok = eduVal >= EDU_LEVELS.bachelors;
+    items.push({ label: "Education: bachelor's degree minimum", passed: ok,
+      note: !ok ? `Currently: ${EDU_LABELS[edu] || edu}` : null });
+    if (!ok) {
+      items.push({ label: 'Ministry exception: 5+ yrs full-time or 10+ yrs associated',
+        passed: ftYrs >= 5 || asYrs >= 10,
+        note: `${ftYrs} yr FT / ${asYrs} yr associated` });
+    }
+  } else if (level === 'doctorate') {
+    const isPhD = /ph\.?d|philosophy/i.test(applicant.program_applied || '');
+    if (isPhD) {
+      items.push({ label: 'Prerequisite: existing Th.D. or D.Min.',
+        passed: edu === 'doctorate',
+        note: edu !== 'doctorate' ? `Currently: ${EDU_LABELS[edu] || edu}` : null });
+    } else {
+      const ok = eduVal >= EDU_LEVELS.masters;
+      items.push({ label: "Education: master's degree minimum", passed: ok,
+        note: !ok ? `Currently: ${EDU_LABELS[edu] || edu}` : null });
+      if (!ok && eduVal >= EDU_LEVELS.bachelors) {
+        items.push({ label: 'Ministry exception: 10+ yrs FT or 20+ yrs associated',
+          passed: ftYrs >= 10 || asYrs >= 20,
+          note: `${ftYrs} yr FT / ${asYrs} yr associated` });
+      }
+    }
+  }
+  // Institute / certificate / associate → open enrollment, docs only
+
+  return items;
+}
+
+function RequirementsChecklist({ applicant }) {
+  const items = buildChecklist(applicant);
+  if (!items.length) return null;
+  return (
+    <div className="mt-3 pt-3 border-t border-gray-200">
+      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Requirements</p>
+      <ul className="space-y-1">
+        {items.map((item, i) => (
+          <li key={i} className="flex items-start gap-2 text-xs">
+            <span className={`mt-0.5 font-bold ${item.passed ? 'text-green-600' : 'text-red-500'}`}>
+              {item.passed ? '✓' : '✗'}
+            </span>
+            <span className={item.passed ? 'text-gray-700' : 'text-red-700 font-medium'}>
+              {item.label}
+              {item.note && <span className="text-gray-400 font-normal ml-1">({item.note})</span>}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function AIRecommendation({ applicant, onReviewComplete }) {
@@ -143,7 +231,8 @@ export default function AIRecommendation({ applicant, onReviewComplete }) {
           <p className="text-sm text-red-900 leading-relaxed">
             {ai_reasoning || 'This applicant does not meet the minimum requirements for their selected program. Re-submit the application through MachForm once requirements are met to re-evaluate.'}
           </p>
-          <p className="text-xs text-red-700 font-medium">
+          <RequirementsChecklist applicant={applicant} />
+          <p className="text-xs text-red-700 font-medium mt-2">
             A final decision has not been made — this is the eligibility assessment only. The admissions team must review and submit a decision below.
           </p>
         </div>
@@ -280,7 +369,8 @@ export default function AIRecommendation({ applicant, onReviewComplete }) {
           </p>
         )}
       </div>
-      <p className="mt-2 text-xs text-gray-400">{aiSourceLabel}</p>
+      <RequirementsChecklist applicant={applicant} />
+      <p className="mt-3 text-xs text-gray-400">{aiSourceLabel}</p>
       <RunButton greyed={isRulesEngineResult} />
     </div>
   );
