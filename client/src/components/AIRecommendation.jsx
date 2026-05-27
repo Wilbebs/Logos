@@ -89,12 +89,18 @@ export default function AIRecommendation({ applicant, onReviewComplete }) {
   }
 
   // Shared run/rerun button
-  const RunButton = () => (
+  // greyed = true when the result is rules-engine-determined (no AI involved)
+  const RunButton = ({ greyed = false }) => (
     <div className="mt-3 space-y-1">
       <button
-        onClick={handleRunAssessment}
-        disabled={running}
-        className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-800 disabled:text-blue-300 font-medium"
+        onClick={greyed ? undefined : handleRunAssessment}
+        disabled={running || greyed}
+        title={greyed ? 'AI assessment is not used for this case — result is determined by the rules engine' : undefined}
+        className={`flex items-center gap-1.5 text-xs font-medium ${
+          greyed
+            ? 'text-gray-400 cursor-not-allowed'
+            : 'text-blue-600 hover:text-blue-800 disabled:text-blue-300'
+        }`}
       >
         {running ? (
           <><span className="animate-spin inline-block w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full" /> Running assessment…</>
@@ -158,7 +164,7 @@ export default function AIRecommendation({ applicant, onReviewComplete }) {
 
         <div className="px-4 py-2 bg-red-50 border-t border-red-200 flex items-center justify-between">
           <p className="text-xs text-gray-400">Evaluated by LOGOS Eligibility Engine — document check</p>
-          <RunButton />
+          <RunButton greyed />
         </div>
       </div>
     );
@@ -206,7 +212,7 @@ export default function AIRecommendation({ applicant, onReviewComplete }) {
 
         <div className="px-4 py-2 bg-yellow-50 border-t border-yellow-200 flex items-center justify-between">
           <p className="text-xs text-gray-400">Evaluated by LOGOS Eligibility Engine — financial check</p>
-          <RunButton />
+          <RunButton greyed />
         </div>
       </div>
     );
