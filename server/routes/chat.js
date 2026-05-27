@@ -196,7 +196,9 @@ Available columns: id, email, full_name, phone, program_applied, program_level, 
 Example program_level values: certificate, associate, bachelors, masters, doctorate
 Example eligibility_status values: eligible, ineligible, needs_review
 Example decision values: pending, approved, rejected, info_requested
-Example highest_education values: high_school, associate, bachelor, masters, doctorate`,
+Example highest_education values: high_school, associate, bachelor, masters, doctorate
+
+IMPORTANT — name search: Many applicants have Hispanic names with accent marks (é, á, ó, ú, ñ, etc.). When searching by name, ALWAYS search using FIRST NAME ONLY with ilike (e.g., full_name ilike '%Catalina%') so that accent differences in the last name do not prevent a match. Never search for the full name including the last name when the user may have omitted accents.`,
       parameters: {
         type: 'object',
         properties: {
