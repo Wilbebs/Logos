@@ -238,9 +238,14 @@ function initials(name) {
   return name.split(' ').slice(0, 2).map(w => w[0]?.toUpperCase() || '').join('');
 }
 
+function safeDecodeURI(s) {
+  // Decode percent-encoded characters that MachForm injects into form-POST values
+  try { return decodeURIComponent(s.replace(/\+/g, ' ')); } catch { return s; }
+}
+
 function formatFieldValue(val) {
   if (val === null || val === undefined || val === '') return null;
-  const s = String(val).trim();
+  const s = safeDecodeURI(String(val).trim());
   if (!s) return null;
   if (s.toLowerCase() === 'true') return 'Yes';
   if (s.toLowerCase() === 'false') return 'No';
