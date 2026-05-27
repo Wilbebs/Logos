@@ -1,29 +1,45 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-// Render assistant message content with ✓/✗ checklist lines colored
+// Render assistant message content with ✓/✗ checklist lines colored.
+// Handles both "✓ label" on one line AND Gemini splitting symbol / label across two lines.
 function MessageContent({ text }) {
-  const lines = text.split('\n');
+  // Pre-process: merge a lone ✓ or ✗ line with the following line
+  const raw = text.split('\n');
+  const lines = [];
+  for (let i = 0; i < raw.length; i++) {
+    const trimmed = raw[i].trim();
+    if ((trimmed === '✓' || trimmed === '✗') && i + 1 < raw.length) {
+      lines.push(trimmed + ' ' + raw[i + 1].trim());
+      i++; // skip the next line since we merged it
+    } else {
+      lines.push(raw[i]);
+    }
+  }
+
   return (
     <span>
       {lines.map((line, i) => {
-        const isCheck = line.trimStart().startsWith('✓');
-        const isCross = line.trimStart().startsWith('✗');
+        const t       = line.trimStart();
+        const isCheck = t.startsWith('✓');
+        const isCross = t.startsWith('✗');
         const isLast  = i === lines.length - 1;
+        const label   = t.slice(1).trimStart();
+
         if (isCheck) {
           return (
-            <span key={i} className="flex items-start gap-1">
-              <span className="font-bold text-green-600 shrink-0">✓</span>
-              <span className="text-gray-700">{line.trimStart().slice(1).trimStart()}</span>
+            <span key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '4px' }}>
+              <span style={{ fontWeight: 700, color: '#16a34a', flexShrink: 0 }}>✓</span>
+              <span style={{ color: '#374151' }}>{label}</span>
               {!isLast && '\n'}
             </span>
           );
         }
         if (isCross) {
           return (
-            <span key={i} className="flex items-start gap-1">
-              <span className="font-bold text-red-500 shrink-0">✗</span>
-              <span className="text-red-700 font-medium">{line.trimStart().slice(1).trimStart()}</span>
+            <span key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '4px' }}>
+              <span style={{ fontWeight: 700, color: '#ef4444', flexShrink: 0 }}>✗</span>
+              <span style={{ color: '#b91c1c', fontWeight: 500 }}>{label}</span>
               {!isLast && '\n'}
             </span>
           );
