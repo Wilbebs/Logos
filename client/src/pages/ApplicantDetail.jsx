@@ -326,9 +326,10 @@ export default function ApplicantDetail() {
             <FormChecklist applicant={applicant} />
           </div>
 
-          {/* Raw form data */}
+          {/* Raw form data — compact backup; all fields are shown in LeadProfile above */}
           <div className="bg-white border border-gray-200 rounded p-5">
-            <h3 className="text-sm font-bold text-gray-700 mb-4">Raw Form Data</h3>
+            <h3 className="text-sm font-bold text-gray-700 mb-1">Raw Form Data</h3>
+            <p className="text-xs text-gray-400 mb-4">Unprocessed data exactly as received from MachForm.</p>
             <FormAccordion forms={forms} />
           </div>
 
