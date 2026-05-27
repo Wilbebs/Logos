@@ -69,7 +69,7 @@ $expected = @{
     # AI edge cases (threshold boundaries)
     "test-edge-mast-10yrassoc@logos.edu"     = @{ status = "needs_review"; ai = "any";      label = "AI EDGE: Master assoc+10yr assoc" }
     "test-edge-doc-bach10yrassoc@logos.edu"  = @{ status = "needs_review"; ai = "any";      label = "AI EDGE: Doctorate bach+10yr assoc" }
-    "test-edge-doc-assoc10yr@logos.edu"      = @{ status = "needs_review"; ai = "any";      label = "AI EDGE: Doctorate assoc+10yr ft" }
+    "test-edge-doc-assoc10yr@logos.edu"      = @{ status = "ineligible";   ai = $null;     label = "AUTO-REJECT: Doctorate assoc+10yr ft (hard floor: below bachelor)" }
 }
 
 # Fetch all test applicants from Supabase

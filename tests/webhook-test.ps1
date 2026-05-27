@@ -99,6 +99,7 @@ Send-Application `
     -Form1Fields @{
         "StudyLevelsNivelesDeEstudio"  = "Certificate - Certificado"
         "DesiredProgramProramaDeseado" = "Liderazgo Espiritual / Diplomado"
+        "MarqueLosDocumentosQueEstaIncluyen" = "Copia del Diploma de Escuela Secundaria,Transcripts - Registros oficiales de Notas de grado"
     } `
     -Form2Fields @{} `
     -Form3Fields @{}
@@ -109,6 +110,7 @@ Send-Application `
     -Form1Fields @{
         "StudyLevelsNivelesDeEstudio"  = "Associate - Tecnico Superior"
         "DesiredProgramProramaDeseado" = "Associate of Biblical Studies"
+        "MarqueLosDocumentosQueEstaIncluyen" = "Copia del Diploma de Escuela Secundaria,Transcripts - Registros oficiales de Notas de grado"
     } `
     -Form2Fields @{} `
     -Form3Fields @{}
@@ -249,12 +251,15 @@ Send-Application `
 $i_acute = [char]237   # í
 $e_acute = [char]233   # é
 
+$HS_DOCS = "Copia del Diploma de Escuela Secundaria,Transcripts - Registros oficiales de Notas de grado"
+
 Send-Application `
     -TestName "AUTO-APPROVE: Certificado en Estudios Biblicos (CBS)" `
     -Email    "test-cert-cbs@logos.edu" `
     -Form1Fields @{
         "StudyLevelsNivelesDeEstudio"  = "Certificate - Certificado"
         "DesiredProgramProramaDeseado" = "Certificado en Estudios B${i_acute}blicos"
+        "MarqueLosDocumentosQueEstaIncluyen" = $HS_DOCS
     } `
     -Form2Fields @{} `
     -Form3Fields @{}
@@ -265,6 +270,7 @@ Send-Application `
     -Form1Fields @{
         "StudyLevelsNivelesDeEstudio"  = "Certificate - Certificado"
         "DesiredProgramProramaDeseado" = "Programa Acelerado Ministerial"
+        "MarqueLosDocumentosQueEstaIncluyen" = $HS_DOCS
     } `
     -Form2Fields @{} `
     -Form3Fields @{}
@@ -275,6 +281,7 @@ Send-Application `
     -Form1Fields @{
         "StudyLevelsNivelesDeEstudio"  = "Certificate - Certificado"
         "DesiredProgramProramaDeseado" = "Capellan${i_acute}a"
+        "MarqueLosDocumentosQueEstaIncluyen" = $HS_DOCS
     } `
     -Form2Fields @{} `
     -Form3Fields @{}
@@ -285,6 +292,7 @@ Send-Application `
     -Form1Fields @{
         "StudyLevelsNivelesDeEstudio"  = "Certificate - Certificado"
         "DesiredProgramProramaDeseado" = "Pastores"
+        "MarqueLosDocumentosQueEstaIncluyen" = $HS_DOCS
     } `
     -Form2Fields @{} `
     -Form3Fields @{}
@@ -295,6 +303,7 @@ Send-Application `
     -Form1Fields @{
         "StudyLevelsNivelesDeEstudio"  = "Certificate - Certificado"
         "DesiredProgramProramaDeseado" = "Coaching / Liderazgo Sist${e_acute}mico"
+        "MarqueLosDocumentosQueEstaIncluyen" = $HS_DOCS
     } `
     -Form2Fields @{} `
     -Form3Fields @{}
@@ -309,6 +318,7 @@ Send-Application `
     -Form1Fields @{
         "StudyLevelsNivelesDeEstudio"  = "Associate - Tecnico Superior"
         "DesiredProgramProramaDeseado" = "Associate of Theological Studies"
+        "MarqueLosDocumentosQueEstaIncluyen" = $HS_DOCS
     } `
     -Form2Fields @{} `
     -Form3Fields @{}
@@ -319,6 +329,7 @@ Send-Application `
     -Form1Fields @{
         "StudyLevelsNivelesDeEstudio"  = "Associate - Tecnico Superior"
         "DesiredProgramProramaDeseado" = "Associate of Christian Counseling"
+        "MarqueLosDocumentosQueEstaIncluyen" = $HS_DOCS
     } `
     -Form2Fields @{} `
     -Form3Fields @{}
@@ -329,6 +340,7 @@ Send-Application `
     -Form1Fields @{
         "StudyLevelsNivelesDeEstudio"  = "Associate - Tecnico Superior"
         "DesiredProgramProramaDeseado" = "Associate of Pastoral Studies"
+        "MarqueLosDocumentosQueEstaIncluyen" = $HS_DOCS
     } `
     -Form2Fields @{} `
     -Form3Fields @{}
