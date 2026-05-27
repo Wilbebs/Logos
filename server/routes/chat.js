@@ -100,12 +100,40 @@ async function toolGetApplicantDetails({ id }) {
   return { applicant, forms: forms ?? [] };
 }
 
+// ── Tool: update_applicant_decision ───────────────────────────────────────────
+// Allowed: change decision, add/update notes. NOT allowed: touch eligibility,
+// ai fields, email, program, or any identity/engine-owned column.
+const ALLOWED_DECISIONS = ['approved', 'rejected', 'info_requested', 'pending'];
+
+async function toolUpdateDecision({ id, decision, notes, decision_by }) {
+  if (!id) return { error: 'id is required' };
+  if (decision && !ALLOWED_DECISIONS.includes(decision)) {
+    return { error: `Invalid decision "${decision}". Allowed: ${ALLOWED_DECISIONS.join(', ')}` };
+  }
+
+  const payload = { updated_at: new Date().toISOString() };
+  if (decision)     { payload.decision    = decision; payload.decision_at = new Date().toISOString(); }
+  if (notes !== undefined && notes !== null) payload.decision_notes = notes;
+  if (decision_by)  payload.decision_by  = decision_by;
+
+  const { data, error } = await supabase
+    .from('applicants')
+    .update(payload)
+    .eq('id', id)
+    .select('id, full_name, decision, decision_notes, decision_by, decision_at')
+    .single();
+
+  if (error) return { error: error.message };
+  return { success: true, updated: data };
+}
+
 // ── Tool dispatcher ────────────────────────────────────────────────────────────
 async function dispatchTool(name, args) {
   switch (name) {
-    case 'get_stats':             return toolGetStats();
-    case 'query_applicants':      return toolQueryApplicants(args);
-    case 'get_applicant_details': return toolGetApplicantDetails(args);
+    case 'get_stats':               return toolGetStats();
+    case 'query_applicants':        return toolQueryApplicants(args);
+    case 'get_applicant_details':   return toolGetApplicantDetails(args);
+    case 'update_applicant':        return toolUpdateDecision(args);
     default: return { error: `Unknown tool: ${name}` };
   }
 }
@@ -166,21 +194,46 @@ Example highest_education values: high_school, associate, bachelor, masters, doc
         required: ['id'],
       },
     },
+    {
+      name: 'update_applicant',
+      description: `Update an applicant's decision, notes, or decision_by name. Use this when the user wants to:
+- Add or update a note on an applicant
+- Change the decision (approved, rejected, info_requested, pending)
+- Request more information from an applicant
+- Record who made the decision
+
+You CANNOT change eligibility_status, ai fields, email, program, or any engine-owned field.
+Always confirm what you updated in your reply.`,
+      parameters: {
+        type: 'object',
+        properties: {
+          id:          { type: 'string',  description: 'Applicant UUID — find it first with query_applicants if you only have a name' },
+          decision:    { type: 'string',  description: 'New decision: approved, rejected, info_requested, or pending' },
+          notes:       { type: 'string',  description: 'Note text to set on the applicant' },
+          decision_by: { type: 'string',  description: 'Name of the person making this decision' },
+        },
+        required: ['id'],
+      },
+    },
   ],
 }];
 
 // ── System instruction ─────────────────────────────────────────────────────────
 const SYSTEM_INSTRUCTION = `You are a helpful, intelligent AI assistant for the LOGOS Christian University Admissions office.
 
-You have READ-ONLY access to the admissions database via the tools provided. You CANNOT and MUST NOT modify, delete, or create any records. If asked to do so, politely decline.
+You have access to the admissions database via tools. You can READ all applicant data and you can WRITE the following fields: decision, decision_notes, decision_by. You CANNOT delete records or modify eligibility_status, ai fields, email, program, or any engine-owned field.
 
 You help the admissions team with anything they need:
 - Finding applicants by any criteria (name, email, program, status, budget, education, experience, etc.)
 - Listing, filtering, and summarizing applicant data
 - Explaining eligibility decisions, AI recommendations, and what they mean
 - Dashboard stats and counts
+- Adding notes to applicants
+- Updating decisions (approved, rejected, info_requested, pending)
 - Answering questions about the admissions process and program requirements
 - Anything else the team needs — think creatively with the tools available
+
+If you need to update an applicant but only have their name (not ID), first call query_applicants to find their ID, then call update_applicant.
 
 When you're not sure what data to fetch, make a reasonable attempt with the tools. You can call multiple tools in one turn if needed.
 
