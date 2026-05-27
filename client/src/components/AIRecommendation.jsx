@@ -207,7 +207,7 @@ export default function AIRecommendation({ applicant, onReviewComplete }) {
 
         <div className="px-4 py-2 bg-red-50 border-t border-red-200 flex items-center justify-between">
           <p className="text-xs text-gray-400">Evaluated by LOGOS Eligibility Engine — document check</p>
-          <RunButton greyed={isRulesEngineResult} />
+          <RunButton greyed />
         </div>
       </div>
     );
@@ -255,7 +255,7 @@ export default function AIRecommendation({ applicant, onReviewComplete }) {
 
         <div className="px-4 py-2 bg-yellow-50 border-t border-yellow-200 flex items-center justify-between">
           <p className="text-xs text-gray-400">Evaluated by LOGOS Eligibility Engine — financial check</p>
-          <RunButton greyed={isRulesEngineResult} />
+          <RunButton greyed />
         </div>
       </div>
     );
