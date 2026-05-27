@@ -567,19 +567,21 @@ router.post('/:id/ai-review', async (req, res) => {
     const mergedRaw = { ...(form1?.raw_data || {}), ...(form3?.raw_data || {}) };
     const mergedSubmission = { raw_data: mergedRaw };
 
-    // If the rules engine already flagged missing documents, preserve that
-    // determination instead of calling the AI (which would produce inconsistent
-    // natural language that doesn't match the document-flag UI card).
+    // Re-run the rules engine fresh to get the current verdict.
+    // AI is only called for true academic edge cases (needs_review without a
+    // specific document or financial flag). For all other cases the rules engine
+    // result is deterministic and Gemini only hallucinates.
     const { evaluateEligibility } = await import('../services/eligibility.js');
     const freshEval = evaluateEligibility(applicant, mergedSubmission);
 
     let aiResult;
+
+    // ── Case 1: Missing documents ──────────────────────────────────────────────
     if (freshEval.document_flag && freshEval.missing_documents?.length > 0) {
-      const { DOC_LABELS_PUBLIC } = await import('../services/eligibility.js').catch(() => ({}));
       const missingLabels = freshEval.missing_documents.map(d =>
         d === 'transcripts'           ? 'academic transcripts' :
         d === 'diploma'               ? 'diploma' :
-        d === 'undergraduate_diploma' ? 'undergraduate diploma (bachelor\'s degree — required for all graduate programs)' :
+        d === 'undergraduate_diploma' ? "undergraduate diploma (bachelor's degree — required for all graduate programs)" :
         d
       );
       aiResult = {
@@ -589,8 +591,39 @@ router.post('/:id/ai-review', async (req, res) => {
         confidence: 0.95,
         flags: ['MISSING_DOCUMENTS'],
       };
+
+    // ── Case 2: Financial mismatch ─────────────────────────────────────────────
+    } else if (freshEval.financial_flag) {
+      aiResult = {
+        recommendation: 'escalate',
+        reasoning: freshEval.financial_note ||
+          'Financial mismatch: applicant\'s stated budget does not cover this program. Contact them to discuss an affordable starting point.',
+        confidence: 0.95,
+        flags: ['FINANCIAL_MISMATCH'],
+      };
+
+    // ── Case 3: Clearly ineligible ─────────────────────────────────────────────
+    } else if (freshEval.status === 'ineligible') {
+      const topReason = freshEval.reasons?.find(r => r.toLowerCase().startsWith('auto-reject')) ||
+        freshEval.recommended_action || 'Applicant does not meet the minimum requirements for this program.';
+      aiResult = {
+        recommendation: 'reject',
+        reasoning: topReason.replace(/^Auto-reject:\s*/i, ''),
+        confidence: 0.99,
+        flags: ['RULES_ENGINE_INELIGIBLE'],
+      };
+
+    // ── Case 4: Clearly eligible ───────────────────────────────────────────────
+    } else if (freshEval.status === 'eligible') {
+      aiResult = {
+        recommendation: 'approve',
+        reasoning: `Applicant meets all academic and financial requirements for ${applicant.program_applied || 'this program'}. All required documents are confirmed as submitted.`,
+        confidence: 0.99,
+        flags: [],
+      };
+
+    // ── Case 5: True edge case — call Gemini ───────────────────────────────────
     } else {
-      // Import and call the AI reviewer
       const { callAIReview } = await import('../services/aiReview.js');
       aiResult = await callAIReview(applicant, mergedSubmission);
     }
