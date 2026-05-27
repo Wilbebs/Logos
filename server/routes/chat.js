@@ -227,36 +227,31 @@ router.post('/', async (req, res) => {
     const chat = model.startChat({ history: geminiHistory });
 
     // ── Agentic loop: let Gemini call tools until it gives a text response ──────
-    let response = await chat.sendMessage(lastUserMsg);
+    let result = await chat.sendMessage(lastUserMsg);
     let rawReply = '';
     let action = null;
     const MAX_TOOL_ROUNDS = 5;
 
     for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
-      const candidate = response.candidates?.[0];
-      const parts = candidate?.content?.parts ?? [];
+      const functionCalls = result.response.functionCalls?.() ?? [];
 
-      // Check if Gemini wants to call functions
-      const functionCalls = parts.filter(p => p.functionCall);
-      if (functionCalls.length === 0) {
-        // No more tool calls — collect the text response
-        rawReply = parts.filter(p => p.text).map(p => p.text).join('').trim();
+      if (!functionCalls || functionCalls.length === 0) {
+        // No tool calls — this is the final text answer
+        rawReply = result.response.text();
         break;
       }
 
-      // Execute all requested tool calls
-      const toolResults = [];
-      for (const part of functionCalls) {
-        const { name, args } = part.functionCall;
-        console.log(`[chat] Tool call: ${name}`, JSON.stringify(args).substring(0, 200));
-        const result = await dispatchTool(name, args || {});
-        toolResults.push({
-          functionResponse: { name, response: result },
-        });
-      }
+      // Execute all requested tool calls in parallel
+      const toolResults = await Promise.all(
+        functionCalls.map(async ({ name, args }) => {
+          console.log(`[chat] Tool call: ${name}`, JSON.stringify(args ?? {}).substring(0, 300));
+          const data = await dispatchTool(name, args ?? {});
+          return { functionResponse: { name, response: data } };
+        })
+      );
 
-      // Send tool results back to Gemini
-      response = await chat.sendMessage(toolResults);
+      // Feed results back to Gemini for next round
+      result = await chat.sendMessage(toolResults);
     }
 
     // Parse optional ACTION block from reply
