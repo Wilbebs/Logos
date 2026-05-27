@@ -273,10 +273,10 @@ export default function AcceptanceLetterPage() {
       {/* Top nav */}
       <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between shrink-0">
         <button
-          onClick={() => navigate(`/applicants/${id}`)}
+          onClick={() => navigate(-1)}
           className="text-sm text-blue-600 hover:underline flex items-center gap-1"
         >
-          ← Back to Application
+          ← Back
         </button>
         <p className="text-xs text-gray-400">LOGOS Admissions — Acceptance Letter</p>
       </div>
