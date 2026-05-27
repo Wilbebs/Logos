@@ -17,8 +17,8 @@ export async function callAIReview(applicant, formData) {
 
   // Prefer enriched applicant-record fields; fall back to raw form data
   const highest_education   = applicant.highest_education   || raw.highest_education   || 'Not provided';
-  const min_ft              = applicant.ministerial_years_fulltime   ?? parseInt(raw.ministerial_years_fulltime,  10) || 0;
-  const min_assoc           = applicant.ministerial_years_associated ?? parseInt(raw.ministerial_years_associated, 10) || 0;
+  const min_ft              = applicant.ministerial_years_fulltime   ?? (parseInt(raw.ministerial_years_fulltime,  10) || 0);
+  const min_assoc           = applicant.ministerial_years_associated ?? (parseInt(raw.ministerial_years_associated, 10) || 0);
   const has_doctorate       = applicant.highest_education === 'doctorate' || raw.has_existing_doctorate === 'true' || raw.has_existing_doctorate === true;
 
   // Verified document status (from the applicant record — set when Form 3 was processed)
