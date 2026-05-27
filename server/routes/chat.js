@@ -263,7 +263,9 @@ Example highest_education values: high_school, associate, bachelor, masters, doc
 
 IMPORTANT — forms_complete is a BOOLEAN (true/false), not a number. Use is_true or is_false operator. To find applicants who submitted all 3 forms, use: forms_complete is_true. Do NOT use eq/gte/lte with a number for this column.
 
-IMPORTANT — name search: Many applicants have Hispanic names with accent marks (é, á, ó, ú, ñ, etc.). When searching by name, ALWAYS search using FIRST NAME ONLY with ilike (e.g., full_name ilike '%Catalina%') so that accent differences in the last name do not prevent a match. Never search for the full name including the last name when the user may have omitted accents.`,
+IMPORTANT — name search: Many applicants have Hispanic names with accent marks (é, á, ó, ú, ñ, etc.). When searching by name, ALWAYS search using FIRST NAME ONLY with ilike (e.g., full_name ilike '%Catalina%') so that accent differences in the last name do not prevent a match. Never search for the full name including the last name when the user may have omitted accents.
+
+IMPORTANT — email search: The email column is fully searchable with ilike. Test applicants follow the pattern test-<descriptor>@logos.edu. When the user references something like "test-phd-reject", search email ilike '%test-phd-reject%'. Always try an email ilike search as a fallback when a name search returns nothing.`,
       parameters: {
         type: 'object',
         properties: {
@@ -355,6 +357,17 @@ You help the admissions team with anything they need:
 If you need to update an applicant but only have their name (not ID), first call query_applicants to find their ID, then call update_applicant.
 
 When you're not sure what data to fetch, make a reasonable attempt with the tools. You can call multiple tools in one turn if needed.
+
+SMART SEARCH & FUZZY RECOVERY — follow this every time a search returns 0 results:
+1. The user's input is probably a partial name, nickname, or slightly misspelled identifier. Do NOT give up after the first miss.
+2. Retry with progressively looser queries in this order:
+   a. Strip common suffixes: remove trailing 's', 'app', 'application', 'applicant'.
+   b. Search by FIRST token only: if input is "test-phd-reject", try ilike on full_name with '%phd%' OR filter email ilike '%test-phd-reject%'.
+   c. If the input looks like an email or contains '@', search email ilike '%<the-part-before-@>%'.
+   d. If the input looks like a test address (starts with 'test-'), search email ilike '%<input>%' — test emails map directly to the email column.
+3. When a close match IS found, open with: "Did you mean **[full name]** (email: [email])?" then continue answering about that applicant.
+4. When multiple close matches are found, list them: "I found a few possible matches — which did you mean?" with name + email for each.
+5. Only say "I can't find anyone" after at least 2–3 retry attempts all return 0 results.
 
 REQUIREMENTS CHECKLIST: When get_applicant_details returns a requirements_checklist array, always include it in your reply under a "Requirements" heading. Format each item on its own line using EXACTLY this format:
 ✓ Requirement label
