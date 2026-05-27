@@ -318,10 +318,11 @@ router.post('/', async (req, res) => {
     });
 
     // Build Gemini-format history (must start with 'user', alternate user/model)
-    // Filter out the opening assistant greeting and ensure proper alternation
+    // Limit to last 10 messages (5 turns) to prevent context overflow causing tool-loop failures
+    const historyMsgs = messages.slice(0, -1).slice(-10);
     const geminiHistory = [];
     let lastRole = null;
-    for (const msg of messages.slice(0, -1)) {
+    for (const msg of historyMsgs) {
       const role = msg.role === 'user' ? 'user' : 'model';
       if (role === lastRole) continue; // skip consecutive same-role messages
       geminiHistory.push({ role, parts: [{ text: msg.content }] });
@@ -339,7 +340,7 @@ router.post('/', async (req, res) => {
     let result = await chat.sendMessage(lastUserMsg);
     let rawReply = '';
     let action = null;
-    const MAX_TOOL_ROUNDS = 5;
+    const MAX_TOOL_ROUNDS = 8;
 
     for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
       const functionCalls = result.response.functionCalls?.() ?? [];
