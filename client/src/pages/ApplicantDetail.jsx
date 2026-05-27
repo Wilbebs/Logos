@@ -144,9 +144,36 @@ function DecisionPanel({ applicant, onDecisionSubmitted }) {
   if (!isPending || submitted) {
     const displayDecision = submitted ? selectedDecision : applicant.decision;
     const displayNotes = submitted ? notes : applicant.decision_notes;
+    const [revoking, setRevoking] = useState(false);
+
+    async function handleRevoke() {
+      if (!window.confirm('Revoke this decision and return to pending?')) return;
+      setRevoking(true);
+      try {
+        await fetch(`${API_URL}/api/applicants/${applicant.id}/decision`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ decision: 'pending', decision_notes: null, decision_by: null }),
+        });
+        if (onDecisionSubmitted) onDecisionSubmitted();
+      } finally {
+        setRevoking(false);
+      }
+    }
+
     return (
       <div className="border border-gray-200 rounded p-4">
-        <h3 className="text-sm font-bold text-gray-700 mb-3">Decision</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-bold text-gray-700">Decision</h3>
+          <button
+            onClick={handleRevoke}
+            disabled={revoking}
+            className="text-xs text-gray-400 hover:text-red-500 disabled:opacity-50 transition-colors"
+            title="Revoke decision and return to pending"
+          >
+            {revoking ? 'Revoking…' : 'Revoke'}
+          </button>
+        </div>
         {submitted && (
           <div className="mb-3 p-2 bg-green-50 border border-green-200 text-green-700 text-sm rounded">
             Decision recorded.
