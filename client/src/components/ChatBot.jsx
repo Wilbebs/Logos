@@ -1,6 +1,39 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
+// Render assistant message content with ✓/✗ checklist lines colored
+function MessageContent({ text }) {
+  const lines = text.split('\n');
+  return (
+    <span>
+      {lines.map((line, i) => {
+        const isCheck = line.trimStart().startsWith('✓');
+        const isCross = line.trimStart().startsWith('✗');
+        const isLast  = i === lines.length - 1;
+        if (isCheck) {
+          return (
+            <span key={i} className="flex items-start gap-1">
+              <span className="font-bold text-green-600 shrink-0">✓</span>
+              <span className="text-gray-700">{line.trimStart().slice(1).trimStart()}</span>
+              {!isLast && '\n'}
+            </span>
+          );
+        }
+        if (isCross) {
+          return (
+            <span key={i} className="flex items-start gap-1">
+              <span className="font-bold text-red-500 shrink-0">✗</span>
+              <span className="text-red-700 font-medium">{line.trimStart().slice(1).trimStart()}</span>
+              {!isLast && '\n'}
+            </span>
+          );
+        }
+        return <span key={i}>{line}{!isLast && '\n'}</span>;
+      })}
+    </span>
+  );
+}
+
 const API_URL = import.meta.env.VITE_API_URL || '';
 
 /**
@@ -120,7 +153,9 @@ export default function ChatBot() {
                       : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
                   }`}
                 >
-                  {msg.content}
+                  {msg.role === 'assistant' && !msg.isError
+                    ? <MessageContent text={msg.content} />
+                    : msg.content}
                   {msg.action?.type === 'navigate' && msg.action.path && (
                     <Link
                       to={msg.action.path}

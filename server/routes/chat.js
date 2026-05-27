@@ -86,6 +86,67 @@ async function toolQueryApplicants({ filters = [], select_columns, order_by, ord
   return { count: data.length, results: data };
 }
 
+// ── Requirements checklist (mirrors AIRecommendation.jsx buildChecklist) ───────
+const EDU_LEVELS = {
+  none: 0, high_school: 1, some_college: 2, associate: 3,
+  bachelors: 4, masters: 5, doctorate: 6,
+};
+const EDU_LABELS = {
+  none: 'None', high_school: 'High School', some_college: 'Some College',
+  associate: 'Associate Degree', bachelors: "Bachelor's Degree",
+  masters: "Master's Degree", doctorate: 'Doctorate',
+};
+
+function buildChecklistItems(applicant) {
+  const level  = (applicant.program_level || '').toLowerCase();
+  const edu    = applicant.highest_education || 'none';
+  const eduVal = EDU_LEVELS[edu] ?? 0;
+  const ftYrs  = applicant.ministerial_years_fulltime  ?? 0;
+  const asYrs  = applicant.ministerial_years_associated ?? 0;
+  const items  = [];
+
+  // Documents
+  items.push({ label: 'Academic transcripts', passed: !!applicant.submitted_transcripts });
+  if (level === 'masters' || level === 'doctorate') {
+    items.push({ label: "Undergraduate diploma (bachelor's)", passed: !!applicant.submitted_undergraduate_diploma });
+  } else {
+    items.push({ label: 'Diploma', passed: !!applicant.submitted_diploma });
+  }
+
+  // Education / experience
+  if (level === 'bachelors') {
+    const ok = eduVal >= EDU_LEVELS.some_college;
+    items.push({ label: 'Education: some college or higher', passed: ok,
+      note: !ok ? `Currently: ${EDU_LABELS[edu] || edu}` : null });
+  } else if (level === 'masters') {
+    const ok = eduVal >= EDU_LEVELS.bachelors;
+    items.push({ label: "Education: bachelor's degree minimum", passed: ok,
+      note: !ok ? `Currently: ${EDU_LABELS[edu] || edu}` : null });
+    if (!ok) {
+      items.push({ label: 'Ministry exception: 5+ yrs full-time or 10+ yrs associated',
+        passed: ftYrs >= 5 || asYrs >= 10,
+        note: `${ftYrs} yr FT / ${asYrs} yr associated` });
+    }
+  } else if (level === 'doctorate') {
+    const isPhD = /ph\.?d|philosophy/i.test(applicant.program_applied || '');
+    if (isPhD) {
+      items.push({ label: 'Prerequisite: existing Th.D. or D.Min.',
+        passed: edu === 'doctorate',
+        note: edu !== 'doctorate' ? `Currently: ${EDU_LABELS[edu] || edu}` : null });
+    } else {
+      const ok = eduVal >= EDU_LEVELS.masters;
+      items.push({ label: "Education: master's degree minimum", passed: ok,
+        note: !ok ? `Currently: ${EDU_LABELS[edu] || edu}` : null });
+      if (!ok && eduVal >= EDU_LEVELS.bachelors) {
+        items.push({ label: 'Ministry exception: 10+ yrs FT or 20+ yrs associated',
+          passed: ftYrs >= 10 || asYrs >= 20,
+          note: `${ftYrs} yr FT / ${asYrs} yr associated` });
+      }
+    }
+  }
+  return items;
+}
+
 // ── Tool: get_applicant_details ────────────────────────────────────────────────
 async function toolGetApplicantDetails({ id }) {
   if (!id) return { error: 'id is required' };
@@ -97,7 +158,9 @@ async function toolGetApplicantDetails({ id }) {
     .select('form_number, submitted_at, raw_data')
     .eq('applicant_id', id)
     .order('form_number', { ascending: true });
-  return { applicant, forms: forms ?? [] };
+
+  const requirements_checklist = buildChecklistItems(applicant);
+  return { applicant, forms: forms ?? [], requirements_checklist };
 }
 
 // ── Tool: update_applicant_decision ───────────────────────────────────────────
@@ -292,6 +355,11 @@ You help the admissions team with anything they need:
 If you need to update an applicant but only have their name (not ID), first call query_applicants to find their ID, then call update_applicant.
 
 When you're not sure what data to fetch, make a reasonable attempt with the tools. You can call multiple tools in one turn if needed.
+
+REQUIREMENTS CHECKLIST: When get_applicant_details returns a requirements_checklist array, always include it in your reply under a "Requirements" heading. Format each item on its own line using EXACTLY this format:
+✓ Requirement label
+✗ Requirement label (note if any)
+Use ✓ for passed=true items and ✗ for passed=false items. Always include the note in parentheses when present. Do not skip any items. Place the checklist after the main summary, before your closing remarks.
 
 NAVIGATION: When you identify a single specific applicant the user likely wants to open, end your reply with:
 ACTION:{"type":"navigate","path":"/applicants/THEIR-UUID"}
