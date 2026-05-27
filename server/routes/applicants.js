@@ -540,4 +540,63 @@ Do not include a subject line. Start directly with the salutation.`;
   }
 });
 
+// ------------------------------------------------------------------
+// POST /api/applicants/:id/ai-review
+// Manually (re)run the AI assessment for any applicant.
+// Updates ai_recommendation + ai_reasoning only.
+// Does NOT change eligibility_status or decision.
+// ------------------------------------------------------------------
+router.post('/:id/ai-review', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Fetch applicant
+    const { data: applicant, error: aErr } = await supabase
+      .from('applicants').select('*').eq('id', id).single();
+    if (aErr || !applicant) return res.status(404).json({ error: 'Applicant not found.' });
+
+    // Fetch form submissions and merge raw data (same pattern as webhook)
+    const { data: allForms } = await supabase
+      .from('form_submissions')
+      .select('form_number, raw_data')
+      .eq('applicant_id', id)
+      .order('form_number', { ascending: true });
+
+    const form1 = (allForms || []).find(f => Number(f.form_number) === 1) ?? null;
+    const form3 = (allForms || []).find(f => Number(f.form_number) === 3) ?? null;
+    const mergedRaw = { ...(form1?.raw_data || {}), ...(form3?.raw_data || {}) };
+    const mergedSubmission = { raw_data: mergedRaw };
+
+    // Import and call the AI reviewer
+    const { callAIReview } = await import('../services/aiReview.js');
+    const aiResult = await callAIReview(applicant, mergedSubmission);
+
+    // Write ONLY the AI fields — never touch eligibility_status or decision
+    const { data: updated, error: uErr } = await supabase
+      .from('applicants')
+      .update({
+        ai_recommendation: aiResult.recommendation,
+        ai_reasoning:      aiResult.reasoning,
+        updated_at:        new Date().toISOString(),
+      })
+      .eq('id', id)
+      .select('id, full_name, eligibility_status, ai_recommendation, ai_reasoning, decision')
+      .single();
+
+    if (uErr) return res.status(500).json({ error: uErr.message });
+
+    return res.json({
+      success: true,
+      ai_recommendation: aiResult.recommendation,
+      ai_reasoning:      aiResult.reasoning,
+      confidence:        aiResult.confidence,
+      flags:             aiResult.flags,
+      applicant:         updated,
+    });
+  } catch (err) {
+    console.error('[POST /api/applicants/:id/ai-review] Error:', err);
+    return res.status(500).json({ error: 'AI review failed: ' + (err.message || 'unknown error') });
+  }
+});
+
 export default router;

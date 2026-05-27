@@ -127,12 +127,53 @@ async function toolUpdateDecision({ id, decision, notes, decision_by }) {
   return { success: true, updated: data };
 }
 
+// ── Tool: run_ai_assessment ────────────────────────────────────────────────────
+async function toolRunAiAssessment({ id }) {
+  if (!id) return { error: 'id is required' };
+  try {
+    // Reuse the same endpoint logic via internal fetch-equivalent
+    const { data: applicant, error: aErr } = await supabase
+      .from('applicants').select('*').eq('id', id).single();
+    if (aErr || !applicant) return { error: 'Applicant not found' };
+
+    const { data: allForms } = await supabase
+      .from('form_submissions')
+      .select('form_number, raw_data')
+      .eq('applicant_id', id)
+      .order('form_number', { ascending: true });
+
+    const form1 = (allForms || []).find(f => Number(f.form_number) === 1) ?? null;
+    const form3 = (allForms || []).find(f => Number(f.form_number) === 3) ?? null;
+    const mergedRaw = { ...(form1?.raw_data || {}), ...(form3?.raw_data || {}) };
+
+    const { callAIReview } = await import('../services/aiReview.js');
+    const aiResult = await callAIReview(applicant, { raw_data: mergedRaw });
+
+    await supabase.from('applicants').update({
+      ai_recommendation: aiResult.recommendation,
+      ai_reasoning:      aiResult.reasoning,
+      updated_at:        new Date().toISOString(),
+    }).eq('id', id);
+
+    return {
+      success: true,
+      applicant_name: applicant.full_name,
+      ai_recommendation: aiResult.recommendation,
+      ai_reasoning: aiResult.reasoning,
+      confidence: aiResult.confidence,
+    };
+  } catch (err) {
+    return { error: 'AI assessment failed: ' + err.message };
+  }
+}
+
 // ── Tool dispatcher ────────────────────────────────────────────────────────────
 async function dispatchTool(name, args) {
   switch (name) {
     case 'get_stats':               return toolGetStats();
     case 'query_applicants':        return toolQueryApplicants(args);
     case 'get_applicant_details':   return toolGetApplicantDetails(args);
+    case 'run_ai_assessment':       return toolRunAiAssessment(args);
     case 'update_applicant':        return toolUpdateDecision(args);
     default: return { error: `Unknown tool: ${name}` };
   }
@@ -190,6 +231,17 @@ Example highest_education values: high_school, associate, bachelor, masters, doc
         type: 'object',
         properties: {
           id: { type: 'string', description: 'Applicant UUID' },
+        },
+        required: ['id'],
+      },
+    },
+    {
+      name: 'run_ai_assessment',
+      description: `Manually run (or re-run) the Gemini AI eligibility assessment for an applicant. Updates ai_recommendation and ai_reasoning only — does NOT change eligibility_status or decision. Use when the user asks to run, rerun, refresh, or redo the AI review for someone.`,
+      parameters: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'Applicant UUID — find it first with query_applicants if you only have a name' },
         },
         required: ['id'],
       },
