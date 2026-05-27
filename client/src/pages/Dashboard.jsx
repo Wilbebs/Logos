@@ -74,16 +74,12 @@ function applyFilters(applicants, activeFilter, dateFrom, dateTo, formsCompleteO
     result = result.filter((a) => a.forms_complete);
   }
 
-  // Date range filter on created_at
+  // Date range filter on created_at — compare YYYY-MM-DD strings to avoid timezone skew
   if (dateFrom) {
-    const from = new Date(dateFrom);
-    from.setHours(0, 0, 0, 0);
-    result = result.filter((a) => a.created_at && new Date(a.created_at) >= from);
+    result = result.filter((a) => a.created_at && a.created_at.slice(0, 10) >= dateFrom);
   }
   if (dateTo) {
-    const to = new Date(dateTo);
-    to.setHours(23, 59, 59, 999);
-    result = result.filter((a) => a.created_at && new Date(a.created_at) <= to);
+    result = result.filter((a) => a.created_at && a.created_at.slice(0, 10) <= dateTo);
   }
 
   return result;
