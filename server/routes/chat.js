@@ -40,11 +40,11 @@ async function searchApplicants(term) {
     return data ?? [];
   }
 
-  // Name — search name columns
+  // Name — only full_name and email columns exist; first_name/last_name do not
   const { data } = await supabase
     .from('applicants')
     .select(cols)
-    .or(`full_name.ilike.%${term}%,first_name.ilike.%${term}%,last_name.ilike.%${term}%`)
+    .ilike('full_name', `%${term}%`)
     .limit(5);
   return data ?? [];
 }
