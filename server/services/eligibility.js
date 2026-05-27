@@ -356,8 +356,31 @@ export function evaluateEligibility(applicant, formData) {
     }
   }
 
-  // 4c. Doctorate (non-PhD) — below master's AND low ministerial experience
+  // 4c. Doctorate (non-PhD) — education floor checks
   if (program.level === 'doctorate' && programId !== 'phd') {
+    // Hard floor: associate's degree or below → always ineligible, no exceptions.
+    // A bachelor's degree is the minimum to even be considered for any review.
+    if (eduLevel < EDUCATION_LEVELS.bachelors) {
+      return {
+        status: 'ineligible',
+        confidence: 'high',
+        reasons: [
+          ...reasons,
+          `Auto-reject: Doctoral programs require at minimum a bachelor's degree. Applicant's highest education is "${highest_education}". ` +
+            'An associate\'s degree or below does not qualify for a doctoral program under any exception.',
+        ],
+        recommended_action:
+          `Reject application — applicant holds only a "${highest_education}" degree. A bachelor's degree is the minimum requirement to be considered for ${program.display_name}.`,
+        financial_flag: false,
+        suggested_alternative: null,
+        financial_note: null,
+        document_flag: false,
+        missing_documents: [],
+        document_note: null,
+      };
+    }
+
+    // Below master's AND low ministerial experience → also ineligible
     const belowMasters = eduLevel < EDUCATION_LEVELS.masters;
     const totalMinisterialYears =
       ministerial_years_fulltime + ministerial_years_associated;
@@ -373,13 +396,17 @@ export function evaluateEligibility(applicant, formData) {
         reasons: [
           ...reasons,
           `Auto-reject: Doctoral programs require a master's degree. Applicant's highest education is "${highest_education}" ` +
-            `and has only ${ministerial_years_fulltime} year(s) full-time / ${ministerial_years_associated} year(s) associated ministerial experience.`,
+            `and has only ${ministerial_years_fulltime} year(s) full-time / ${ministerial_years_associated} year(s) associated ministerial experience ` +
+            '(minimum for exceptional review: 10 years full-time OR 20 years associated).',
         ],
         recommended_action:
           `Reject application — applicant does not meet minimum educational requirements for ${program.display_name} and has insufficient ministerial experience for an exceptional review.`,
         financial_flag: false,
         suggested_alternative: null,
         financial_note: null,
+        document_flag: false,
+        missing_documents: [],
+        document_note: null,
       };
     }
   }
