@@ -239,8 +239,14 @@ function initials(name) {
 }
 
 function safeDecodeURI(s) {
-  // Decode percent-encoded characters that MachForm injects into form-POST values
-  try { return decodeURIComponent(s.replace(/\+/g, ' ')); } catch { return s; }
+  // Decode percent-encoded characters that MachForm injects into form-POST values.
+  // MachForm sometimes sends Latin-1 (ISO-8859-1) encoded bytes (e.g. %F3 = ó)
+  // which are not valid UTF-8 and will throw in decodeURIComponent.
+  // We fall back to the deprecated-but-universal unescape() which handles Latin-1.
+  const clean = s.replace(/\+/g, ' ');
+  try { return decodeURIComponent(clean); } catch { /* invalid UTF-8 sequence */ }
+  // eslint-disable-next-line no-unescape-func
+  try { return unescape(clean); } catch { return s; }
 }
 
 function formatFieldValue(val) {
