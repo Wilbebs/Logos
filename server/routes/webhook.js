@@ -452,9 +452,18 @@ async function handleFormSubmission(req, res, formNumber) {
         console.log(`[webhook] Financial flag for ${applicant.id}:`, eligResult.suggested_alternative);
 
       } else {
+        // For ineligible applicants, save the rejection reason so the dashboard
+        // can display it without running an AI review (which would be misleading).
+        const baseUpdate = { eligibility_status: eligResult.status };
+        if (eligResult.status === 'ineligible') {
+          baseUpdate.ai_reasoning =
+            eligResult.recommended_action ||
+            eligResult.reasons?.[eligResult.reasons.length - 1] ||
+            'Application does not meet eligibility requirements.';
+        }
         await supabase
           .from('applicants')
-          .update({ eligibility_status: eligResult.status })
+          .update(baseUpdate)
           .eq('id', applicant.id);
 
         if (eligResult.confidence === 'low' || eligResult.status === 'needs_review') {
