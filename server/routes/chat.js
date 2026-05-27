@@ -1,9 +1,6 @@
 /**
  * POST /api/chat
  * General-purpose admissions AI assistant with live Supabase access.
- *
- * Body: { messages: [{ role: 'user'|'assistant', content: string }, ...] }
- * Response: { reply: string, action?: { type: 'navigate', path: string } }
  */
 
 import { Router } from 'express';
@@ -12,6 +9,9 @@ import supabase from '../db/client.js';
 
 const router = Router();
 
+const COLS = 'id, full_name, email, program_applied, program_level, eligibility_status, ai_recommendation, ai_reasoning, decision, forms_complete, monthly_budget';
+
+// ── Stats ──────────────────────────────────────────────────────────────────────
 async function getStats() {
   const { data, error } = await supabase
     .from('applicants')
@@ -30,67 +30,111 @@ async function getStats() {
   return s;
 }
 
-async function searchApplicants(term) {
-  if (!term || term.length < 2) return [];
-  const cols = 'id, full_name, email, program_applied, program_level, eligibility_status, ai_recommendation, ai_reasoning, decision, forms_complete, monthly_budget';
-
-  // Email — use exact ilike on the email column only (avoids @ breaking the or() parser)
-  if (term.includes('@')) {
-    const { data } = await supabase.from('applicants').select(cols).ilike('email', `%${term}%`).limit(5);
-    return data ?? [];
-  }
-
-  // Name — only full_name and email columns exist; first_name/last_name do not
+// ── All applicants (for "list all" requests) ───────────────────────────────────
+async function getAllApplicants() {
   const { data } = await supabase
     .from('applicants')
-    .select(cols)
-    .ilike('full_name', `%${term}%`)
-    .limit(5);
+    .select(COLS)
+    .order('created_at', { ascending: false })
+    .limit(100);
   return data ?? [];
 }
 
-// Common words to ignore so we don't search for "How", "Was", "The", etc.
+// ── Search by name ─────────────────────────────────────────────────────────────
+async function searchByName(term) {
+  const { data } = await supabase
+    .from('applicants')
+    .select(COLS)
+    .ilike('full_name', `%${term}%`)
+    .limit(10);
+  return data ?? [];
+}
+
+// ── Search by email ────────────────────────────────────────────────────────────
+async function searchByEmail(term) {
+  const { data } = await supabase
+    .from('applicants')
+    .select(COLS)
+    .ilike('email', `%${term}%`)
+    .limit(10);
+  return data ?? [];
+}
+
+// ── Search by program keyword (e.g. "Psychology", "Theology", "Ministry") ──────
+async function searchByProgram(keyword) {
+  const { data } = await supabase
+    .from('applicants')
+    .select(COLS)
+    .ilike('program_applied', `%${keyword}%`)
+    .limit(10);
+  return data ?? [];
+}
+
+// ── Detect intent from the latest user message ─────────────────────────────────
+function detectIntent(text) {
+  const t = text.toLowerCase();
+  return {
+    wantsAll: /list\s+(all|every|applicants)|show\s+(all|every|applicants)|all\s+applicants|everyone|every\s+applicant/.test(t),
+    wantsStats: /how\s+many|total|count|stat|overview|pending|approved|rejected|needs\s+review/.test(t),
+    emails: text.match(/[\w.-]+@[\w.-]+\.\w+/g) ?? [],
+    // Program keywords — things that sound like subjects/programs
+    programKeywords: extractProgramKeywords(text),
+    // Proper names (2+ title-cased words, not stop words)
+    names: extractNames(text),
+  };
+}
+
 const STOP_WORDS = new Set([
   'how','was','the','did','is','are','what','who','when','where','why','can',
   'does','has','have','their','this','that','show','find','tell','me','about',
   'my','your','our','its','been','they','them','then','than','will','would',
   'could','should','make','just','also','only','any','all','new','more','for',
   'and','but','not','with','from','into','onto','over','under','too','very',
+  'list','every','everyone','applicant','applicants','application','applications',
+  'know','of','an','wanted','study','there','want','i','a','to','in','at','by',
 ]);
 
-function extractSearchTerms(text) {
-  const terms = [];
-
-  // Always grab emails — exact match
-  const emails = text.match(/[\w.-]+@[\w.-]+\.\w+/g);
-  if (emails) terms.push(...emails);
-
-  // Grab sequences of Title-Cased words (names) — e.g. "Wilbert Hernandez"
-  // Filter out common stop words so "How Was" doesn't become a search term
+function extractNames(text) {
+  const names = [];
   const words = text.split(/\s+/);
-  let nameBuffer = [];
+  let buf = [];
   for (const word of words) {
-    const clean = word.replace(/'s$/i, '').replace(/[^a-zA-Z]/g, ''); // strip possessive before cleaning
-    if (clean.length > 1 && clean[0] === clean[0].toUpperCase() && clean[0] !== clean[0].toLowerCase() && !STOP_WORDS.has(clean.toLowerCase())) {
-      nameBuffer.push(clean);
+    const clean = word.replace(/'s$/i, '').replace(/[^a-zA-Z]/g, '');
+    const isTitle = clean.length > 1 && clean[0] === clean[0].toUpperCase() && clean[0] !== clean[0].toLowerCase();
+    if (isTitle && !STOP_WORDS.has(clean.toLowerCase())) {
+      buf.push(clean);
     } else {
-      if (nameBuffer.length >= 2) terms.push(nameBuffer.join(' '));
-      nameBuffer = [];
+      if (buf.length >= 2) names.push(buf.join(' '));
+      buf = [];
     }
   }
-  if (nameBuffer.length >= 2) terms.push(nameBuffer.join(' '));
+  if (buf.length >= 2) names.push(buf.join(' '));
 
-  // Also grab single capitalized words after explicit trigger verbs (e.g. "find Maria")
-  const triggerPattern = /(?:show me|find|look up|search for|tell me about|who is|check|open|navigate to)\s+([A-Za-z][\w\s'-]{1,40}?)(?:\s*[;,?]|$)/gi;
-  let m;
-  while ((m = triggerPattern.exec(text)) !== null) {
-    const candidate = m[1].trim();
-    if (candidate.length > 2) terms.push(candidate);
+  // Also catch single names after trigger words: "find Maria", "open John"
+  const triggerMatch = text.match(/(?:find|show me|look up|open|check|who is)\s+([A-Za-z]{2,})/gi);
+  if (triggerMatch) {
+    for (const m of triggerMatch) {
+      const name = m.replace(/^(find|show me|look up|open|check|who is)\s+/i, '').trim();
+      if (!STOP_WORDS.has(name.toLowerCase())) names.push(name);
+    }
   }
 
-  return [...new Set(terms)];
+  return [...new Set(names)];
 }
 
+function extractProgramKeywords(text) {
+  // Match subject-like words that commonly appear in program names
+  const programTerms = [
+    'theology','theological','ministry','divinity','biblical','bible','studies',
+    'counseling','education','pastoral','leadership','psychology','christian',
+    'doctorate','master','bachelor','associate','certificate','philosophy',
+    'religious','church','missions','evangelism','worship','preaching',
+  ];
+  const lower = text.toLowerCase();
+  return programTerms.filter(t => lower.includes(t));
+}
+
+// ── Route ──────────────────────────────────────────────────────────────────────
 router.post('/', async (req, res) => {
   try {
     const { messages } = req.body;
@@ -101,59 +145,76 @@ router.post('/', async (req, res) => {
       return res.status(503).json({ error: 'AI not configured — GEMINI_API_KEY missing on server.' });
     }
 
-    // Gather live data
     const lastUserMsg = [...messages].reverse().find(m => m.role === 'user')?.content || '';
+    const intent = detectIntent(lastUserMsg);
     const contextParts = [];
 
+    // Always include stats
     const stats = await getStats();
     if (stats) contextParts.push('LIVE DASHBOARD STATS:\n' + JSON.stringify(stats, null, 2));
 
-    const terms = extractSearchTerms(lastUserMsg);
-    const found = [];
-    for (const t of terms) {
-      const r = await searchApplicants(t);
-      found.push(...r);
-    }
-    const unique = [...new Map(found.map(a => [a.id, a])).values()];
-    if (unique.length > 0) {
-      contextParts.push('MATCHING APPLICANTS:\n' + JSON.stringify(unique, null, 2));
-    } else if (terms.length > 0) {
-      contextParts.push('No applicants found matching: ' + terms.join(', '));
+    // "List all applicants"
+    if (intent.wantsAll) {
+      const all = await getAllApplicants();
+      contextParts.push(`ALL APPLICANTS (${all.length} total):\n` + JSON.stringify(all, null, 2));
+    } else {
+      const found = [];
+
+      // Search by email
+      for (const email of intent.emails) {
+        const r = await searchByEmail(email);
+        found.push(...r);
+      }
+
+      // Search by name
+      for (const name of intent.names) {
+        const r = await searchByName(name);
+        found.push(...r);
+      }
+
+      // Search by program keyword
+      for (const kw of intent.programKeywords) {
+        const r = await searchByProgram(kw);
+        found.push(...r);
+      }
+
+      const unique = [...new Map(found.map(a => [a.id, a])).values()];
+      if (unique.length > 0) {
+        contextParts.push('MATCHING APPLICANTS:\n' + JSON.stringify(unique, null, 2));
+      }
     }
 
-    // Build conversation as flat text — avoids Gemini role alternation restrictions
+    // Build conversation as flat text
     const history = messages
       .map(m => (m.role === 'user' ? 'User' : 'Assistant') + ': ' + m.content)
       .join('\n\n');
 
-    const dataBlock = contextParts.length > 0
-      ? '\n\n--- LIVE DATA (use this; do not fabricate) ---\n' + contextParts.join('\n\n') + '\n--- END LIVE DATA ---\n'
-      : '';
+    const dataBlock = '\n\n--- LIVE DATA ---\n' + contextParts.join('\n\n') + '\n--- END LIVE DATA ---\n';
 
     const prompt = [
       'You are a helpful AI assistant for the LOGOS Christian University Admissions office.',
       '',
       'You help the admissions team with anything related to the dashboard and admissions process:',
-      '- Looking up applicants by name or email',
-      '- Reporting live stats (totals, needs review, approved, rejected, pending, etc.)',
+      '- Looking up specific applicants by name or email',
+      '- Listing all applicants or filtering by program, status, level, etc.',
+      '- Reporting live stats (totals, needs review, approved, rejected, pending)',
       '- Explaining eligibility decisions and AI recommendations',
-      '- Clarifying program requirements and the admissions process',
-      '- Navigating to an applicant profile (end reply with ACTION block)',
+      '- Answering questions about programs and admissions requirements',
+      '- Finding applicants interested in a subject (e.g. "who wanted to study theology?")',
       '',
-      'Key system concepts:',
-      '- eligibility_status: eligible (auto-approved), ineligible (auto-rejected), needs_review (manual/AI review needed)',
+      'Key concepts:',
+      '- eligibility_status: eligible (auto-approved), ineligible (auto-rejected), needs_review (manual/AI review)',
       '- decision: pending, approved, rejected, info_requested',
-      '- forms_complete = true means all 3 MachForm submissions received',
+      '- forms_complete = true means all 3 forms received',
       '- Program levels: certificate, associate, bachelors, masters, doctorate',
-      '- Financial flag: budget too low for program level → needs_review',
-      '- Document flag: missing transcripts or diploma → needs_review',
-      '- AI recommendation (approve/reject/escalate) only set for needs_review cases',
+      '',
+      'IMPORTANT RULES:',
+      '- Only report data from LIVE DATA below — never fabricate names, emails, or numbers',
+      '- When listing multiple applicants, format them as a clean readable list',
+      '- When you identify a single specific applicant the user likely wants to open, end your reply with:',
+      '  ACTION:{"type":"navigate","path":"/applicants/THEIR-UUID"}',
+      '- Only include ACTION when there is exactly one clear applicant being discussed',
       dataBlock,
-      'Only report data from LIVE DATA above. Never invent applicant names or numbers.',
-      '',
-      'To navigate to an applicant profile, end your reply with exactly:',
-      'ACTION:{"type":"navigate","path":"/applicants/THEIR-UUID"}',
-      '',
       '--- CONVERSATION ---',
       history,
     ].join('\n');

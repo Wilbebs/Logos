@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -62,11 +63,6 @@ export default function ChatBot() {
       const action = data.action || null; // future: { type: 'navigate', path: '/applicants/123' }
 
       setMessages(prev => [...prev, { role: 'assistant', content: reply, action }]);
-
-      // Future navigation support
-      if (action?.type === 'navigate' && action.path) {
-        window.location.href = action.path;
-      }
     } catch (err) {
       setMessages(prev => [
         ...prev,
@@ -125,14 +121,13 @@ export default function ChatBot() {
                   }`}
                 >
                   {msg.content}
-                  {/* Future: navigate action link */}
                   {msg.action?.type === 'navigate' && msg.action.path && (
-                    <a
-                      href={msg.action.path}
-                      className="block mt-1 text-xs text-blue-500 underline"
+                    <Link
+                      to={msg.action.path}
+                      className="block mt-2 text-xs font-medium text-blue-600 underline hover:text-blue-800"
                     >
-                      Open applicant →
-                    </a>
+                      Open Application →
+                    </Link>
                   )}
                 </div>
               </div>
