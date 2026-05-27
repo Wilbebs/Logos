@@ -116,6 +116,19 @@ export default function AIRecommendation({ applicant, onReviewComplete }) {
   );
 
   if (!ai_recommendation) {
+    // For rules-engine bypass cases (eligible/ineligible), AI review is not used
+    if (isRulesEngineResult) {
+      return (
+        <div className="bg-gray-50 border border-gray-200 rounded p-4">
+          <p className="text-sm text-gray-500">AI review not applicable.</p>
+          <p className="text-xs text-gray-400 mt-1 mb-2">
+            This applicant's eligibility was determined by the rules engine.
+          </p>
+          <p className="text-xs text-gray-400">{aiSourceLabel}</p>
+          <RunButton greyed />
+        </div>
+      );
+    }
     return (
       <div className="bg-gray-50 border border-gray-200 rounded p-4">
         <p className="text-sm text-gray-500">No AI review yet.</p>
