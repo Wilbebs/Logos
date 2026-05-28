@@ -1,16 +1,18 @@
 /**
  * AcceptanceLetterPage  /applicants/:id/acceptance
  *
- * Gmail-style header (From / To / Subject) with a Word-document shell
- * as the body. The document area looks like a real letter page — white
- * paper, drop shadow, serif font, margins — so what you see is close to
- * what the .docx attachment will look like.
+ * Gmail-style compose header (From / To / Subject) wrapping a rendered
+ * email body. The email body contains:
+ *   1. Editable preamble text  (will become a template)
+ *   2. Embedded Word document shell  (the letter itself, .docx attachment)
+ *   3. Editable sign-off text  (will become a template)
  *
  * Flow:
- *  1. Load applicant data, pre-fill fields.
- *  2. "Generate Letter" → Gemini drafts the body.
- *  3. User edits in the document shell (contentEditable).
- *  4. "Send Letter" → backend sends email with .docx attached.
+ *  1. Load applicant data, pre-fill header + preamble + sign-off defaults.
+ *  2. "Generate Letter" → Gemini drafts the letter body inside the doc shell.
+ *  3. User edits freely — preamble, doc, sign-off are all contentEditable.
+ *  4. "Send Letter" → backend sends email (preamble+signoff as email text)
+ *     with the letter as a .docx attachment.
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -18,23 +20,53 @@ import AdmissionTimeline from '../components/AdmissionTimeline.jsx';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
-// (Timeline now lives in AdmissionTimeline.jsx — shared sticky component)
-
-// ── Word document shell ───────────────────────────────────────────────────────
-// Looks like a sheet of paper in a Word processor window.
-// Uses contentEditable so it feels like typing in a doc.
-function DocShell({ value, onChange, placeholder, disabled }) {
+// ── Editable plain-text block (preamble / sign-off) ──────────────────────────
+function EditableBlock({ value, onChange, placeholder, disabled, minHeight = '60px' }) {
   const ref = useRef(null);
 
-  // Sync external value into the div (e.g. after generation)
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    // Only overwrite if content actually changed to avoid caret jump on every keystroke
+    if (el.innerText !== value) {
+      el.innerText = value || '';
+    }
+  }, [value]);
+
+  return (
+    <div
+      ref={ref}
+      contentEditable={!disabled}
+      suppressContentEditableWarning
+      onInput={e => onChange(e.currentTarget.innerText)}
+      spellCheck
+      data-placeholder={placeholder}
+      style={{
+        fontFamily: 'ui-sans-serif, system-ui, sans-serif',
+        fontSize: '13.5px',
+        lineHeight: '1.7',
+        color: value ? '#374151' : '#9ca3af',
+        outline: 'none',
+        minHeight,
+        whiteSpace: 'pre-wrap',
+        wordBreak: 'break-word',
+      }}
+      onFocus={e => { if (!value) e.currentTarget.style.color = '#374151'; }}
+      onBlur={e => { if (!e.currentTarget.innerText.trim()) e.currentTarget.style.color = '#9ca3af'; }}
+    />
+  );
+}
+
+// ── Word document shell ───────────────────────────────────────────────────────
+// White paper page embedded inside the email body — mimics a Word doc.
+function DocShell({ value, onChange, placeholder, disabled }) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
     const current = el.innerText;
     if (current !== value) {
       el.innerText = value || '';
-      // Move caret to end
       const range = document.createRange();
       const sel   = window.getSelection();
       range.selectNodeContents(el);
@@ -44,44 +76,30 @@ function DocShell({ value, onChange, placeholder, disabled }) {
     }
   }, [value]);
 
-  function handleInput(e) {
-    onChange(e.currentTarget.innerText);
-  }
-
   return (
-    // Gray canvas — like Word's "behind the paper" area
-    <div className="bg-gray-200 px-6 py-8 overflow-y-auto" style={{ minHeight: '600px' }}>
+    // Gray canvas — Word's "behind the paper" area
+    <div className="bg-gray-200 px-8 py-8" style={{ borderRadius: '0' }}>
       {/* Paper sheet */}
       <div
         className="mx-auto bg-white shadow-xl relative"
-        style={{
-          width: '680px',
-          minHeight: '880px',
-          padding: '80px 96px',
-        }}
+        style={{ width: '640px', minHeight: '820px', padding: '72px 88px' }}
       >
         {/* Placeholder */}
         {!value && !disabled && (
-          <p
-            className="absolute pointer-events-none select-none"
-            style={{
-              top: '80px', left: '96px',
-              fontFamily: 'Georgia, "Times New Roman", serif',
-              fontSize: '12pt',
-              lineHeight: '1.8',
-              color: '#bbb',
-            }}
-          >
+          <p className="absolute pointer-events-none select-none" style={{
+            top: '72px', left: '88px',
+            fontFamily: 'Georgia, "Times New Roman", serif',
+            fontSize: '12pt', lineHeight: '1.8', color: '#bbb',
+          }}>
             {placeholder || 'Click Generate Letter or start typing…'}
           </p>
         )}
-
-        {/* Editable body */}
+        {/* Editable letter body */}
         <div
           ref={ref}
           contentEditable={!disabled}
           suppressContentEditableWarning
-          onInput={handleInput}
+          onInput={e => onChange(e.currentTarget.innerText)}
           spellCheck
           style={{
             fontFamily: 'Georgia, "Times New Roman", serif',
@@ -89,7 +107,7 @@ function DocShell({ value, onChange, placeholder, disabled }) {
             lineHeight: '1.8',
             color: '#1a1a1a',
             outline: 'none',
-            minHeight: '720px',
+            minHeight: '680px',
             whiteSpace: 'pre-wrap',
             wordBreak: 'break-word',
           }}
@@ -108,11 +126,15 @@ export default function AcceptanceLetterPage() {
   const [loading,   setLoading]   = useState(true);
   const [loadErr,   setLoadErr]   = useState('');
 
-  // Compose fields
+  // Email envelope fields
   const [from,    setFrom]    = useState('admissions@logos.edu');
   const [to,      setTo]      = useState('');
   const [subject, setSubject] = useState('');
-  const [body,    setBody]    = useState('');
+
+  // Email body sections (all editable; will become templates)
+  const [preamble, setPreamble] = useState('');
+  const [body,     setBody]     = useState('');   // the letter doc content
+  const [signoff,  setSignoff]  = useState('');
 
   // UI state
   const [generating, setGenerating] = useState(false);
@@ -130,6 +152,18 @@ export default function AcceptanceLetterPage() {
         setApplicant(data);
         setTo(data.email || '');
         setSubject('Congratulations! Acceptance to ' + (data.program_applied || 'LOGOS University'));
+        // Default preamble — will become a formal template
+        setPreamble(
+          `Dear ${data.full_name || 'Applicant'},\n\n` +
+          `Please find your official acceptance letter from LOGOS Christian University attached below. ` +
+          `We are delighted to welcome you into our community of scholars and ministers of the Gospel.`
+        );
+        // Default sign-off
+        setSignoff(
+          `Should you have any questions regarding your acceptance or the enrollment process, ` +
+          `please do not hesitate to reach out to our admissions office.\n\n` +
+          `Blessings,\nLOGOS Admissions Office\nadmissions@logos.edu`
+        );
       } catch (err) {
         setLoadErr(err.message);
       } finally {
@@ -168,7 +202,7 @@ export default function AcceptanceLetterPage() {
       const res  = await fetch(`${API_URL}/api/applicants/${id}/acceptance/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from, to, subject, body }),
+        body: JSON.stringify({ from, to, subject, body, emailPreamble: preamble, emailSignoff: signoff }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Send failed');
@@ -309,14 +343,64 @@ export default function AcceptanceLetterPage() {
             </div>
           </div>
 
-          {/* ── Word document shell ── */}
-          <div className="border-t border-gray-100">
-            <DocShell
-              value={body}
-              onChange={setBody}
-              disabled={generating}
-              placeholder="Click Generate Letter or start typing your acceptance letter..."
-            />
+          {/* ── Email body: preamble → doc → sign-off ── */}
+          <div className="border-t border-gray-100 bg-gray-50">
+
+            {/* Rendered email body wrapper */}
+            <div
+              className="mx-auto my-6 bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden"
+              style={{ maxWidth: '760px' }}
+            >
+              {/* Email header stripe (LOGOS branding) */}
+              <div className="bg-blue-700 px-8 py-4 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-xs font-bold shrink-0">L</div>
+                <div>
+                  <p className="text-white text-sm font-semibold leading-tight">LOGOS Christian University</p>
+                  <p className="text-blue-200 text-xs">Office of Admissions · admissions@logos.edu</p>
+                </div>
+              </div>
+
+              {/* Preamble — editable email intro text */}
+              <div className="px-8 pt-6 pb-4">
+                <EditableBlock
+                  value={preamble}
+                  onChange={setPreamble}
+                  disabled={generating}
+                  placeholder="Write an email introduction here…"
+                  minHeight="72px"
+                />
+              </div>
+
+              {/* Document attachment label */}
+              <div className="px-8 pb-3 flex items-center gap-2">
+                <div className="flex items-center gap-1.5 text-xs text-gray-500 bg-gray-100 border border-gray-200 rounded px-2.5 py-1">
+                  <span>📄</span>
+                  <span className="font-medium">
+                    Acceptance_Letter_{(applicant?.full_name || 'Applicant').replace(/\s+/g, '_')}.docx
+                  </span>
+                  <span className="text-gray-400 ml-1">· attached</span>
+                </div>
+              </div>
+
+              {/* Embedded document shell */}
+              <DocShell
+                value={body}
+                onChange={setBody}
+                disabled={generating}
+                placeholder="Click Generate Letter or start typing your acceptance letter…"
+              />
+
+              {/* Sign-off — editable closing text */}
+              <div className="px-8 py-6 border-t border-gray-100">
+                <EditableBlock
+                  value={signoff}
+                  onChange={setSignoff}
+                  disabled={generating}
+                  placeholder="Write a closing message here…"
+                  minHeight="60px"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Send bar */}

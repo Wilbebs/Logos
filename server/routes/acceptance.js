@@ -119,11 +119,18 @@ function buildDocx(applicantName, subject, body) {
 router.post('/:id/acceptance/send', async (req, res) => {
   try {
     const { id } = req.params;
-    const { from, to, subject, body } = req.body;
+    const { from, to, subject, body, emailPreamble, emailSignoff } = req.body;
 
     if (!to || !subject || !body) {
       return res.status(400).json({ error: 'to, subject, and body are required' });
     }
+
+    // Compose full email text: preamble → letter body → sign-off
+    const parts = [];
+    if (emailPreamble?.trim()) parts.push(emailPreamble.trim());
+    parts.push(body.trim());
+    if (emailSignoff?.trim()) parts.push(emailSignoff.trim());
+    const fullEmailText = parts.join('\n\n---\n\n');
 
     const { data: applicant, error } = await supabase
       .from('applicants').select('id, full_name, email, program_applied').eq('id', id).single();
@@ -153,7 +160,7 @@ router.post('/:id/acceptance/send', async (req, res) => {
       from: fromAddress,
       to: recipientEmail,
       subject,
-      text: body,
+      text: fullEmailText,
       attachments: [
         {
           filename: `Acceptance_Letter_${(applicant.full_name || 'Applicant').replace(/\s+/g, '_')}.docx`,
