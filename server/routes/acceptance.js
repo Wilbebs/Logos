@@ -17,7 +17,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import {
   Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType,
 } from 'docx';
-import supabase from '../db/client.js';
+import supabase, { supabaseAdmin } from '../db/client.js';
 import { Resend } from 'resend';
 import { logEmail } from '../services/emailService.js';
 
@@ -170,7 +170,7 @@ router.post('/:id/acceptance/send', async (req, res) => {
     const storagePath   = `applicants/${id}/admission_documents/${docFilename}`;
     const STORAGE_BUCKET = 'applicant-files';
 
-    const { error: storageErr } = await supabase.storage
+    const { error: storageErr } = await supabaseAdmin.storage
       .from(STORAGE_BUCKET)
       .upload(storagePath, docBuffer, {
         contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -178,7 +178,7 @@ router.post('/:id/acceptance/send', async (req, res) => {
       });
 
     if (!storageErr) {
-      const { data: urlData } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(storagePath);
+      const { data: urlData } = supabaseAdmin.storage.from(STORAGE_BUCKET).getPublicUrl(storagePath);
       // Record file in applicant_files so it shows in the Files tab
       await supabase.from('applicant_files').insert({
         applicant_id: id,

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
-import supabase from '../db/client.js';
+import supabase, { supabaseAdmin } from '../db/client.js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // File uploads — stored in memory, then forwarded to Supabase Storage.
@@ -323,8 +323,8 @@ router.post('/:id/files', upload.single('file'), async (req, res) => {
     const safeFilename = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
     const storagePath = `applicants/${id}/${category}/${Date.now()}-${safeFilename}`;
 
-    // Upload to Supabase Storage
-    const { error: uploadError } = await supabase.storage
+    // Upload to Supabase Storage (admin client bypasses RLS)
+    const { error: uploadError } = await supabaseAdmin.storage
       .from(STORAGE_BUCKET)
       .upload(storagePath, file.buffer, {
         contentType: file.mimetype,
@@ -336,8 +336,7 @@ router.post('/:id/files', upload.single('file'), async (req, res) => {
       return res.status(500).json({ error: 'File upload to storage failed: ' + uploadError.message });
     }
 
-    // Get the public URL (works for public buckets; for private buckets use createSignedUrl)
-    const { data: urlData } = supabase.storage
+    const { data: urlData } = supabaseAdmin.storage
       .from(STORAGE_BUCKET)
       .getPublicUrl(storagePath);
 
@@ -393,7 +392,7 @@ router.delete('/:id/files/:fileId', async (req, res) => {
     }
 
     // Delete from Supabase Storage
-    const { error: storageError } = await supabase.storage
+    const { error: storageError } = await supabaseAdmin.storage
       .from(STORAGE_BUCKET)
       .remove([fileRecord.file_path]);
 
