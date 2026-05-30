@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import logoUrl from '../../../../public/logos-logo.png';
 import { 
   Search, 
   Calendar, 
@@ -77,8 +78,8 @@ export function LogosBrand() {
       
       {/* Sidebar */}
       <div className="w-[240px] flex-shrink-0 flex flex-col border-r border-gray-200" style={{ backgroundColor: colors.sidebar }}>
-        <div className="p-6 h-20 flex items-center">
-          <img src="/logos-logo.png" alt="LOGOS" className="h-12 object-contain" />
+        <div className="px-5 h-20 flex items-center">
+          <img src={logoUrl} alt="LOGOS University College" className="h-11 object-contain" />
         </div>
         
         <nav className="flex-1 px-4 py-6 space-y-2">
