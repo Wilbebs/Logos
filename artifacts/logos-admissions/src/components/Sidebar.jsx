@@ -50,24 +50,35 @@ export default function Sidebar() {
           alignItems: 'center',
           justifyContent: hovered ? 'flex-start' : 'center',
           padding: hovered ? '0 18px' : '0',
-          transition: 'padding 0.24s ease, justify-content 0s',
+          transition: 'padding 0.24s ease',
           flexShrink: 0,
           overflow: 'hidden',
         }}
       >
-        {/* Collapsed: shield only, centered */}
+        {/* Collapsed: shield clipped at 34px wide; zoom image tall so text is off-screen */}
         {!hovered && (
           <div
             style={{
-              width: 38,
-              height: 38,
-              backgroundImage: 'url(/logos-logo.png)',
-              backgroundSize: 'auto 38px',
-              backgroundPosition: 'left center',
-              backgroundRepeat: 'no-repeat',
+              width: 34,
+              height: 40,
+              overflow: 'hidden',
               flexShrink: 0,
+              position: 'relative',
             }}
-          />
+          >
+            <img
+              src="/logos-logo.png"
+              alt=""
+              style={{
+                height: 40,
+                width: 'auto',
+                maxWidth: 'none',
+                position: 'absolute',
+                left: 0,
+                top: 0,
+              }}
+            />
+          </div>
         )}
 
         {/* Expanded: full logo */}
@@ -84,10 +95,11 @@ export default function Sidebar() {
       <nav
         style={{
           flex: 1,
-          padding: '14px 10px',
+          padding: hovered ? '14px 10px' : '14px 0',
           display: 'flex',
           flexDirection: 'column',
           gap: 2,
+          transition: 'padding 0.24s ease',
         }}
       >
         {NAV_ITEMS.map(({ icon: Icon, label, path }) => {
@@ -143,21 +155,23 @@ export default function Sidebar() {
       {/* ── User ─────────────────────────────────────────── */}
       <div
         style={{
-          padding: '12px 10px',
+          padding: hovered ? '12px 10px' : '12px 0',
           borderTop: '1px solid #E5E7EB',
           flexShrink: 0,
+          transition: 'padding 0.24s ease',
         }}
       >
         <div
           style={{
+            width: '100%',
             display: 'flex',
             alignItems: 'center',
             gap: 10,
-            padding: '8px',
-            borderRadius: 10,
+            padding: hovered ? '8px 10px' : '8px 0',
+            borderRadius: hovered ? 10 : 0,
             cursor: 'pointer',
             justifyContent: hovered ? 'flex-start' : 'center',
-            transition: 'background-color 0.15s',
+            transition: 'background-color 0.15s, padding 0.24s ease',
           }}
           onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(123,35,53,0.08)'; }}
           onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
@@ -182,33 +196,19 @@ export default function Sidebar() {
             AD
           </div>
 
-          <div
-            style={{
-              flex: 1,
-              minWidth: 0,
-              opacity: hovered ? 1 : 0,
-              maxWidth: hovered ? 200 : 0,
-              overflow: 'hidden',
-              transition: 'opacity 0.16s ease, max-width 0.24s ease',
-            }}
-          >
-            <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: textDark, whiteSpace: 'nowrap' }}>
-              Admin User
-            </p>
-            <p style={{ margin: 0, fontSize: 11, color: '#9CA3AF', whiteSpace: 'nowrap' }}>
-              admin@logos.edu
-            </p>
-          </div>
-
-          <LogOut
-            size={14}
-            style={{
-              color: '#9CA3AF',
-              flexShrink: 0,
-              opacity: hovered ? 1 : 0,
-              transition: 'opacity 0.16s ease',
-            }}
-          />
+          {hovered && (
+            <>
+              <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+                <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: textDark, whiteSpace: 'nowrap' }}>
+                  Admin User
+                </p>
+                <p style={{ margin: 0, fontSize: 11, color: '#9CA3AF', whiteSpace: 'nowrap' }}>
+                  admin@logos.edu
+                </p>
+              </div>
+              <LogOut size={14} style={{ color: '#9CA3AF', flexShrink: 0 }} />
+            </>
+          )}
         </div>
       </div>
     </div>
