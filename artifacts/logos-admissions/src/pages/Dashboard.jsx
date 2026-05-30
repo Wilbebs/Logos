@@ -45,7 +45,18 @@ function rowBgClass(applicant) {
   return 'bg-white';
 }
 
-function applyFilters(applicants, activeFilter, dateFrom, dateTo, formsCompleteOnly) {
+function matchesSearch(applicant, query) {
+  if (!query) return true;
+  const q = query.toLowerCase();
+  return (
+    (applicant.full_name || '').toLowerCase().includes(q) ||
+    (applicant.email || '').toLowerCase().includes(q) ||
+    (applicant.program_applied || '').toLowerCase().includes(q) ||
+    (applicant.program_level || '').toLowerCase().includes(q)
+  );
+}
+
+function applyFilters(applicants, activeFilter, dateFrom, dateTo, formsCompleteOnly, search) {
   let result = applicants;
 
   // Tab filter
@@ -88,6 +99,11 @@ function applyFilters(applicants, activeFilter, dateFrom, dateTo, formsCompleteO
     });
   }
 
+  // Search
+  if (search && search.trim()) {
+    result = result.filter((a) => matchesSearch(a, search.trim()));
+  }
+
   return result;
 }
 
@@ -99,6 +115,7 @@ export default function Dashboard() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [formsCompleteOnly, setFormsCompleteOnly] = useState(false);
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -126,14 +143,15 @@ export default function Dashboard() {
     loadData();
   }, []);
 
-  const filtered = applyFilters(applicants, activeFilter, dateFrom, dateTo, formsCompleteOnly);
+  const filtered = applyFilters(applicants, activeFilter, dateFrom, dateTo, formsCompleteOnly, search);
 
-  const hasActiveFilters = dateFrom || dateTo || formsCompleteOnly;
+  const hasActiveFilters = dateFrom || dateTo || formsCompleteOnly || search;
 
   function clearFilters() {
     setDateFrom('');
     setDateTo('');
     setFormsCompleteOnly(false);
+    setSearch('');
   }
 
   return (
@@ -179,9 +197,36 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Date + Forms Complete Filters */}
+      {/* Search + Date + Forms Complete Filters */}
       <div className="bg-white border-b border-gray-200 px-6 py-3">
         <div className="flex flex-wrap items-center gap-4">
+          {/* Search bar */}
+          <div className="relative flex items-center">
+            <svg className="absolute left-2.5 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+            </svg>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search name, email, program…"
+              className="pl-8 pr-8 py-1.5 border border-gray-300 rounded text-sm text-gray-700 w-64 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                className="absolute right-2 text-gray-400 hover:text-gray-600"
+                aria-label="Clear search"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          <div className="w-px h-5 bg-gray-200" />
+
           <div className="flex items-center gap-2">
             <label className="text-xs font-medium text-gray-500 whitespace-nowrap">From</label>
             <input
