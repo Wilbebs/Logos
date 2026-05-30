@@ -177,6 +177,10 @@ const EMAIL_ALLOWLIST = (process.env.EMAIL_ALLOWLIST || 'hernwilbwork@gmail.com'
   .split(',')
   .map(e => e.trim().toLowerCase());
 
+export const sendApprovalEmail    = (applicant) => sendEmail('approved',       applicant);
+export const sendRejectionEmail   = (applicant) => sendEmail('rejected',       applicant);
+export const sendInfoRequestEmail = (applicant) => sendEmail('info_requested', applicant);
+
 export async function sendEmail(emailType, applicant, extraData = {}) {
   const recipientEmail = applicant.email?.toLowerCase() || '';
 

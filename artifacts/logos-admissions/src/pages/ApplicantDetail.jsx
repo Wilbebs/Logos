@@ -86,6 +86,7 @@ function DecisionPanel({ applicant, onDecisionSubmitted }) {
   const [error, setError] = useState('');
   const [suggestionLoading, setSuggestionLoading] = useState(false);
   const [suggestionError, setSuggestionError] = useState('');
+  const [revoking, setRevoking] = useState(false);
 
   const isPending = applicant.decision === 'pending' || !applicant.decision;
   const notesRequired = selectedDecision === 'rejected' || selectedDecision === 'info_requested';
@@ -145,7 +146,6 @@ function DecisionPanel({ applicant, onDecisionSubmitted }) {
   if (!isPending || submitted) {
     const displayDecision = submitted ? selectedDecision : applicant.decision;
     const displayNotes = submitted ? notes : applicant.decision_notes;
-    const [revoking, setRevoking] = useState(false);
 
     async function handleRevoke() {
       if (!window.confirm('Revoke this decision and return to pending?')) return;

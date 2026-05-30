@@ -66,8 +66,8 @@ router.post('/resend/:applicantId', async (req, res) => {
     if (methodName && typeof emailService[methodName] === 'function') {
       await emailService[methodName](applicant);
     } else if (typeof emailService.sendEmail === 'function') {
-      // Generic fallback
-      await emailService.sendEmail(applicant, email_type);
+      // Generic fallback — correct arg order: (emailType, applicant)
+      await emailService.sendEmail(email_type, applicant);
     } else {
       return res.status(400).json({
         error: `Unknown email_type "${email_type}" and no generic sendEmail method available.`,
