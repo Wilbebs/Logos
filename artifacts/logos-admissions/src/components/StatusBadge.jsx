@@ -1,17 +1,17 @@
 import React from 'react';
 
-const ELIGIBILITY_COLORS = {
-  pending: 'bg-gray-100 text-gray-700',
-  eligible: 'bg-blue-100 text-blue-700',
-  ineligible: 'bg-red-100 text-red-700',
-  needs_review: 'bg-yellow-100 text-yellow-800',
+const ELIGIBILITY_STYLES = {
+  pending:      { bg: '#F3F4F6', text: '#374151', border: '#D1D5DB' },
+  eligible:     { bg: '#DCFCE7', text: '#166534', border: '#86EFAC' },
+  ineligible:   { bg: '#FEE2E2', text: '#B91C1C', border: '#FCA5A5' },
+  needs_review: { bg: '#FEF3C7', text: '#92400E', border: '#FCD34D' },
 };
 
-const DECISION_COLORS = {
-  pending: 'bg-gray-100 text-gray-700',
-  approved: 'bg-green-100 text-green-700',
-  rejected: 'bg-red-100 text-red-700',
-  info_requested: 'bg-yellow-100 text-yellow-800',
+const DECISION_STYLES = {
+  pending:       { bg: '#F3F4F6', text: '#374151', border: '#D1D5DB' },
+  approved:      { bg: '#15803D', text: '#FFFFFF', border: '#15803D' },
+  rejected:      { bg: '#FEE2E2', text: '#B91C1C', border: '#FCA5A5' },
+  info_requested:{ bg: '#FEF3C7', text: '#92400E', border: '#FCD34D' },
 };
 
 function formatLabel(status) {
@@ -23,15 +23,22 @@ function formatLabel(status) {
 }
 
 export default function StatusBadge({ status, type = 'eligibility', large = false }) {
-  const colorMap = type === 'decision' ? DECISION_COLORS : ELIGIBILITY_COLORS;
-  const colorClass = colorMap[status] || 'bg-gray-100 text-gray-600';
-
-  const sizeClass = large
-    ? 'text-sm px-3 py-1 rounded-full font-semibold'
-    : 'text-xs px-2 py-0.5 rounded-full';
+  const styleMap = type === 'decision' ? DECISION_STYLES : ELIGIBILITY_STYLES;
+  const s = styleMap[status] || { bg: '#F3F4F6', text: '#374151', border: '#D1D5DB' };
 
   return (
-    <span className={`inline-block font-medium ${sizeClass} ${colorClass}`}>
+    <span
+      style={{
+        backgroundColor: s.bg,
+        color: s.text,
+        border: `1px solid ${s.border}`,
+        display: 'inline-block',
+        fontWeight: 600,
+        borderRadius: '9999px',
+        fontSize: large ? '0.875rem' : '0.75rem',
+        padding: large ? '4px 12px' : '2px 8px',
+      }}
+    >
       {formatLabel(status)}
     </span>
   );

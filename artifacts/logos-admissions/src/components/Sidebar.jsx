@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, FileText, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Settings, LogOut } from 'lucide-react';
 
 const primary = '#7B2335';
 const text = '#1B2340';
@@ -8,15 +8,8 @@ const sidebarBg = '#F3F4F8';
 
 const NAV_ITEMS = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-  { icon: Users,           label: 'Applicants', path: '/applicants' },
-  { icon: FileText,        label: 'Reports',    path: '/reports' },
   { icon: Settings,        label: 'Settings',   path: '/settings' },
 ];
-
-function getInitials(name) {
-  if (!name) return 'AD';
-  return name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase();
-}
 
 export default function Sidebar() {
   const location = useLocation();

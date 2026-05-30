@@ -1,17 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Sparkles, X, Send } from 'lucide-react';
 
-// Render assistant message content with ✓/✗ checklist lines colored.
-// Handles both "✓ label" on one line AND Gemini splitting symbol / label across two lines.
+const primary   = '#7B2335';
+const primaryDk = '#6A1B2A';
+const navy      = '#1B3272';
+
 function MessageContent({ text }) {
-  // Pre-process: merge a lone ✓ or ✗ line with the following line
   const raw = text.split('\n');
   const lines = [];
   for (let i = 0; i < raw.length; i++) {
     const trimmed = raw[i].trim();
     if ((trimmed === '✓' || trimmed === '✗') && i + 1 < raw.length) {
       lines.push(trimmed + ' ' + raw[i + 1].trim());
-      i++; // skip the next line since we merged it
+      i++;
     } else {
       lines.push(raw[i]);
     }
@@ -28,7 +30,7 @@ function MessageContent({ text }) {
 
         if (isCheck) {
           return (
-            <span key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '4px' }}>
+            <span key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 4 }}>
               <span style={{ fontWeight: 700, color: '#16a34a', flexShrink: 0 }}>✓</span>
               <span style={{ color: '#374151' }}>{label}</span>
               {!isLast && '\n'}
@@ -37,7 +39,7 @@ function MessageContent({ text }) {
         }
         if (isCross) {
           return (
-            <span key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '4px' }}>
+            <span key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 4 }}>
               <span style={{ fontWeight: 700, color: '#ef4444', flexShrink: 0 }}>✗</span>
               <span style={{ color: '#b91c1c', fontWeight: 500 }}>{label}</span>
               {!isLast && '\n'}
@@ -52,33 +54,25 @@ function MessageContent({ text }) {
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
-/**
- * ChatBot
- * A floating chat widget mounted globally in App.jsx.
- * Has access to the backend /api/chat endpoint which can query Supabase and
- * navigate the app (future). For now it sends messages and streams responses.
- */
 export default function ChatBot() {
-  const [open, setOpen]       = useState(false);
+  const [open, setOpen]         = useState(false);
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
       content: "Hi! I'm your admissions assistant. You can ask me things like:\n• \"Show me Fernando Mendes's application\"\n• \"How many applicants need review?\"\n• \"Is Maria eligible for the Master's program?\"",
     },
   ]);
-  const [input, setInput]     = useState('');
+  const [input, setInput]   = useState('');
   const [loading, setLoading] = useState(false);
   const bottomRef             = useRef(null);
   const inputRef              = useRef(null);
 
-  // Scroll to latest message
   useEffect(() => {
     if (open && bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, open]);
 
-  // Focus input when opened
   useEffect(() => {
     if (open && inputRef.current) inputRef.current.focus();
   }, [open]);
@@ -97,20 +91,13 @@ export default function ChatBot() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: [...messages, userMsg].map(m => ({
-            role: m.role,
-            content: m.content,
-          })),
+          messages: [...messages, userMsg].map(m => ({ role: m.role, content: m.content })),
         }),
       });
-
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.error || `Request failed: ${res.status}`);
-
-      const reply = data.reply || data.message || '(No response)';
-      const action = data.action || null; // future: { type: 'navigate', path: '/applicants/123' }
-
+      const reply  = data.reply || data.message || '(No response)';
+      const action = data.action || null;
       setMessages(prev => [...prev, { role: 'assistant', content: reply, action }]);
     } catch (err) {
       setMessages(prev => [
@@ -123,51 +110,67 @@ export default function ChatBot() {
   }
 
   function handleKey(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   }
 
   return (
     <>
-      {/* ── Floating button ─────────────────────────────────────── */}
+      {/* Floating trigger */}
       <button
         onClick={() => setOpen(o => !o)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg flex items-center justify-center text-2xl transition-transform active:scale-95"
+        style={{ backgroundColor: open ? primaryDk : primary }}
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full text-white shadow-lg flex items-center justify-center transition-all hover:shadow-xl hover:-translate-y-0.5 active:scale-95"
         aria-label="Open admissions assistant"
       >
-        {open ? '✕' : '✦'}
+        {open
+          ? <X size={20} />
+          : <Sparkles size={20} />
+        }
       </button>
 
-      {/* ── Chat panel ──────────────────────────────────────────── */}
+      {/* Chat panel */}
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 flex flex-col shadow-2xl rounded-xl overflow-hidden border border-gray-200 bg-white">
-
+        <div
+          className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 flex flex-col shadow-2xl rounded-2xl overflow-hidden"
+          style={{ border: '1px solid #E5E7EB' }}
+        >
           {/* Header */}
-          <div className="px-4 py-3 bg-blue-600 text-white flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold">Admissions Assistant</p>
-              <p className="text-xs text-blue-200">Ask about any applicant or stat</p>
+          <div
+            className="px-5 py-4 flex items-center justify-between"
+            style={{ backgroundColor: primary }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                <Sparkles size={16} className="text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-white">Admissions Assistant</p>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                  Ask about any applicant or stat
+                </p>
+              </div>
             </div>
-            <button onClick={() => setOpen(false)} className="text-blue-200 hover:text-white text-lg">✕</button>
+            <button
+              onClick={() => setOpen(false)}
+              className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
+            >
+              <X size={15} className="text-white" />
+            </button>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 max-h-96 bg-gray-50">
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 max-h-96" style={{ backgroundColor: '#F8F8FB' }}>
             {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
+              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div
-                  className={`max-w-[85%] px-3 py-2 rounded-lg text-sm whitespace-pre-wrap ${
+                  className="max-w-[85%] px-3.5 py-2.5 rounded-2xl text-sm whitespace-pre-wrap"
+                  style={
                     msg.role === 'user'
-                      ? 'bg-blue-600 text-white rounded-br-none'
+                      ? { backgroundColor: primary, color: '#fff', borderBottomRightRadius: 4 }
                       : msg.isError
-                      ? 'bg-red-50 border border-red-200 text-red-700 rounded-bl-none'
-                      : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
-                  }`}
+                      ? { backgroundColor: '#FEF2F2', border: '1px solid #FECACA', color: '#B91C1C', borderBottomLeftRadius: 4 }
+                      : { backgroundColor: '#fff', border: '1px solid #E5E7EB', color: '#1B2340', borderBottomLeftRadius: 4 }
+                  }
                 >
                   {msg.role === 'assistant' && !msg.isError
                     ? <MessageContent text={msg.content} />
@@ -175,7 +178,8 @@ export default function ChatBot() {
                   {msg.action?.type === 'navigate' && msg.action.path && (
                     <Link
                       to={msg.action.path}
-                      className="block mt-2 text-xs font-medium text-blue-600 underline hover:text-blue-800"
+                      className="block mt-2 text-xs font-semibold underline"
+                      style={{ color: navy }}
                     >
                       Open Application →
                     </Link>
@@ -186,8 +190,14 @@ export default function ChatBot() {
 
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-white border border-gray-200 text-gray-400 text-sm px-3 py-2 rounded-lg rounded-bl-none flex items-center gap-1.5">
-                  <span className="animate-spin inline-block w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full" />
+                <div
+                  className="text-sm px-3.5 py-2.5 rounded-2xl flex items-center gap-2"
+                  style={{ backgroundColor: '#fff', border: '1px solid #E5E7EB', color: '#9CA3AF', borderBottomLeftRadius: 4 }}
+                >
+                  <span
+                    className="inline-block w-3.5 h-3.5 rounded-full border-2 border-t-transparent animate-spin"
+                    style={{ borderColor: primary, borderTopColor: 'transparent' }}
+                  />
                   Thinking…
                 </div>
               </div>
@@ -197,7 +207,7 @@ export default function ChatBot() {
           </div>
 
           {/* Input */}
-          <div className="p-3 border-t border-gray-200 bg-white flex gap-2">
+          <div className="p-3 border-t border-gray-200 bg-white flex gap-2 items-end">
             <textarea
               ref={inputRef}
               value={input}
@@ -205,19 +215,26 @@ export default function ChatBot() {
               onKeyDown={handleKey}
               rows={1}
               placeholder="Ask anything…"
-              className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm text-gray-800 resize-none focus:outline-none focus:border-blue-400"
+              className="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-800 resize-none focus:outline-none transition-colors"
+              style={{ maxHeight: 96 }}
+              onFocus={e => e.target.style.borderColor = primary}
+              onBlur={e => e.target.style.borderColor = '#D1D5DB'}
             />
             <button
               onClick={sendMessage}
               disabled={loading || !input.trim()}
-              className="px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm rounded font-medium"
+              className="w-9 h-9 rounded-xl flex items-center justify-center transition-all flex-shrink-0"
+              style={{
+                backgroundColor: loading || !input.trim() ? '#E5C5CB' : primary,
+                color: '#fff',
+              }}
             >
-              Send
+              <Send size={15} />
             </button>
           </div>
 
-          {/* Footer note */}
-          <div className="px-3 py-1.5 bg-gray-50 border-t border-gray-100">
+          {/* Footer */}
+          <div className="px-3 py-2 bg-white border-t border-gray-100">
             <p className="text-xs text-gray-400 text-center">
               AI assistant — verify important info in the dashboard
             </p>

@@ -128,6 +128,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showDateFilter, setShowDateFilter] = useState(false);
+  const [hoveredRow, setHoveredRow] = useState(null);
 
   useEffect(() => {
     async function loadData() {
@@ -369,16 +370,22 @@ export default function Dashboard() {
                   filtered.map((applicant) => {
                     const forms = countForms(applicant);
                     const formsLabel = `${forms}/3`;
+                    const isHovered = hoveredRow === applicant.id;
+                    const cellPy = isHovered ? '18px' : '14px';
                     return (
                       <tr
                         key={applicant.id}
                         onClick={() => navigate(`/applicants/${applicant.id}`)}
-                        className="cursor-pointer transition-colors"
-                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = hover; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ''; }}
+                        className="cursor-pointer"
+                        style={{
+                          backgroundColor: isHovered ? hover : '',
+                          transition: 'background-color 0.15s ease',
+                        }}
+                        onMouseEnter={() => setHoveredRow(applicant.id)}
+                        onMouseLeave={() => setHoveredRow(null)}
                       >
                         {/* Applicant */}
-                        <td className="px-5 py-4 whitespace-nowrap">
+                        <td className="px-5 whitespace-nowrap" style={{ paddingTop: cellPy, paddingBottom: cellPy, transition: 'padding 0.15s ease' }}>
                           <div className="flex items-center gap-3">
                             <div
                               className="h-9 w-9 rounded-full flex items-center justify-center text-sm font-semibold text-white flex-shrink-0"
@@ -398,14 +405,14 @@ export default function Dashboard() {
                         </td>
 
                         {/* Program */}
-                        <td className="px-5 py-4 text-gray-700 max-w-[200px]">
+                        <td className="px-5 text-gray-700 max-w-[200px]" style={{ paddingTop: cellPy, paddingBottom: cellPy, transition: 'padding 0.15s ease' }}>
                           <span title={applicant.program_applied}>
                             {truncate(applicant.program_applied, 32)}
                           </span>
                         </td>
 
                         {/* Level */}
-                        <td className="px-5 py-4 whitespace-nowrap">
+                        <td className="px-5 whitespace-nowrap" style={{ paddingTop: cellPy, paddingBottom: cellPy, transition: 'padding 0.15s ease' }}>
                           {applicant.program_level ? (
                             <span className="bg-gray-100 text-gray-700 text-xs px-2 py-0.5 rounded-full font-medium">
                               {applicant.program_level}
@@ -416,7 +423,7 @@ export default function Dashboard() {
                         </td>
 
                         {/* Forms */}
-                        <td className="px-5 py-4 whitespace-nowrap">
+                        <td className="px-5 whitespace-nowrap" style={{ paddingTop: cellPy, paddingBottom: cellPy, transition: 'padding 0.15s ease' }}>
                           <div className="flex items-center gap-2 text-gray-700">
                             {formsLabel}
                             {forms === 3 && (
@@ -426,22 +433,22 @@ export default function Dashboard() {
                         </td>
 
                         {/* Eligibility */}
-                        <td className="px-5 py-4 whitespace-nowrap">
+                        <td className="px-5 whitespace-nowrap" style={{ paddingTop: cellPy, paddingBottom: cellPy, transition: 'padding 0.15s ease' }}>
                           <StatusBadge status={applicant.eligibility_status} type="eligibility" />
                         </td>
 
                         {/* AI Rec */}
-                        <td className="px-5 py-4 whitespace-nowrap text-gray-600">
+                        <td className="px-5 whitespace-nowrap text-gray-600" style={{ paddingTop: cellPy, paddingBottom: cellPy, transition: 'padding 0.15s ease' }}>
                           {applicant.ai_recommendation ? capitalize(applicant.ai_recommendation) : '—'}
                         </td>
 
                         {/* Decision */}
-                        <td className="px-5 py-4 whitespace-nowrap">
+                        <td className="px-5 whitespace-nowrap" style={{ paddingTop: cellPy, paddingBottom: cellPy, transition: 'padding 0.15s ease' }}>
                           <StatusBadge status={applicant.decision} type="decision" />
                         </td>
 
                         {/* Submitted */}
-                        <td className="px-5 py-4 whitespace-nowrap text-gray-500 text-xs">
+                        <td className="px-5 whitespace-nowrap text-gray-500 text-xs" style={{ paddingTop: cellPy, paddingBottom: cellPy, transition: 'padding 0.15s ease' }}>
                           {formatDate(applicant.created_at)}
                         </td>
                       </tr>
