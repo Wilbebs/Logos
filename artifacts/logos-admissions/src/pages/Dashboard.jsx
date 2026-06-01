@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, TrendingUp, TrendingDown, MoreVertical, Calendar } from 'lucide-react';
+import { Search, Calendar } from 'lucide-react';
 import StatusBadge from '../components/StatusBadge.jsx';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
@@ -128,7 +128,19 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showDateFilter, setShowDateFilter] = useState(false);
+  const [showStatusMenu, setShowStatusMenu] = useState(false);
   const [hoveredRow, setHoveredRow] = useState(null);
+  const statusMenuRef = useRef(null);
+  const dateMenuRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (statusMenuRef.current && !statusMenuRef.current.contains(e.target)) setShowStatusMenu(false);
+      if (dateMenuRef.current && !dateMenuRef.current.contains(e.target)) setShowDateFilter(false);
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     async function loadData() {
@@ -164,33 +176,42 @@ export default function Dashboard() {
 
   const STAT_CARDS = stats
     ? [
-        { label: 'Total Applicants', value: stats.total,          color: primary },
-        { label: 'Needs Review',     value: stats.needs_review,   color: secondary },
-        { label: 'Forms Complete',   value: stats.forms_complete, color: primary },
-        { label: 'Approved',         value: stats.approved,       color: secondary },
-        { label: 'Rejected',         value: stats.rejected,       color: primary },
+        { label: 'Total',          value: stats.total,          filterKey: 'all',            color: secondary },
+        { label: 'Needs Review',   value: stats.needs_review,   filterKey: 'needs_review',   color: secondary },
+        { label: 'Forms Complete', value: stats.forms_complete, filterKey: 'forms_complete', color: secondary },
+        { label: 'Approved',       value: stats.approved,       filterKey: 'approved',       color: '#16a34a' },
+        { label: 'Rejected',       value: stats.rejected,       filterKey: 'rejected',       color: '#dc2626' },
       ]
     : [];
 
   return (
     <div className="flex flex-col h-full overflow-hidden" style={{ backgroundColor: '#F8F8FB', color: textDark }}>
 
-      {/* Top header */}
-      <header
-        className="h-20 px-8 flex items-center justify-between border-b border-gray-200 bg-white flex-shrink-0"
-      >
+      {/* Top header — title + inline stat chips */}
+      <header className="px-6 py-3 flex items-center justify-between gap-4 border-b border-gray-200 bg-white flex-shrink-0 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold" style={{ color: secondary }}>Admissions Overview</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Manage and review university applications</p>
+          <h1 className="text-lg font-semibold leading-tight" style={{ color: secondary }}>Admissions Overview</h1>
+          <p className="text-xs text-gray-400 mt-0.5">Manage and review university applications</p>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setShowDateFilter((v) => !v)}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            <Calendar size={15} />
-            Date Range
-          </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          {loading && !stats
+            ? Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="w-24 h-8 rounded-lg border border-gray-200 bg-gray-100 animate-pulse" />
+              ))
+            : STAT_CARDS.map(({ label, value, filterKey, color }) => (
+                <button
+                  key={label}
+                  onClick={() => setActiveFilter(filterKey)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium hover:bg-gray-50 transition-colors"
+                  style={{
+                    borderColor: activeFilter === filterKey ? color : '#e5e7eb',
+                    backgroundColor: activeFilter === filterKey ? color + '10' : '#fff',
+                  }}
+                >
+                  <span className="text-base font-bold" style={{ color }}>{value ?? '—'}</span>
+                  <span className="text-gray-500">{label}</span>
+                </button>
+              ))}
         </div>
       </header>
 
@@ -204,134 +225,109 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-5 gap-4 mb-7">
-          {loading
-            ? Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 h-24 animate-pulse" />
-              ))
-            : STAT_CARDS.map((s) => (
-                <div key={s.label} className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex flex-col justify-between">
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{s.label}</p>
-                  <p className="text-3xl font-bold mt-3" style={{ color: s.color }}>
-                    {s.value ?? '—'}
-                  </p>
-                </div>
-              ))}
-        </div>
-
-        {/* Date range panel */}
-        {showDateFilter && (
-          <div className="mb-5 p-4 bg-white rounded-xl border border-gray-200 shadow-sm flex items-center gap-6 flex-wrap">
-            <div className="flex items-center gap-2">
-              <label className="text-xs font-medium text-gray-500 whitespace-nowrap">From</label>
-              <input
-                type="date"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:border-transparent"
-                style={{ '--tw-ring-color': primary }}
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <label className="text-xs font-medium text-gray-500 whitespace-nowrap">To</label>
-              <input
-                type="date"
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:border-transparent"
-                style={{ '--tw-ring-color': primary }}
-              />
-            </div>
-            {(dateFrom || dateTo) && (
-              <button
-                onClick={() => { setDateFrom(''); setDateTo(''); }}
-                className="text-xs hover:underline"
-                style={{ color: primary }}
-              >
-                Clear dates
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* Filter Pills */}
-        <div className="flex items-center gap-2 mb-5 flex-wrap">
-          {TABS.map((tab) => {
-            const isActive = activeFilter === tab.key;
-            const count = tabCount(applicants, tab.key);
-            return (
-              <button
-                key={tab.key}
-                onClick={() => setActiveFilter(tab.key)}
-                className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border transition-all"
-                style={
-                  isActive
-                    ? { backgroundColor: primary, color: '#fff', borderColor: primary }
-                    : { backgroundColor: '#fff', color: '#4B5563', borderColor: '#D1D5DB' }
-                }
-              >
-                {tab.label}
-                <span
-                  className="px-1.5 py-0.5 rounded-full text-xs font-semibold"
-                  style={
-                    isActive
-                      ? { backgroundColor: 'rgba(255,255,255,0.25)', color: '#fff' }
-                      : { backgroundColor: '#F3F4F6', color: '#6B7280' }
-                  }
-                >
-                  {loading ? '…' : count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
         {/* Table Card */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
 
-          {/* Toolbar */}
-          <div className="px-5 py-3 border-b border-gray-200 bg-gray-50/60 flex items-center justify-between gap-4 flex-wrap">
+          {/* Toolbar — search + collapsible status filter + date popover + forms checkbox */}
+          <div className="px-5 py-3 border-b border-gray-200 bg-gray-50/60 flex items-center gap-2 flex-wrap">
+
+            {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search name, email, program…"
-                className="pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-700 w-72 focus:outline-none focus:ring-1 focus:border-transparent"
-                style={{ '--tw-ring-color': primary }}
+                className="pl-9 pr-7 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-700 w-64 focus:outline-none"
               />
               {search && (
-                <button
-                  onClick={() => setSearch('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path d="M18 6 6 18M6 6l12 12" />
-                  </svg>
+                <button onClick={() => setSearch('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-base leading-none">
+                  ×
                 </button>
               )}
             </div>
 
-            <div className="flex items-center gap-4">
-              <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={formsCompleteOnly}
-                  onChange={(e) => setFormsCompleteOnly(e.target.checked)}
-                  className="rounded border-gray-300"
-                  style={{ accentColor: primary }}
-                />
-                Forms complete only
-              </label>
-
-              {hasActiveFilters && (
-                <button onClick={clearFilters} className="text-xs hover:underline" style={{ color: primary }}>
-                  Clear all filters
-                </button>
+            {/* Status dropdown */}
+            <div className="relative" ref={statusMenuRef}>
+              <button
+                onClick={() => setShowStatusMenu((v) => !v)}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border bg-white hover:bg-gray-50 transition-colors"
+                style={{
+                  borderColor: activeFilter !== 'all' ? primary : '#d1d5db',
+                  color: activeFilter !== 'all' ? primary : '#374151',
+                }}
+              >
+                {TABS.find((t) => t.key === activeFilter)?.label || 'All'}
+                <span className="text-xs px-1.5 py-0.5 rounded-full"
+                  style={{ backgroundColor: '#f3f4f6', color: '#6b7280' }}>
+                  {loading ? '…' : tabCount(applicants, activeFilter)}
+                </span>
+                <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
+              {showStatusMenu && (
+                <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-1 min-w-[190px]">
+                  {TABS.map((tab) => (
+                    <button
+                      key={tab.key}
+                      onClick={() => { setActiveFilter(tab.key); setShowStatusMenu(false); }}
+                      className="w-full flex items-center justify-between px-3 py-2 text-sm text-left hover:bg-gray-50"
+                      style={{ color: activeFilter === tab.key ? primary : '#374151', fontWeight: activeFilter === tab.key ? 600 : 400 }}
+                    >
+                      {tab.label}
+                      <span className="text-xs text-gray-400 ml-4">{loading ? '…' : tabCount(applicants, tab.key)}</span>
+                    </button>
+                  ))}
+                </div>
               )}
+            </div>
 
+            {/* Date range popover */}
+            <div className="relative" ref={dateMenuRef}>
+              <button
+                onClick={() => setShowDateFilter((v) => !v)}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border bg-white hover:bg-gray-50 transition-colors"
+                style={{ borderColor: (dateFrom || dateTo) ? primary : '#d1d5db', color: (dateFrom || dateTo) ? primary : '#374151' }}
+              >
+                <Calendar size={14} />
+                {dateFrom || dateTo ? `${dateFrom || '…'} – ${dateTo || '…'}` : 'Date range'}
+                {(dateFrom || dateTo)
+                  ? <span onClick={(e) => { e.stopPropagation(); setDateFrom(''); setDateTo(''); }}
+                      className="ml-1 text-gray-400 hover:text-gray-700 leading-none">×</span>
+                  : <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" /></svg>
+                }
+              </button>
+              {showDateFilter && (
+                <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-3 space-y-2" style={{ minWidth: '200px' }}>
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-gray-500 w-8 shrink-0">From</label>
+                    <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
+                      className="flex-1 border border-gray-300 rounded px-2 py-1 text-xs text-gray-700 focus:outline-none" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-gray-500 w-8 shrink-0">To</label>
+                    <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
+                      className="flex-1 border border-gray-300 rounded px-2 py-1 text-xs text-gray-700 focus:outline-none" />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Forms complete */}
+            <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
+              <input type="checkbox" checked={formsCompleteOnly} onChange={(e) => setFormsCompleteOnly(e.target.checked)}
+                className="rounded border-gray-300" style={{ accentColor: primary }} />
+              Forms complete
+            </label>
+
+            {/* Count + clear */}
+            <div className="flex items-center gap-3 ml-auto">
+              {hasActiveFilters && (
+                <button onClick={clearFilters} className="text-xs hover:underline" style={{ color: primary }}>Clear all</button>
+              )}
               <span className="text-xs text-gray-400">
                 {loading ? '…' : `${filtered.length} result${filtered.length !== 1 ? 's' : ''}`}
               </span>

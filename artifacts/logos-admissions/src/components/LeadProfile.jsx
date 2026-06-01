@@ -279,16 +279,16 @@ function FinancialColumn({ data }) {
       {presentDocs.length > 0 && (
         <div>
           <ColumnHeader label="Documents" />
-          <div className="flex flex-col gap-1.5 mt-1">
+          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
             {presentDocs.map(({ key, label }) => {
               const val = String(data[key] || '').toLowerCase();
               const submitted = val === 'true' || val === 'yes';
               return (
-                <div key={key} className="flex items-center gap-2 py-1 border-b border-gray-50 last:border-0">
+                <div key={key} className="flex items-center gap-1">
                   <span className={`text-xs font-bold ${submitted ? 'text-green-600' : 'text-red-500'}`}>
                     {submitted ? '✓' : '✗'}
                   </span>
-                  <span className={`text-sm ${submitted ? 'text-gray-700' : 'text-red-600 font-medium'}`}>
+                  <span className={`text-xs ${submitted ? 'text-gray-700' : 'text-red-600 font-medium'}`}>
                     {label}
                   </span>
                 </div>
@@ -325,38 +325,37 @@ export default function LeadProfile({ applicant, forms }) {
     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
 
       {/* ── Profile Header ── */}
-      <div className="px-5 py-4 border-b border-gray-100 flex items-start gap-4">
+      <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-3">
         {/* Brand-color avatar */}
-        <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
+        <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
           style={{ backgroundColor: '#7B2D3E' }}>
-          <span className="text-white font-bold text-sm">{initials(applicant.full_name)}</span>
+          <span className="text-white font-bold text-xs">{initials(applicant.full_name)}</span>
         </div>
 
         <div className="flex-1 min-w-0">
-          <h2 className="text-lg font-bold text-gray-900 leading-tight">{applicant.full_name || '(no name)'}</h2>
-          <p className="text-sm text-gray-500">{applicant.email || '—'}</p>
-          {applicant.phone && <p className="text-sm text-gray-500">{applicant.phone}</p>}
+          <h2 className="text-sm font-bold text-gray-900 leading-tight">{applicant.full_name || '(no name)'}</h2>
+          <p className="text-xs text-gray-500">{applicant.email || '—'}{applicant.phone ? ` · ${applicant.phone}` : ''}</p>
         </div>
 
-        <div className="flex flex-col items-end gap-2 shrink-0">
+        <div className="flex items-center gap-3 shrink-0">
           {applicant.program_applied && (
             <div className="text-right">
-              <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-0.5">Applying for</p>
-              <p className="text-sm font-semibold text-gray-800">{applicant.program_applied}</p>
+              <p className="text-[10px] text-gray-400 uppercase tracking-wider leading-tight">Applying for</p>
+              <p className="text-xs font-semibold text-gray-800 leading-tight">{applicant.program_applied}</p>
               {applicant.program_level && (
-                <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">
                   {applicant.program_level}
                 </span>
               )}
             </div>
           )}
           {/* Form completion pills */}
-          <div className="flex items-center gap-1 mt-1">
+          <div className="flex items-center gap-1">
             {[1, 2, 3].map(n => {
               const submitted = !!applicant[`form${n}_submitted_at`];
               return (
                 <span key={n} title={`Form ${n}`}
-                  className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold tracking-wide ${
+                  className={`text-[10px] px-1.5 py-0.5 rounded-full border font-semibold ${
                     submitted
                       ? 'bg-green-50 border-green-300 text-green-700'
                       : 'bg-gray-100 border-gray-200 text-gray-400'
