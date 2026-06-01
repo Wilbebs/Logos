@@ -422,46 +422,38 @@ export default function AcceptanceLetterPage() {
                   minHeight="60px"
                 />
               </div>
+
+              {/* Send controls — inline below the letter */}
+              <div className="px-8 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between gap-4 flex-wrap rounded-b-xl">
+                <p className="text-xs text-gray-400">📄 Word document (.docx) will be auto-attached on send</p>
+                <div className="flex items-center gap-3">
+                  {sendError && <p className="text-xs text-red-600">{sendError}</p>}
+                  <button onClick={() => navigate(`/applicants/${id}`)}
+                    className="text-sm text-gray-500 hover:text-gray-700 font-medium px-3 py-2">
+                    Cancel
+                  </button>
+                  <button
+                    onClick={sendLetter}
+                    disabled={sending || !body.trim()}
+                    className="flex items-center gap-2 text-white text-sm font-semibold px-6 py-2.5 rounded-lg transition-colors disabled:opacity-50"
+                    style={{ backgroundColor: '#7B2D3E' }}
+                    onMouseEnter={e => { if (!sending && body.trim()) e.currentTarget.style.backgroundColor = '#6a2535'; }}
+                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#7B2D3E'; }}
+                  >
+                    {sending ? (
+                      <>
+                        <span className="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full" />
+                        Sending...
+                      </>
+                    ) : (
+                      <>✉ Send Letter</>
+                    )}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
-        </div>
-      </div>
-
-      {/* Fixed send bar — always visible above the timeline bar */}
-      <div
-        className="fixed left-0 right-0 z-39 bg-white border-t border-gray-200 shadow-md"
-        style={{ bottom: 'var(--timeline-bar-height, 54px)' }}
-      >
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-xs text-gray-400">
-            <span>📄</span>
-            <span className="hidden sm:inline">Word document (.docx) will be auto-attached on send</span>
-          </div>
-          <div className="flex items-center gap-3">
-            {sendError && <p className="text-xs text-red-600">{sendError}</p>}
-            <button onClick={() => navigate(`/applicants/${id}`)}
-              className="text-sm text-gray-500 hover:text-gray-700 font-medium px-3 py-2">
-              Cancel
-            </button>
-            <button
-              onClick={sendLetter}
-              disabled={sending || !body.trim()}
-              className="flex items-center gap-2 text-white text-sm font-semibold px-6 py-2.5 rounded-lg transition-colors disabled:opacity-50"
-              style={{ backgroundColor: '#7B2D3E' }}
-              onMouseEnter={e => { if (!sending && body.trim()) e.currentTarget.style.backgroundColor = '#6a2535'; }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#7B2D3E'; }}
-            >
-              {sending ? (
-                <>
-                  <span className="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full" />
-                  Sending...
-                </>
-              ) : (
-                <>✉ Send Letter</>
-              )}
-            </button>
-          </div>
         </div>
       </div>
 
