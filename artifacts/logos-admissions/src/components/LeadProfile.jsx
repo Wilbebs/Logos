@@ -1,12 +1,7 @@
 import React from 'react';
 
 // ── Comprehensive field label maps ─────────────────────────────────────────────
-// Every MachForm field name that we know about is mapped to a readable label.
-// Both CamelCase slugs (how MachForm sends them) and snake_case aliases are covered.
-// Fields not found here fall through to the smart humanizer.
-
 const PERSONAL_FIELDS = {
-  // Name / Identity
   Title:                        'Title / Prefijo',
   FirstNmeNombre:               'First Name',
   first_name:                   'First Name',
@@ -23,7 +18,6 @@ const PERSONAL_FIELDS = {
   EstadoDeNacimiento:           'Birth State',
   PaisCiudadania:               'Country of Citizenship',
   citizenship:                  'Country of Citizenship',
-  // Address
   Direccion:                    'Street Address',
   street_address:               'Street Address',
   Ciudad:                       'City',
@@ -34,7 +28,6 @@ const PERSONAL_FIELDS = {
   postal_code:                  'Postal Code',
   Pais:                         'Country',
   country:                      'Country',
-  // Social / Contact extras
   WhatsApp:                     'WhatsApp',
   whatsapp:                     'WhatsApp',
   Skype:                        'Skype',
@@ -43,19 +36,16 @@ const PERSONAL_FIELDS = {
   LinkedIn:                     'LinkedIn',
   IdiomaPreferido:              'Preferred Language',
   language_preferred:           'Preferred Language',
-  // Family
   ParienteCercano:              'Nearest Relative / Friend',
   RelacionPariente:             'Relationship',
   TelefonoPariente:             'Relative Phone',
 };
 
 const MINISTRY_FIELDS = {
-  // Experience metrics (used by eligibility engine)
   ministerial_years_fulltime:   'Full-time Ministry (years)',
   ministerial_years_associated: 'Associated Ministry (years)',
   years_christian:              'Years as Christian',
   how_long_christian:           'Years as Christian',
-  // Church
   NombreDeIglesia:              'Church Name',
   church_name:                  'Church Name',
   iglesia:                      'Church Name',
@@ -66,13 +56,11 @@ const MINISTRY_FIELDS = {
   Denominacion:                 'Denomination',
   denomination:                 'Denomination',
   AQueDenominacionPertenece:    'Denomination',
-  // Ordination / history
   AnoOrdenado:                  'Year Ordained',
   year_ordained:                'Year Ordained',
   DesdeCuandoAsiste:            'Attending Church Since',
   DesdeCuandoPastorea:          'Pastoring Since',
   CuantasPersonasAsisten:       'Sunday Attendance',
-  // Summary
   ResumenMinisterio:            'Ministry Summary',
   ministry_summary:             'Ministry Summary',
   has_ministerial_education:    'Prior Ministerial Education',
@@ -87,17 +75,14 @@ const ACADEMIC_FIELDS = {
   has_existing_doctorate:         'Holds Th.D. or D.Min.',
   transfer_credits:               'Transfer Credits',
   life_experience_description:    'Life Experience Description',
-  // High school
   CompletoSuEscuelaSecundaria:    'Completed High School',
   NombreEscuelaSecundaria:        'High School Name',
   CiudadEscuelaSecundaria:        'High School City',
   AnoGraduacionSecundaria:        'High School Grad Year',
-  // University sections (yes/no fields already used to derive highest_education)
   Associate:                      'Associate Degree',
   Licenciatura:                   'Bachelor\'s Degree (Licenciatura)',
   Maestria:                       'Master\'s Degree (Maestría)',
   Doctorado:                      'Doctorate',
-  // Degree details
   NombreUniversidad:              'University / Seminary Name',
   CiudadUniversidad:              'University City',
   GradoObtenido:                  'Degree Earned',
@@ -121,11 +106,9 @@ const FINANCIAL_FIELDS = {
 };
 
 const PASTORAL_REC_FIELDS = {
-  // Applicant info (entered by pastor)
   NombreDelSolicitante:         'Applicant Name',
   ApellidoDelSolicitante:       'Applicant Last Name',
   FechaNacimientoPastor:        'Applicant DOB (per pastor)',
-  // Pastor info
   NombreDelPastor:              'Pastor Name',
   ApellidoPastor:               'Pastor Last Name',
   IglesiaCongregacion:          'Congregation',
@@ -138,7 +121,6 @@ const PASTORAL_REC_FIELDS = {
   TelefonoPastor:               'Pastor Phone',
   FirmaPastor:                  'Pastor Signature Date',
   FirmaFecha:                   'Signature Date',
-  // Pastoral questions
   TiempoConociendo:             'Known Applicant For',
   CuanBienConoce:               'How Well Known',
   EsSalvo:                      'Professed Salvation',
@@ -179,7 +161,6 @@ const MINISTERIAL_EXP_FIELDS = {
   ReferenciaMinisterial1:       'Ministry Reference 1',
   ReferenciaMinisterial2:       'Ministry Reference 2',
   ReferenciaMinisterial3:       'Ministry Reference 3',
-  // Church data (Form 3)
   NombreIglesiaForm3:           'Church Name',
   NombrePastorForm3:            'Pastor Name',
   DireccionIglesiaForm3:        'Church Address',
@@ -193,7 +174,6 @@ const PROFESSIONAL_FIELDS = {
   SoftwareHerramientas:         'Software / Tools',
 };
 
-// Fields shown in header — never shown again in body sections
 const HEADER_KEYS = new Set([
   'email', 'full_name', 'name', 'phone',
   'EmailICorreoElectrónicoI', 'EmailICorreoElectronico',
@@ -202,12 +182,10 @@ const HEADER_KEYS = new Set([
   'FirstNmeNombre', 'LastNameApellido',
   'program_applied', 'program_level', 'form_number',
   'DesiredProgramProramaDeseado', 'StudyLevelsNivelesDeEstudio',
-  // Enriched/computed — shown in structured header sections
   'highest_education', 'monthly_budget', 'BudgetsPresupuesto',
   'submitted_transcripts', 'submitted_diploma', 'submitted_undergraduate_diploma',
 ]);
 
-// All explicitly categorised keys (for catch-all filtering)
 const ALL_SECTION_MAPS = [
   PERSONAL_FIELDS, MINISTRY_FIELDS, ACADEMIC_FIELDS,
   DOCUMENT_FIELDS, FINANCIAL_FIELDS,
@@ -218,20 +196,16 @@ const ALL_KNOWN_KEYS = new Set([
   ...HEADER_KEYS,
 ]);
 
-// ── Smart key humanizer (fallback for truly unknown fields) ────────────────────
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
 function humanizeKey(key) {
   return key
-    // split CamelCase: "NombreDelPastor" → "Nombre Del Pastor"
     .replace(/([a-z])([A-Z])/g, '$1 $2')
     .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
-    // replace underscores/hyphens with spaces
     .replace(/[_-]/g, ' ')
     .trim()
-    // title-case
     .replace(/\b\w/g, c => c.toUpperCase());
 }
-
-// ── Helpers ────────────────────────────────────────────────────────────────────
 
 function initials(name) {
   if (!name) return '?';
@@ -239,14 +213,9 @@ function initials(name) {
 }
 
 function safeDecodeURI(s) {
-  // Decode percent-encoded characters that MachForm injects into form-POST values.
-  // MachForm sometimes sends Latin-1 (ISO-8859-1) encoded bytes (e.g. %F3 = ó)
-  // which are not valid UTF-8 and will throw in decodeURIComponent.
-  // We fall back to the deprecated-but-universal unescape() which handles Latin-1.
   const clean = s.replace(/\+/g, ' ');
-  try { return decodeURIComponent(clean); } catch { /* invalid UTF-8 sequence */ }
-  // eslint-disable-next-line no-unescape-func
-  try { return unescape(clean); } catch { return s; }
+  try { return decodeURIComponent(clean); } catch { /* ignore */ }
+  try { return unescape(clean); } catch { return s; } // eslint-disable-line no-unescape-func
 }
 
 function formatFieldValue(val) {
@@ -274,7 +243,6 @@ function budgetLabel(val) {
   return String(val);
 }
 
-// Build auto-generated narrative
 function buildNarrative(merged, applicant) {
   const parts = [];
   const name = applicant.full_name || merged.full_name || 'This applicant';
@@ -313,7 +281,7 @@ function FieldRow({ label, value }) {
   );
 }
 
-function ProfileSection({ title, fieldMap, data, specialRenderer }) {
+function ProfileSection({ title, fieldMap, data }) {
   const entries = [];
   const seenLabels = new Set();
 
@@ -323,7 +291,6 @@ function ProfileSection({ title, fieldMap, data, specialRenderer }) {
     const val = formatFieldValue(raw);
     if (!val) continue;
 
-    // Special rendering for specific keys
     let display = val;
     if (key === 'highest_education') display = educationLabel(val);
     else if (key === 'monthly_budget' || key === 'BudgetsPresupuesto') display = budgetLabel(val);
@@ -375,15 +342,15 @@ function DocumentStatus({ data }) {
   );
 }
 
-// Shows ALL form fields in a clean table, grouped by form, open by default
+// All form responses — collapsed by default (can expand individually)
 function AllFormResponses({ forms }) {
-  const [openForms, setOpenForms] = React.useState(() => forms.map((_, i) => i));
+  // Start collapsed — users open only what they need
+  const [openForms, setOpenForms] = React.useState([]);
 
   function toggle(i) {
     setOpenForms(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i]);
   }
 
-  // Build a label for a field key
   function getLabel(key) {
     for (const map of ALL_SECTION_MAPS) {
       if (map[key]) return map[key];
@@ -391,21 +358,29 @@ function AllFormResponses({ forms }) {
     return humanizeKey(key);
   }
 
-  // Fields to skip in the "all responses" table (they appear in structured sections above)
   const SKIP_KEYS = new Set([
     'form_number', 'applicant_id',
-    // computed enrichment — not raw form values
     'submitted_transcripts', 'submitted_diploma', 'submitted_undergraduate_diploma',
     'highest_education',
   ]);
 
   if (!forms || forms.length === 0) return null;
 
+  const allOpen = openForms.length === forms.length;
+
   return (
     <div className="border-t border-gray-100">
-      <div className="px-5 py-3 bg-gray-50 border-b border-gray-100">
-        <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">All Form Responses</p>
-        <p className="text-xs text-gray-400 mt-0.5">Every field submitted across all 3 forms</p>
+      <div className="px-5 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+        <div>
+          <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">All Form Responses</p>
+          <p className="text-xs text-gray-400 mt-0.5">Every field submitted across all {forms.length} forms</p>
+        </div>
+        <button
+          onClick={() => setOpenForms(allOpen ? [] : forms.map((_, i) => i))}
+          className="text-xs text-gray-400 hover:text-gray-600 font-medium transition-colors"
+        >
+          {allOpen ? 'Collapse all' : 'Expand all'}
+        </button>
       </div>
       <div className="divide-y divide-gray-100">
         {forms.map((form, i) => {
@@ -426,7 +401,10 @@ function AllFormResponses({ forms }) {
                 onClick={() => toggle(i)}
                 className="w-full flex items-center justify-between px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 text-left"
               >
-                <span>{formLabel} <span className="text-gray-400 font-normal text-xs ml-2">({entries.length} fields)</span></span>
+                <span>
+                  {formLabel}
+                  <span className="text-gray-400 font-normal text-xs ml-2">({entries.length} fields)</span>
+                </span>
                 <span className="text-gray-400 text-xs ml-2">{isOpen ? '▲' : '▼'}</span>
               </button>
               {isOpen && (
@@ -453,40 +431,64 @@ function AllFormResponses({ forms }) {
 // ── Main component ─────────────────────────────────────────────────────────────
 
 export default function LeadProfile({ applicant, forms }) {
-  // Merge all form raw_data — later forms don't override Form 1's academic/doc fields
   const merged = {};
   [...(forms || [])].sort((a, b) => a.form_number - b.form_number).forEach(f => {
     Object.assign(merged, f.raw_data || {});
   });
-  // Ensure applicant-level fields are accessible
   const data = { ...merged, ...applicant };
 
   const narrative = buildNarrative(merged, applicant);
 
+  // Form completion summary for the header
+  const formKeys = ['form1_submitted_at', 'form2_submitted_at', 'form3_submitted_at'];
+  const submittedCount = formKeys.filter(k => applicant[k]).length;
+
   return (
-    <div className="bg-white border border-gray-200 rounded overflow-hidden">
+    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
 
       {/* ── Profile Header ── */}
       <div className="px-5 py-4 border-b border-gray-100 flex items-start gap-4">
-        <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center shrink-0">
+        {/* Brand-color avatar */}
+        <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
+          style={{ backgroundColor: '#7B2D3E' }}>
           <span className="text-white font-bold text-sm">{initials(applicant.full_name)}</span>
         </div>
+
         <div className="flex-1 min-w-0">
           <h2 className="text-lg font-bold text-gray-900 leading-tight">{applicant.full_name || '(no name)'}</h2>
           <p className="text-sm text-gray-500">{applicant.email || '—'}</p>
           {applicant.phone && <p className="text-sm text-gray-500">{applicant.phone}</p>}
         </div>
-        {applicant.program_applied && (
-          <div className="text-right shrink-0">
-            <p className="text-xs text-gray-500 mb-0.5">Applying for</p>
-            <p className="text-sm font-semibold text-gray-800">{applicant.program_applied}</p>
-            {applicant.program_level && (
-              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                {applicant.program_level}
-              </span>
-            )}
+
+        <div className="flex flex-col items-end gap-2 shrink-0">
+          {applicant.program_applied && (
+            <div className="text-right">
+              <p className="text-xs text-gray-500 mb-0.5">Applying for</p>
+              <p className="text-sm font-semibold text-gray-800">{applicant.program_applied}</p>
+              {applicant.program_level && (
+                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                  {applicant.program_level}
+                </span>
+              )}
+            </div>
+          )}
+          {/* Compact form-completion pills */}
+          <div className="flex items-center gap-1 mt-1">
+            {[1, 2, 3].map(n => {
+              const submitted = !!applicant[`form${n}_submitted_at`];
+              return (
+                <span key={n} title={`Form ${n}`}
+                  className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
+                    submitted
+                      ? 'bg-green-50 border-green-300 text-green-700'
+                      : 'bg-gray-100 border-gray-200 text-gray-400'
+                  }`}>
+                  {submitted ? `F${n} ✓` : `F${n}`}
+                </span>
+              );
+            })}
           </div>
-        )}
+        </div>
       </div>
 
       {/* ── Narrative ── */}
@@ -499,30 +501,25 @@ export default function LeadProfile({ applicant, forms }) {
 
       {/* ── Structured sections ── */}
       <div className="px-5 py-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8">
-        {/* Column 1 */}
         <div>
-          <ProfileSection title="Ministry Background"     fieldMap={MINISTRY_FIELDS}      data={data} />
-          <ProfileSection title="Ministerial Experience"  fieldMap={MINISTERIAL_EXP_FIELDS} data={data} />
+          <ProfileSection title="Ministry Background"     fieldMap={MINISTRY_FIELDS}        data={data} />
+          <ProfileSection title="Ministerial Experience"  fieldMap={MINISTERIAL_EXP_FIELDS}  data={data} />
         </div>
-
-        {/* Column 2 */}
         <div>
-          <ProfileSection title="Academic Background"     fieldMap={ACADEMIC_FIELDS}      data={data} />
-          <ProfileSection title="Personal Information"    fieldMap={PERSONAL_FIELDS}       data={data} />
-          <ProfileSection title="Professional Background" fieldMap={PROFESSIONAL_FIELDS}   data={data} />
+          <ProfileSection title="Academic Background"     fieldMap={ACADEMIC_FIELDS}         data={data} />
+          <ProfileSection title="Personal Information"    fieldMap={PERSONAL_FIELDS}          data={data} />
+          <ProfileSection title="Professional Background" fieldMap={PROFESSIONAL_FIELDS}      data={data} />
         </div>
-
-        {/* Column 3 */}
         <div>
           <div className="mb-4">
-            <ProfileSection title="Financial"             fieldMap={FINANCIAL_FIELDS}      data={data} />
+            <ProfileSection title="Financial"             fieldMap={FINANCIAL_FIELDS}        data={data} />
             <DocumentStatus data={data} />
           </div>
-          <ProfileSection title="Pastoral Recommendation" fieldMap={PASTORAL_REC_FIELDS}   data={data} />
+          <ProfileSection title="Pastoral Recommendation" fieldMap={PASTORAL_REC_FIELDS}    data={data} />
         </div>
       </div>
 
-      {/* ── All Form Responses (comprehensive, open by default) ── */}
+      {/* ── All Form Responses (collapsed by default) ── */}
       {forms && forms.length > 0 && (
         <AllFormResponses forms={[...forms].sort((a, b) => a.form_number - b.form_number)} />
       )}

@@ -1,13 +1,10 @@
 /**
  * FileAttachments
  *
- * Tabbed document and communication hub for an applicant.
- *
- * Tabs:
- *   Applicant Docs  — files submitted by the applicant (transcripts, diplomas…)
- *   Admission Docs  — files we generated (acceptance letters, correspondence…)
- *   Other           — anything else
- *   Communications  — email log with subject, status, date, and expandable body
+ * Two-tab document hub for an applicant:
+ *   Documents      — all uploaded files (transcripts, diplomas, generated letters…)
+ *                    Each file row shows a subtle category badge.
+ *   Communications — email log with subject, status, date, and expandable body
  */
 import React, { useState, useEffect, useRef } from 'react';
 
@@ -46,62 +43,80 @@ const STATUS_STYLES = {
   failed:  'bg-red-100 text-red-700',
 };
 const EMAIL_LABELS = {
-  form1_received:   'Form 1 Received',
-  form2_received:   'Form 2 Received',
-  form3_received:   'Form 3 Received',
-  approved:         'Approval Notification',
-  rejected:         'Rejection Notification',
-  info_requested:   'Info Requested',
-  acceptance_letter:'Acceptance Letter',
+  form1_received:    'Form 1 Received',
+  form2_received:    'Form 2 Received',
+  form3_received:    'Form 3 Received',
+  approved:          'Approval Notification',
+  rejected:          'Rejection Notification',
+  info_requested:    'Info Requested',
+  acceptance_letter: 'Acceptance Letter',
 };
 
-// ── Category from file_path fallback ─────────────────────────────────────────
+const CATEGORY_LABELS = {
+  applicant_documents: 'Applicant',
+  admission_documents: 'Admission',
+  other:               'Other',
+};
+
 function categoryFromPath(path) {
   if (!path) return 'other';
-  const parts = path.split('/');
-  // path format: applicants/{id}/{category}/{filename}
-  return parts[2] || 'other';
+  return path.split('/')[2] || 'other';
 }
 
-// ── File list ─────────────────────────────────────────────────────────────────
+// ── All-files list ────────────────────────────────────────────────────────────
 function FileList({ files, onDelete, deletingId }) {
   if (files.length === 0) {
-    return <p className="text-sm text-gray-400 py-4 text-center">No files here yet.</p>;
+    return (
+      <div className="text-center py-8">
+        <p className="text-2xl mb-2">📂</p>
+        <p className="text-sm text-gray-400">No documents uploaded yet.</p>
+        <p className="text-xs text-gray-300 mt-1">Drag a file below or click to browse.</p>
+      </div>
+    );
   }
   return (
     <ul className="space-y-2">
-      {files.map(f => (
-        <li key={f.id} className="flex items-center gap-3 p-3 border border-gray-200 rounded bg-white hover:border-gray-300 transition-colors">
-          <span className="text-xl shrink-0">{fileIcon(f.file_type)}</span>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-800 truncate" title={f.file_name}>{f.file_name}</p>
-            <p className="text-xs text-gray-400 mt-0.5">
-              {formatBytes(f.file_size)}
-              {f.uploaded_at && ` · ${formatDate(f.uploaded_at)}`}
-              {f.uploaded_by && f.uploaded_by !== 'system' && ` · ${f.uploaded_by}`}
-              {f.uploaded_by === 'system' && ' · Auto-generated'}
-            </p>
-          </div>
-          <div className="flex items-center gap-3 shrink-0">
-            {f.file_url && (
-              <a href={f.file_url} target="_blank" rel="noopener noreferrer"
-                className="text-xs text-blue-600 hover:underline font-medium">
-                Open
-              </a>
-            )}
-            <button onClick={() => onDelete(f.id)} disabled={deletingId === f.id}
-              className="text-xs text-red-400 hover:text-red-600 disabled:text-gray-300 transition-colors">
-              {deletingId === f.id ? '…' : 'Delete'}
-            </button>
-          </div>
-        </li>
-      ))}
+      {files.map(f => {
+        const cat = f.category || categoryFromPath(f.file_path);
+        const catLabel = CATEGORY_LABELS[cat];
+        return (
+          <li key={f.id} className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg bg-white hover:border-gray-300 transition-colors">
+            <span className="text-xl shrink-0">{fileIcon(f.file_type)}</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-800 truncate" title={f.file_name}>{f.file_name}</p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                {formatBytes(f.file_size)}
+                {f.uploaded_at && ` · ${formatDate(f.uploaded_at)}`}
+                {f.uploaded_by && f.uploaded_by !== 'system' && ` · ${f.uploaded_by}`}
+                {f.uploaded_by === 'system' && ' · Auto-generated'}
+              </p>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              {catLabel && (
+                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full hidden sm:inline">
+                  {catLabel}
+                </span>
+              )}
+              {f.file_url && (
+                <a href={f.file_url} target="_blank" rel="noopener noreferrer"
+                  className="text-xs text-blue-600 hover:underline font-medium">
+                  Open
+                </a>
+              )}
+              <button onClick={() => onDelete(f.id)} disabled={deletingId === f.id}
+                className="text-xs text-red-400 hover:text-red-600 disabled:text-gray-300 transition-colors">
+                {deletingId === f.id ? '…' : 'Delete'}
+              </button>
+            </div>
+          </li>
+        );
+      })}
     </ul>
   );
 }
 
 // ── Upload zone ───────────────────────────────────────────────────────────────
-function UploadZone({ onUpload, uploading, uploadError, category, onCategoryChange }) {
+function UploadZone({ onUpload, uploading, uploadError }) {
   const [dragging, setDragging] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -110,38 +125,19 @@ function UploadZone({ onUpload, uploading, uploadError, category, onCategoryChan
   async function onDrop(e) {
     e.preventDefault(); setDragging(false);
     const file = e.dataTransfer.files?.[0];
-    if (file) onUpload(file, category);
+    if (file) onUpload(file);
   }
   function onChange(e) {
     const file = e.target.files?.[0];
-    if (file) onUpload(file, category);
+    if (file) onUpload(file);
     if (fileInputRef.current) fileInputRef.current.value = '';
   }
 
   return (
-    <div className="space-y-3">
-      {/* Category selector for upload */}
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-gray-500 font-medium">Upload as:</span>
-        {[
-          { val: 'applicant_documents', label: 'Applicant Doc' },
-          { val: 'admission_documents', label: 'Admission Doc' },
-          { val: 'other',              label: 'Other' },
-        ].map(({ val, label }) => (
-          <button key={val} onClick={() => onCategoryChange(val)}
-            className={`text-xs px-2.5 py-1 rounded-full border font-medium transition-colors ${
-              category === val
-                ? 'bg-blue-600 text-white border-blue-600'
-                : 'border-gray-300 text-gray-600 hover:border-blue-400'
-            }`}>
-            {label}
-          </button>
-        ))}
-      </div>
-
+    <div className="space-y-2">
       <div onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
         className={`border-2 border-dashed rounded-lg p-5 text-center transition-colors cursor-pointer
-          ${dragging ? 'border-blue-400 bg-blue-50' : 'border-gray-300 bg-gray-50 hover:border-gray-400'}`}
+          ${dragging ? 'border-[#7B2D3E] bg-red-50' : 'border-gray-300 bg-gray-50 hover:border-gray-400'}`}
         onClick={() => !uploading && fileInputRef.current?.click()}>
         <p className="text-sm text-gray-500 mb-1">
           {uploading ? 'Uploading…' : 'Drag a file here or click to browse'}
@@ -157,9 +153,9 @@ function UploadZone({ onUpload, uploading, uploadError, category, onCategoryChan
 
 // ── Communications list ───────────────────────────────────────────────────────
 function CommunicationsList({ applicantId }) {
-  const [comms, setComms]     = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState('');
+  const [comms, setComms]       = useState([]);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState('');
   const [expanded, setExpanded] = useState(null);
 
   useEffect(() => {
@@ -192,7 +188,6 @@ function CommunicationsList({ applicantId }) {
     <ul className="space-y-2">
       {comms.map(c => (
         <li key={c.id} className="border border-gray-200 rounded-lg overflow-hidden">
-          {/* Row header */}
           <button
             onClick={() => setExpanded(expanded === c.id ? null : c.id)}
             className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left"
@@ -215,8 +210,6 @@ function CommunicationsList({ applicantId }) {
               <span className="text-gray-400 text-xs">{expanded === c.id ? '▲' : '▼'}</span>
             </div>
           </button>
-
-          {/* Expanded body */}
           {expanded === c.id && (
             <div className="border-t border-gray-100 bg-gray-50 px-4 py-3 space-y-2">
               {c.from_address && (
@@ -245,21 +238,18 @@ function CommunicationsList({ applicantId }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 const TABS = [
-  { key: 'applicant_documents', label: 'Applicant Docs',  icon: '📄' },
-  { key: 'admission_documents', label: 'Admission Docs',  icon: '📝' },
-  { key: 'other',               label: 'Other',           icon: '📎' },
-  { key: 'communications',      label: 'Communications',  icon: '✉'  },
+  { key: 'documents',      label: 'Documents',      icon: '📄' },
+  { key: 'communications', label: 'Communications', icon: '✉'  },
 ];
 
 export default function FileAttachments({ applicantId }) {
-  const [activeTab,   setActiveTab]   = useState('applicant_documents');
-  const [files,       setFiles]       = useState([]);
-  const [loadingFiles,setLoadingFiles]= useState(true);
-  const [fileError,   setFileError]   = useState('');
-  const [uploading,   setUploading]   = useState(false);
-  const [uploadError, setUploadError] = useState('');
-  const [deletingId,  setDeletingId]  = useState(null);
-  const [uploadCategory, setUploadCategory] = useState('applicant_documents');
+  const [activeTab,    setActiveTab]    = useState('documents');
+  const [files,        setFiles]        = useState([]);
+  const [loadingFiles, setLoadingFiles] = useState(true);
+  const [fileError,    setFileError]    = useState('');
+  const [uploading,    setUploading]    = useState(false);
+  const [uploadError,  setUploadError]  = useState('');
+  const [deletingId,   setDeletingId]   = useState(null);
 
   async function loadFiles() {
     setLoadingFiles(true);
@@ -278,12 +268,12 @@ export default function FileAttachments({ applicantId }) {
 
   useEffect(() => { if (applicantId) loadFiles(); }, [applicantId]);
 
-  async function handleUpload(file, category) {
+  async function handleUpload(file) {
     setUploading(true);
     setUploadError('');
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('category', category);
+    formData.append('category', 'applicant_documents');
     try {
       const res = await fetch(`${API_URL}/api/applicants/${applicantId}/files`, {
         method: 'POST', body: formData,
@@ -291,7 +281,6 @@ export default function FileAttachments({ applicantId }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Upload failed');
       await loadFiles();
-      setActiveTab(category); // jump to the tab the file landed in
     } catch (err) {
       setUploadError(err.message || 'Upload failed.');
     } finally {
@@ -313,24 +302,11 @@ export default function FileAttachments({ applicantId }) {
     }
   }
 
-  // Split files by category (use DB category field, fall back to parsing path)
-  function filesForTab(tab) {
-    return files.filter(f => {
-      const cat = f.category || categoryFromPath(f.file_path);
-      return cat === tab;
-    });
-  }
-
-  // Badge counts
-  const counts = {
-    applicant_documents: filesForTab('applicant_documents').length,
-    admission_documents: filesForTab('admission_documents').length,
-    other:               filesForTab('other').length,
-  };
+  const totalFiles = files.length;
 
   return (
     <div className="space-y-4">
-      {/* Tab bar */}
+      {/* Two-tab bar */}
       <div className="flex gap-1 border-b border-gray-200 -mx-1">
         {TABS.map(tab => (
           <button
@@ -338,46 +314,36 @@ export default function FileAttachments({ applicantId }) {
             onClick={() => setActiveTab(tab.key)}
             className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
               activeTab === tab.key
-                ? 'border-blue-600 text-blue-700'
+                ? 'border-[#7B2D3E] text-[#7B2D3E]'
                 : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
             <span>{tab.icon}</span>
             {tab.label}
-            {counts[tab.key] > 0 && (
+            {tab.key === 'documents' && totalFiles > 0 && (
               <span className={`ml-1 text-xs px-1.5 py-0.5 rounded-full font-semibold ${
-                activeTab === tab.key ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'
+                activeTab === tab.key ? 'bg-red-50 text-[#7B2D3E]' : 'bg-gray-100 text-gray-500'
               }`}>
-                {counts[tab.key]}
+                {totalFiles}
               </span>
             )}
           </button>
         ))}
       </div>
 
-      {/* Communications tab */}
       {activeTab === 'communications' ? (
         <CommunicationsList applicantId={applicantId} />
       ) : (
         <div className="space-y-4">
-          {/* Upload zone */}
           <UploadZone
             onUpload={handleUpload}
             uploading={uploading}
             uploadError={uploadError}
-            category={uploadCategory}
-            onCategoryChange={setUploadCategory}
           />
-
-          {/* File list for active tab */}
           {fileError && <p className="text-xs text-red-600">{fileError}</p>}
           {loadingFiles
             ? <p className="text-sm text-gray-400">Loading files…</p>
-            : <FileList
-                files={filesForTab(activeTab)}
-                onDelete={handleDelete}
-                deletingId={deletingId}
-              />
+            : <FileList files={files} onDelete={handleDelete} deletingId={deletingId} />
           }
         </div>
       )}

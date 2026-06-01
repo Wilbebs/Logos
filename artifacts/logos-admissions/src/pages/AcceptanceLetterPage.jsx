@@ -78,16 +78,16 @@ function DocShell({ value, onChange, placeholder, disabled }) {
 
   return (
     // Gray canvas — Word's "behind the paper" area
-    <div className="bg-gray-200 px-8 py-8" style={{ borderRadius: '0' }}>
-      {/* Paper sheet */}
+    <div className="bg-gray-200 px-4 sm:px-8 py-6 sm:py-8">
+      {/* Paper sheet — responsive width, max 640px */}
       <div
         className="mx-auto bg-white shadow-xl relative"
-        style={{ width: '640px', minHeight: '820px', padding: '72px 88px' }}
+        style={{ maxWidth: '640px', width: '100%', minHeight: '820px', padding: '72px 64px' }}
       >
         {/* Placeholder */}
         {!value && !disabled && (
           <p className="absolute pointer-events-none select-none" style={{
-            top: '72px', left: '88px',
+            top: '72px', left: '64px', right: '64px',
             fontFamily: 'Georgia, "Times New Roman", serif',
             fontSize: '12pt', lineHeight: '1.8', color: '#bbb',
           }}>
@@ -131,9 +131,9 @@ export default function AcceptanceLetterPage() {
   const [to,      setTo]      = useState('');
   const [subject, setSubject] = useState('');
 
-  // Email body sections (all editable; will become templates)
+  // Email body sections (all editable)
   const [preamble, setPreamble] = useState('');
-  const [body,     setBody]     = useState('');   // the letter doc content
+  const [body,     setBody]     = useState('');
   const [signoff,  setSignoff]  = useState('');
 
   // UI state
@@ -152,13 +152,11 @@ export default function AcceptanceLetterPage() {
         setApplicant(data);
         setTo(data.email || '');
         setSubject('Congratulations! Acceptance to ' + (data.program_applied || 'LOGOS University'));
-        // Default preamble — will become a formal template
         setPreamble(
           `Dear ${data.full_name || 'Applicant'},\n\n` +
           `Please find your official acceptance letter from LOGOS Christian University attached below. ` +
           `We are delighted to welcome you into our community of scholars and ministers of the Gospel.`
         );
-        // Default sign-off
         setSignoff(
           `Should you have any questions regarding your acceptance or the enrollment process, ` +
           `please do not hesitate to reach out to our admissions office.\n\n` +
@@ -241,7 +239,9 @@ export default function AcceptanceLetterPage() {
             The acceptance letter was sent to <span className="font-medium">{to}</span> with a Word document attached.
           </p>
           <div className="flex flex-col gap-2 pt-2">
-            <button onClick={() => navigate(`/applicants/${id}`)} className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 rounded">
+            <button onClick={() => navigate(`/applicants/${id}`)}
+              className="w-full text-white text-sm font-semibold py-2.5 rounded"
+              style={{ backgroundColor: '#7B2D3E' }}>
               Back to Application
             </button>
             <button onClick={() => navigate('/')} className="w-full border border-gray-300 text-gray-600 hover:border-gray-400 text-sm font-medium py-2.5 rounded">
@@ -261,7 +261,9 @@ export default function AcceptanceLetterPage() {
           <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center mx-auto text-3xl">⚠</div>
           <h2 className="text-xl font-bold text-gray-800">Email Blocked</h2>
           <p className="text-sm text-gray-600">{sendResult.message}</p>
-          <button onClick={() => setSendResult(null)} className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 rounded">
+          <button onClick={() => setSendResult(null)}
+            className="w-full text-white text-sm font-semibold py-2.5 rounded"
+            style={{ backgroundColor: '#7B2D3E' }}>
             Back to Compose
           </button>
         </div>
@@ -271,29 +273,40 @@ export default function AcceptanceLetterPage() {
 
   // ── Compose ─────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gray-50 pb-20" style={{ display: 'flex', flexDirection: 'column' }}>
+    <div className="min-h-screen bg-gray-50 pb-20 flex flex-col">
 
-      {/* Top nav */}
-      <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between shrink-0">
+      {/* Top nav — breadcrumb */}
+      <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 flex items-center gap-2 shrink-0">
         <button
-          onClick={() => navigate(-1)}
-          className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+          onClick={() => navigate('/')}
+          className="text-sm text-gray-400 hover:text-gray-700 transition-colors"
         >
-          ← Back
+          Dashboard
         </button>
-        <p className="text-xs text-gray-400">LOGOS Admissions — Acceptance Letter</p>
+        <span className="text-gray-300 text-sm">›</span>
+        <button
+          onClick={() => navigate(`/applicants/${id}`)}
+          className="text-sm text-gray-400 hover:text-gray-700 transition-colors truncate max-w-[160px]"
+          title={applicant?.full_name}
+        >
+          {applicant?.full_name || 'Applicant'}
+        </button>
+        <span className="text-gray-300 text-sm">›</span>
+        <span className="text-sm font-semibold text-gray-700">Acceptance Letter</span>
+
+        <div className="ml-auto flex items-center gap-3">
+          <span className="hidden sm:inline text-xs bg-green-100 text-green-700 font-semibold px-2.5 py-0.5 rounded-full">
+            Approved
+          </span>
+          {applicant?.program_applied && (
+            <span className="hidden sm:inline text-xs text-gray-400 truncate max-w-[200px]">
+              {applicant.program_applied}
+            </span>
+          )}
+        </div>
       </div>
 
-      <div className="flex flex-col flex-1 max-w-5xl mx-auto w-full px-6 py-6 gap-4">
-
-        {/* Applicant chip */}
-        <div className="bg-white rounded-xl border border-gray-200 px-6 py-3 flex items-center justify-between shrink-0">
-          <div>
-            <p className="text-sm font-bold text-gray-800">{applicant?.full_name}</p>
-            <p className="text-xs text-gray-500 mt-0.5">{applicant?.program_applied} · {applicant?.email}</p>
-          </div>
-          <span className="text-xs bg-green-100 text-green-700 font-semibold px-2.5 py-1 rounded-full">Approved</span>
-        </div>
+      <div className="flex flex-col flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 gap-4">
 
         {/* Email compose card */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm flex flex-col">
@@ -307,10 +320,19 @@ export default function AcceptanceLetterPage() {
             <button
               onClick={generateLetter}
               disabled={generating}
-              className="flex items-center gap-1.5 text-xs font-semibold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-lg disabled:opacity-50 transition-colors"
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border disabled:opacity-50 transition-colors"
+              style={{
+                backgroundColor: generating ? '#f9fafb' : '#fdf2f3',
+                borderColor: '#e8c4c9',
+                color: '#7B2D3E',
+              }}
             >
               {generating ? (
-                <><span className="animate-spin inline-block w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full" /> Generating...</>
+                <>
+                  <span className="animate-spin inline-block w-3 h-3 border-2 border-t-transparent rounded-full"
+                    style={{ borderColor: '#7B2D3E', borderTopColor: 'transparent' }} />
+                  Generating...
+                </>
               ) : (
                 <>{body ? '↺ Regenerate Letter' : '✦ Generate Letter'}</>
               )}
@@ -351,12 +373,12 @@ export default function AcceptanceLetterPage() {
               className="mx-auto my-6 bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden"
               style={{ maxWidth: '760px' }}
             >
-              {/* Email header stripe (LOGOS branding) */}
-              <div className="bg-blue-700 px-8 py-4 flex items-center gap-3">
+              {/* Email header stripe — brand maroon */}
+              <div className="px-8 py-4 flex items-center gap-3" style={{ backgroundColor: '#7B2D3E' }}>
                 <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-xs font-bold shrink-0">L</div>
                 <div>
                   <p className="text-white text-sm font-semibold leading-tight">LOGOS Christian University</p>
-                  <p className="text-blue-200 text-xs">Office of Admissions · admissions@logos.edu</p>
+                  <p className="text-xs" style={{ color: '#f0c4cc' }}>Office of Admissions · admissions@logos.edu</p>
                 </div>
               </div>
 
@@ -407,7 +429,7 @@ export default function AcceptanceLetterPage() {
           <div className="px-6 py-3 border-t border-gray-100 bg-gray-50 flex items-center justify-between gap-4 shrink-0">
             <div className="flex items-center gap-2 text-xs text-gray-400">
               <span>📄</span>
-              <span>Word document (.docx) will be auto-attached on send</span>
+              <span className="hidden sm:inline">Word document (.docx) will be auto-attached on send</span>
             </div>
             <div className="flex items-center gap-3">
               {sendError && <p className="text-xs text-red-600">{sendError}</p>}
@@ -418,10 +440,16 @@ export default function AcceptanceLetterPage() {
               <button
                 onClick={sendLetter}
                 disabled={sending || !body.trim()}
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-semibold px-6 py-2.5 rounded-lg transition-colors"
+                className="flex items-center gap-2 text-white text-sm font-semibold px-6 py-2.5 rounded-lg transition-colors disabled:opacity-50"
+                style={{ backgroundColor: '#7B2D3E' }}
+                onMouseEnter={e => { if (!sending && body.trim()) e.currentTarget.style.backgroundColor = '#6a2535'; }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#7B2D3E'; }}
               >
                 {sending ? (
-                  <><span className="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full" /> Sending...</>
+                  <>
+                    <span className="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full" />
+                    Sending...
+                  </>
                 ) : (
                   <>✉ Send Letter</>
                 )}

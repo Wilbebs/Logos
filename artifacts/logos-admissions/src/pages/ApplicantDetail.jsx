@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import StatusBadge from '../components/StatusBadge.jsx';
-import FormChecklist from '../components/FormChecklist.jsx';
 import AIRecommendation from '../components/AIRecommendation.jsx';
 import LeadProfile from '../components/LeadProfile.jsx';
 import FileAttachments from '../components/FileAttachments.jsx';
@@ -17,67 +16,9 @@ function formatDate(dateStr) {
   });
 }
 
-// ── Raw form data accordion ────────────────────────────────────────────────────
-function FormAccordion({ forms }) {
-  const [openIndexes, setOpenIndexes] = useState([]);
-
-  function toggle(index) {
-    setOpenIndexes(prev =>
-      prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index]
-    );
-  }
-
-  if (!forms || forms.length === 0) {
-    return <p className="text-sm text-gray-500">No form submissions yet.</p>;
-  }
-
-  return (
-    <div className="space-y-2">
-      {forms.map((form, index) => {
-        const isOpen = openIndexes.includes(index);
-        const entries = Object.entries(form.raw_data || {});
-        return (
-          <div key={form.id || index} className="border border-gray-200 rounded">
-            <button
-              onClick={() => toggle(index)}
-              className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 text-left"
-            >
-              <span>Form {form.form_number ?? index + 1} — submitted {formatDate(form.submitted_at)}</span>
-              <span className="ml-2 text-gray-400 font-bold">{isOpen ? '▲' : '▼'}</span>
-            </button>
-            {isOpen && (
-              <div className="px-4 py-3">
-                {entries.length === 0 ? (
-                  <p className="text-sm text-gray-500">No data available.</p>
-                ) : (
-                  <table className="min-w-full text-sm">
-                    <tbody>
-                      {entries.map(([key, value]) => (
-                        <tr key={key} className="border-b border-gray-100 last:border-0">
-                          <td className="py-1.5 pr-4 font-medium text-gray-500 align-top w-1/3 break-all">{key}</td>
-                          <td className="py-1.5 text-gray-800 align-top break-all">
-                            {value === null || value === undefined
-                              ? '—'
-                              : typeof value === 'object'
-                              ? JSON.stringify(value)
-                              : String(value)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 // ── Decision panel ────────────────────────────────────────────────────────────
-function DecisionPanel({ applicant, onDecisionSubmitted }) {
+// `embedded` = true → renders content only (no outer bordered card wrapper)
+function DecisionPanel({ applicant, onDecisionSubmitted, embedded = false }) {
   const [selectedDecision, setSelectedDecision] = useState(null);
   const [notes, setNotes] = useState('');
   const [decisionBy, setDecisionBy] = useState('');
@@ -143,6 +84,7 @@ function DecisionPanel({ applicant, onDecisionSubmitted }) {
     }
   }
 
+  // ── Already decided ─────────────────────────────────────────────────────────
   if (!isPending || submitted) {
     const displayDecision = submitted ? selectedDecision : applicant.decision;
     const displayNotes = submitted ? notes : applicant.decision_notes;
@@ -162,8 +104,8 @@ function DecisionPanel({ applicant, onDecisionSubmitted }) {
       }
     }
 
-    return (
-      <div className="border border-gray-200 rounded p-4">
+    const inner = (
+      <>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-bold text-gray-700">Decision</h3>
           <button
@@ -193,19 +135,22 @@ function DecisionPanel({ applicant, onDecisionSubmitted }) {
         {applicant.decision_at && (
           <p className="text-sm text-gray-500 mt-1"><span className="font-medium">On: </span>{formatDate(applicant.decision_at)}</p>
         )}
-      </div>
+      </>
     );
+
+    return embedded ? inner : <div className="border border-gray-200 rounded p-4">{inner}</div>;
   }
 
-  return (
-    <div className="border border-gray-200 rounded p-4">
+  // ── Pending decision ────────────────────────────────────────────────────────
+  const inner = (
+    <>
       <h3 className="text-sm font-bold text-gray-700 mb-3">Decision</h3>
 
       <div className="flex gap-2 mb-4 flex-wrap">
         {[
-          { val: 'approved', label: 'Approve', active: 'border-green-600 bg-green-50 text-green-700', hover: 'hover:border-green-400' },
-          { val: 'rejected', label: 'Reject', active: 'border-red-600 bg-red-50 text-red-700', hover: 'hover:border-red-400' },
-          { val: 'info_requested', label: 'Request Info', active: 'border-yellow-500 bg-yellow-50 text-yellow-700', hover: 'hover:border-yellow-400' },
+          { val: 'approved',      label: 'Approve',      active: 'border-green-600 bg-green-50 text-green-700',   hover: 'hover:border-green-400' },
+          { val: 'rejected',      label: 'Reject',       active: 'border-red-600 bg-red-50 text-red-700',         hover: 'hover:border-red-400' },
+          { val: 'info_requested',label: 'Request Info', active: 'border-yellow-500 bg-yellow-50 text-yellow-700',hover: 'hover:border-yellow-400' },
         ].map(({ val, label, active, hover }) => (
           <button
             key={val}
@@ -273,12 +218,17 @@ function DecisionPanel({ applicant, onDecisionSubmitted }) {
       <button
         onClick={handleSubmit}
         disabled={submitting}
-        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-medium py-2 px-4 rounded"
+        className="w-full text-white text-sm font-medium py-2 px-4 rounded transition-colors"
+        style={{ backgroundColor: submitting ? '#a87080' : '#7B2D3E' }}
+        onMouseEnter={e => { if (!submitting) e.currentTarget.style.backgroundColor = '#6a2535'; }}
+        onMouseLeave={e => { if (!submitting) e.currentTarget.style.backgroundColor = '#7B2D3E'; }}
       >
         {submitting ? 'Submitting…' : 'Submit Decision'}
       </button>
-    </div>
+    </>
   );
+
+  return embedded ? inner : <div className="border border-gray-200 rounded p-4">{inner}</div>;
 }
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -331,10 +281,11 @@ export default function ApplicantDetail() {
 
   return (
     <div className={`min-h-screen bg-gray-100 p-6 ${isApproved ? 'pb-20' : ''}`}>
+
       {/* Back */}
       <button
         onClick={() => navigate('/')}
-        className="mb-5 text-sm text-blue-600 hover:underline flex items-center gap-1"
+        className="mb-5 text-sm font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:text-gray-800 transition-colors shadow-sm"
       >
         ← Back to Dashboard
       </button>
@@ -345,59 +296,139 @@ export default function ApplicantDetail() {
       </div>
 
       {/* ── Two-column layout ── */}
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
 
-        {/* LEFT — Form data + Files */}
-        <div className="flex-[3] space-y-6">
+        {/* LEFT — Files & raw data */}
+        <div className="flex-[3] space-y-4">
 
-          {/* Form completion */}
-          <div className="bg-white border border-gray-200 rounded p-5">
-            <h3 className="text-sm font-bold text-gray-700 mb-4">Form Completion</h3>
-            <FormChecklist applicant={applicant} />
-          </div>
-
-          {/* Raw form data — compact backup; all fields are shown in LeadProfile above */}
-          <div className="bg-white border border-gray-200 rounded p-5">
-            <h3 className="text-sm font-bold text-gray-700 mb-1">Raw Form Data</h3>
-            <p className="text-xs text-gray-400 mb-4">Unprocessed data exactly as received from MachForm.</p>
-            <FormAccordion forms={forms} />
-          </div>
-
-          {/* Files */}
-          <div className="bg-white border border-gray-200 rounded p-5">
+          {/* Files & Documents */}
+          <div className="bg-white border border-gray-200 rounded-lg p-5">
             <h3 className="text-sm font-bold text-gray-700 mb-1">Files & Documents</h3>
             <p className="text-xs text-gray-400 mb-4">
               Transcripts, diplomas, and any supporting documents for this applicant.
             </p>
             <FileAttachments applicantId={applicant.id} />
           </div>
+
+          {/* Raw form data — collapsed by default */}
+          <RawFormDataPanel forms={forms} />
         </div>
 
-        {/* RIGHT — Eligibility + AI + Decision */}
-        <div className="flex-[2] space-y-6">
+        {/* RIGHT — Unified Review & Decision card */}
+        <div className="flex-[2]">
+          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
 
-          {/* Eligibility */}
-          <div className="bg-white border border-gray-200 rounded p-5">
-            <h3 className="text-sm font-bold text-gray-700 mb-3">Eligibility Status</h3>
-            <StatusBadge status={applicant.eligibility_status} type="eligibility" large />
+            {/* Card header: title + eligibility badge */}
+            <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+              <h3 className="text-sm font-bold text-gray-700">Review & Decision</h3>
+              <StatusBadge status={applicant.eligibility_status} type="eligibility" />
+            </div>
+
+            {/* AI Review section */}
+            <div className="px-5 py-4 border-b border-gray-100">
+              <AIRecommendation applicant={applicant} />
+            </div>
+
+            {/* Decision section */}
+            <div className="px-5 py-4">
+              <DecisionPanel
+                applicant={applicant}
+                onDecisionSubmitted={loadApplicant}
+                embedded
+              />
+            </div>
+
+            {/* Acceptance Letter link — shown only after approval */}
+            {isApproved && (
+              <div className="border-t border-gray-100 px-5 py-4">
+                <AcceptanceLetter applicant={applicant} />
+              </div>
+            )}
           </div>
-
-          {/* AI Review */}
-          <AIRecommendation applicant={applicant} />
-
-          {/* Decision */}
-          <DecisionPanel applicant={applicant} onDecisionSubmitted={loadApplicant} />
-
-          {/* Acceptance Letter — only shown after approval */}
-          {isApproved && (
-            <AcceptanceLetter applicant={applicant} />
-          )}
         </div>
       </div>
 
-      {/* Sticky admission progress timeline — only when approved */}
+      {/* Sticky admission timeline — only when approved */}
       {isApproved && (
         <AdmissionTimeline applicantId={applicant.id} activeStep={0} />
+      )}
+    </div>
+  );
+}
+
+// ── Raw Form Data panel — collapsed by default ────────────────────────────────
+function RawFormDataPanel({ forms }) {
+  const [open, setOpen] = useState(false);
+  const [openIndexes, setOpenIndexes] = useState([]);
+
+  function toggleForm(index) {
+    setOpenIndexes(prev =>
+      prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index]
+    );
+  }
+
+  if (!forms || forms.length === 0) return null;
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-gray-50 transition-colors"
+      >
+        <div>
+          <p className="text-sm font-bold text-gray-700">Raw Form Data</p>
+          <p className="text-xs text-gray-400 mt-0.5">Unprocessed fields exactly as received from MachForm</p>
+        </div>
+        <span className="text-gray-400 text-xs ml-4 shrink-0">{open ? '▲' : '▼'}</span>
+      </button>
+
+      {open && (
+        <div className="border-t border-gray-100 divide-y divide-gray-100">
+          {forms.map((form, index) => {
+            const isOpen = openIndexes.includes(index);
+            const entries = Object.entries(form.raw_data || {});
+            const label = form.form_number === 1 ? 'Form 1 — Solicitud de Admisión'
+              : form.form_number === 2 ? 'Form 2 — Recomendación Pastoral'
+              : form.form_number === 3 ? 'Form 3 — Experiencia Ministerial'
+              : `Form ${form.form_number ?? index + 1}`;
+
+            return (
+              <div key={form.id || index}>
+                <button
+                  onClick={() => toggleForm(index)}
+                  className="w-full flex items-center justify-between px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 text-left"
+                >
+                  <span>{label} <span className="text-gray-400 font-normal text-xs ml-1">({entries.length} fields)</span></span>
+                  <span className="ml-2 text-gray-400 text-xs">{isOpen ? '▲' : '▼'}</span>
+                </button>
+                {isOpen && (
+                  <div className="px-5 py-3">
+                    {entries.length === 0 ? (
+                      <p className="text-sm text-gray-500">No data available.</p>
+                    ) : (
+                      <table className="min-w-full text-sm">
+                        <tbody>
+                          {entries.map(([key, value]) => (
+                            <tr key={key} className="border-b border-gray-100 last:border-0">
+                              <td className="py-1.5 pr-4 font-medium text-gray-500 align-top w-1/3 break-all">{key}</td>
+                              <td className="py-1.5 text-gray-800 align-top break-all">
+                                {value === null || value === undefined
+                                  ? '—'
+                                  : typeof value === 'object'
+                                  ? JSON.stringify(value)
+                                  : String(value)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       )}
     </div>
   );
