@@ -7,7 +7,7 @@
  * Completed steps are green. Current step is maroon/active. The next
  * step is styled as an obviously-clickable action — not grayed out.
  */
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const STEPS = [
@@ -19,9 +19,26 @@ const BRAND = '#7B2D3E';
 
 export default function AdmissionTimeline({ applicantId, activeStep }) {
   const navigate = useNavigate();
+  const barRef = useRef(null);
+
+  useEffect(() => {
+    const el = barRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(entries => {
+      const h = entries[0]?.borderBoxSize?.[0]?.blockSize ?? entries[0]?.contentRect?.height ?? 0;
+      document.documentElement.style.setProperty('--timeline-bar-height', `${h}px`);
+    });
+    observer.observe(el);
+    // Set immediately in case ResizeObserver fires async
+    document.documentElement.style.setProperty('--timeline-bar-height', `${el.offsetHeight}px`);
+    return () => {
+      observer.disconnect();
+      document.documentElement.style.setProperty('--timeline-bar-height', '0px');
+    };
+  }, []);
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-lg">
+    <div ref={barRef} className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-lg">
       <div className="max-w-5xl mx-auto px-6 py-3 flex items-center gap-0">
         {STEPS.map((step, i) => {
           const done    = i < activeStep;

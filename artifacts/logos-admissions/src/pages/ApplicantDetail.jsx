@@ -280,7 +280,7 @@ export default function ApplicantDetail() {
   const isApproved = applicant.decision === 'approved';
 
   return (
-    <div className={`min-h-screen bg-gray-100 p-6 ${isApproved ? 'pb-36' : 'pb-10'}`}>
+    <div className="min-h-screen bg-gray-100 p-6" style={{ paddingBottom: 'calc(var(--timeline-bar-height, 0px) + 1.5rem)' }}>
 
       {/* Back */}
       <button
