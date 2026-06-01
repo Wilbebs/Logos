@@ -280,7 +280,7 @@ export default function ApplicantDetail() {
   const isApproved = applicant.decision === 'approved';
 
   return (
-    <div className={`min-h-screen bg-gray-100 p-6 ${isApproved ? 'pb-20' : ''}`}>
+    <div className={`min-h-screen bg-gray-100 p-6 ${isApproved ? 'pb-36' : 'pb-10'}`}>
 
       {/* Back */}
       <button
@@ -298,8 +298,11 @@ export default function ApplicantDetail() {
       {/* ── Two-column layout ── */}
       <div className="flex flex-col lg:flex-row gap-6 items-start">
 
-        {/* LEFT — Files & raw data */}
+        {/* LEFT — Form data + files */}
         <div className="flex-[3] space-y-4">
+
+          {/* Form Data — Form 1 open by default */}
+          <RawFormDataPanel forms={forms} />
 
           {/* Files & Documents */}
           <div className="bg-white border border-gray-200 rounded-lg p-5">
@@ -309,9 +312,6 @@ export default function ApplicantDetail() {
             </p>
             <FileAttachments applicantId={applicant.id} />
           </div>
-
-          {/* Raw form data — collapsed by default */}
-          <RawFormDataPanel forms={forms} />
         </div>
 
         {/* RIGHT — Unified Review & Decision card */}
@@ -356,10 +356,11 @@ export default function ApplicantDetail() {
   );
 }
 
-// ── Raw Form Data panel — collapsed by default ────────────────────────────────
+// ── Form Data panel — Form 1 open by default ──────────────────────────────────
 function RawFormDataPanel({ forms }) {
-  const [open, setOpen] = useState(false);
-  const [openIndexes, setOpenIndexes] = useState([]);
+  const [open, setOpen] = useState(true);
+  // Start with Form 1 (index 0) expanded; others collapsed
+  const [openIndexes, setOpenIndexes] = useState([0]);
 
   function toggleForm(index) {
     setOpenIndexes(prev =>
@@ -367,20 +368,39 @@ function RawFormDataPanel({ forms }) {
     );
   }
 
+  function expandAll() {
+    if (!forms) return;
+    setOpenIndexes(forms.map((_, i) => i));
+    setOpen(true);
+  }
+
+  const allExpanded = forms && openIndexes.length === forms.length;
+
   if (!forms || forms.length === 0) return null;
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-      <button
-        onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-gray-50 transition-colors"
-      >
-        <div>
-          <p className="text-sm font-bold text-gray-700">Raw Form Data</p>
-          <p className="text-xs text-gray-400 mt-0.5">Unprocessed fields exactly as received from MachForm</p>
-        </div>
-        <span className="text-gray-400 text-xs ml-4 shrink-0">{open ? '▲' : '▼'}</span>
-      </button>
+      {/* Panel header */}
+      <div className="flex items-center justify-between px-5 py-3.5">
+        <button
+          onClick={() => setOpen(o => !o)}
+          className="flex-1 flex items-center gap-3 text-left"
+        >
+          <div>
+            <p className="text-sm font-bold text-gray-700">Form Data</p>
+            <p className="text-xs text-gray-400 mt-0.5">Fields as received from MachForm</p>
+          </div>
+          <span className="text-gray-400 text-xs shrink-0">{open ? '▲' : '▼'}</span>
+        </button>
+        {open && !allExpanded && (
+          <button
+            onClick={expandAll}
+            className="ml-4 shrink-0 text-xs text-[#7B2D3E] font-medium hover:underline"
+          >
+            Expand all
+          </button>
+        )}
+      </div>
 
       {open && (
         <div className="border-t border-gray-100 divide-y divide-gray-100">
