@@ -4,19 +4,20 @@
  * Sticky bottom navigation bar shown on both the ApplicantDetail page
  * (when approved) and the AcceptanceLetterPage.
  *
- * Each step is a clickable link. The current step is highlighted in blue,
- * completed steps in green, future steps are grey and non-clickable.
+ * Completed steps are green. Current step is maroon/active. The next
+ * step is styled as an obviously-clickable action — not grayed out.
  */
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const STEPS = [
-  { key: 'application',       label: 'Application',       path: id => `/applicants/${id}` },
-  { key: 'acceptance_letter', label: 'Acceptance Letter',  path: id => `/applicants/${id}/acceptance` },
+  { key: 'application',       label: 'Application',      path: id => `/applicants/${id}` },
+  { key: 'acceptance_letter', label: 'Acceptance Letter', path: id => `/applicants/${id}/acceptance` },
 ];
 
+const BRAND = '#7B2D3E';
+
 export default function AdmissionTimeline({ applicantId, activeStep }) {
-  // activeStep: index of the current step (0 = application, 1 = acceptance_letter)
   const navigate = useNavigate();
 
   return (
@@ -25,39 +26,74 @@ export default function AdmissionTimeline({ applicantId, activeStep }) {
         {STEPS.map((step, i) => {
           const done    = i < activeStep;
           const current = i === activeStep;
-          const future  = i > activeStep;
-          const clickable = true; // all steps navigable once approved
+          const isNext  = i === activeStep + 1;
+          const future  = i > activeStep + 1;
+
+          // Circle styling
+          let circleStyle = {};
+          let circleClass = 'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-all ';
+          if (done) {
+            circleClass += 'text-white';
+            circleStyle = { backgroundColor: '#16a34a' };
+          } else if (current) {
+            circleClass += 'text-white ring-2 ring-offset-1';
+            circleStyle = { backgroundColor: BRAND, ringColor: BRAND };
+          } else if (isNext) {
+            circleClass += 'border-2';
+            circleStyle = { borderColor: BRAND, color: BRAND, backgroundColor: '#fff' };
+          } else {
+            circleClass += 'bg-gray-200 text-gray-400';
+          }
+
+          // Label styling
+          let labelClass = 'text-sm font-medium whitespace-nowrap transition-colors ';
+          if (done)         labelClass += 'text-green-700';
+          else if (current) labelClass += 'font-bold';
+          else if (isNext)  labelClass += 'font-semibold';
+          else              labelClass += 'text-gray-400';
+
+          // Button wrapper
+          let btnClass = 'flex items-center gap-2 px-3 py-2 rounded-lg transition-all ';
+          if (current) {
+            btnClass += 'cursor-default';
+          } else if (isNext) {
+            btnClass += 'cursor-pointer hover:bg-red-50 ring-1 ring-inset';
+          } else {
+            btnClass += 'cursor-pointer hover:bg-gray-100';
+          }
+
+          const labelStyle = (!done && !future && !current) ? { color: BRAND } : {};
+          const btnRingStyle = isNext ? { ringColor: `${BRAND}33` } : {};
 
           return (
             <React.Fragment key={step.key}>
               <button
-                onClick={() => clickable && navigate(step.path(applicantId))}
-                disabled={!clickable}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors
-                  ${current ? 'cursor-default' : 'hover:bg-gray-100 cursor-pointer'}`}
+                onClick={() => navigate(step.path(applicantId))}
+                className={btnClass}
+                style={isNext ? { outline: `1px solid ${BRAND}33` } : {}}
+                title={isNext ? `Go to ${step.label}` : undefined}
               >
-                {/* Circle */}
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors
-                  ${done    ? 'bg-green-600 text-white'
-                  : current ? 'bg-blue-600 text-white ring-2 ring-blue-200'
-                  : 'bg-gray-200 text-gray-400'}`}
-                >
+                {/* Step circle */}
+                <div className={circleClass} style={circleStyle}>
                   {done ? '✓' : i + 1}
                 </div>
+
                 {/* Label */}
-                <span className={`text-sm font-medium whitespace-nowrap
-                  ${done    ? 'text-green-700'
-                  : current ? 'text-blue-700'
-                  : 'text-gray-400'}`}
-                >
+                <span className={labelClass} style={isNext ? { color: BRAND } : {}}>
                   {step.label}
                 </span>
+
+                {/* "Go" cue for next step */}
+                {isNext && (
+                  <span className="text-xs ml-0.5" style={{ color: BRAND }}>→</span>
+                )}
               </button>
 
-              {/* Connector */}
+              {/* Connector line */}
               {i < STEPS.length - 1 && (
-                <div className={`flex-1 h-0.5 mx-2 rounded transition-colors
-                  ${done ? 'bg-green-400' : 'bg-gray-200'}`}
+                <div
+                  className="flex-1 h-0.5 mx-2 rounded transition-colors"
+                  style={{ backgroundColor: done ? '#16a34a' : '#e5e7eb' }}
                 />
               )}
             </React.Fragment>
