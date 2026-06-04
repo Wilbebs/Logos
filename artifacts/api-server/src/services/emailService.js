@@ -184,16 +184,7 @@ export const sendInfoRequestEmail = (applicant) => sendEmail('info_requested', a
 export async function sendEmail(emailType, applicant, extraData = {}) {
   const recipientEmail = applicant.email?.toLowerCase() || '';
 
-  if (!EMAIL_ALLOWLIST.includes(recipientEmail)) {
-    console.warn(
-      `[emailService] BLOCKED — "${recipientEmail}" is not on the allowlist. ` +
-      `Email type "${emailType}" was NOT sent. ` +
-      `Add to EMAIL_ALLOWLIST env var to enable.`
-    );
-    await logEmail(applicant.id, emailType, 'blocked', { toAddress: recipientEmail });
-    return { success: false, blocked: true };
-  }
-
+  // Build template first so we can log the body even if blocked
   let template;
 
   switch (emailType) {
@@ -217,6 +208,21 @@ export async function sendEmail(emailType, applicant, extraData = {}) {
       break;
     default:
       throw new Error(`[emailService] Unknown email type: ${emailType}`);
+  }
+
+  // Allowlist check — log full content even when blocked so staff can see what would have been sent
+  if (!EMAIL_ALLOWLIST.includes(recipientEmail)) {
+    console.warn(
+      `[emailService] BLOCKED — "${recipientEmail}" is not on the allowlist. ` +
+      `Email type "${emailType}" was NOT sent. Add to EMAIL_ALLOWLIST env var to enable.`
+    );
+    await logEmail(applicant.id, emailType, 'blocked', {
+      subject:     template.subject,
+      bodyText:    template.text,
+      fromAddress: process.env.RESEND_FROM_EMAIL || 'admissions@logos.edu',
+      toAddress:   recipientEmail,
+    });
+    return { success: false, blocked: true };
   }
 
   try {

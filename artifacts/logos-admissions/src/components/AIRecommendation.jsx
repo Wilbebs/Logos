@@ -220,6 +220,50 @@ export default function AIRecommendation({ applicant, onReviewComplete }) {
   );
   };
 
+  // ── Forms incomplete — primary blocker, shown before everything else ────────
+  if (!applicant.forms_complete) {
+    const missing = [];
+    if (!applicant.form1_submitted_at) missing.push('Form 1 — Solicitud de Admisión');
+    if (!applicant.form2_submitted_at) missing.push('Form 2 — Recomendación Pastoral');
+    if (!applicant.form3_submitted_at) missing.push('Form 3 — Experiencia Ministerial');
+
+    return (
+      <div className="border border-yellow-300 rounded overflow-hidden">
+        <div className="px-4 py-2 bg-yellow-50 border-b border-yellow-200">
+          <p className="text-sm font-bold text-yellow-800">⏳ Waiting for Missing Forms</p>
+        </div>
+        <div className="px-4 py-3 space-y-2">
+          <p className="text-sm text-gray-700">
+            This applicant has not yet submitted all three required forms. Eligibility cannot
+            be evaluated until all forms are received.
+          </p>
+          <ul className="space-y-1 mt-1">
+            {['form1_submitted_at','form2_submitted_at','form3_submitted_at'].map((f, i) => {
+              const labels = ['Form 1 — Solicitud de Admisión','Form 2 — Recomendación Pastoral','Form 3 — Experiencia Ministerial'];
+              const submitted = !!applicant[f];
+              return (
+                <li key={f} className="flex items-center gap-2 text-xs">
+                  <span className={`font-bold ${submitted ? 'text-green-600' : 'text-yellow-600'}`}>
+                    {submitted ? '✓' : '○'}
+                  </span>
+                  <span className={submitted ? 'text-gray-600' : 'text-yellow-800 font-medium'}>
+                    {labels[i]}{submitted ? ' (received)' : ' (pending)'}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+          {applicant.ai_reasoning && (
+            <p className="text-xs text-gray-400 mt-2 italic">{applicant.ai_reasoning}</p>
+          )}
+        </div>
+        <div className="px-4 py-2 bg-gray-50 border-t border-gray-100">
+          <p className="text-xs text-gray-400">Eligibility review will run automatically once all 3 forms are received.</p>
+        </div>
+      </div>
+    );
+  }
+
   // ── Ineligible — hard rules-engine rejection ─────────────────────────────
   if (isIneligible) {
     return (
