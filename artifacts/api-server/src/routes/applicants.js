@@ -41,7 +41,7 @@ const router = Router();
 // ------------------------------------------------------------------
 // Allowed enum values
 // ------------------------------------------------------------------
-const VALID_DECISIONS = ['approved', 'rejected', 'info_requested'];
+const VALID_DECISIONS = ['approved', 'rejected', 'info_requested', 'pending'];
 
 // ------------------------------------------------------------------
 // GET /api/applicants
