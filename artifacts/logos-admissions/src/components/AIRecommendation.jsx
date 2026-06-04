@@ -188,14 +188,14 @@ export default function AIRecommendation({ applicant, onReviewComplete }) {
 
   // Shared run/rerun button
   // greyed = true when AI is not applicable (rules-engine case, doc flag, etc.)
-  // alreadyRun = true when AI has already produced a result — lock it after first run
+  // alreadyRun = true when AI has already produced a result — allow re-run to detect changes
   const alreadyRun = !!(localRec ?? applicant.ai_recommendation);
   const RunButton = ({ greyed = false }) => {
-    const locked = greyed || alreadyRun;
+    const locked = greyed; // never lock on alreadyRun — re-runs are allowed
     const title = greyed
       ? 'AI assessment is not used for this case — result is determined by the rules engine'
       : alreadyRun
-      ? 'AI assessment has already been run for this applicant'
+      ? 'Re-run assessment — Gemini will check if anything has changed since the last review'
       : undefined;
     return (
     <div className="mt-3 space-y-1">
@@ -212,7 +212,7 @@ export default function AIRecommendation({ applicant, onReviewComplete }) {
         {running ? (
           <><span className="animate-spin inline-block w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full" /> Running assessment…</>
         ) : (
-          <>✦ {alreadyRun ? 'Assessment Complete' : 'Run AI Assessment'}</>
+          <>✦ {alreadyRun ? 'Re-run Assessment' : 'Run AI Assessment'}</>
         )}
       </button>
       {runError && <p className="text-xs text-red-600">{runError}</p>}

@@ -1,7 +1,73 @@
 import express from 'express';
-import supabase from '../db/client.js';
+import supabase, { supabaseAdmin } from '../db/client.js';
 import { evaluateEligibility } from '../services/eligibility.js';
 import { callAIReview } from '../services/aiReview.js';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MachForm file ingestion
+// Files attached to Form 1 are listed by filename in DocumentosParaEvaluaciónSePuedenA.
+// We download each from the known MachForm uploads base URL and store in Supabase.
+// ─────────────────────────────────────────────────────────────────────────────
+const MACHFORM_UPLOADS_BASE = 'https://logoscu.com/forms/uploads/';
+const STORAGE_BUCKET = 'applicant-files';
+
+async function ingestMachFormFiles(applicantId, body) {
+  const rawField = body['DocumentosParaEvaluaciónSePuedenA']
+    || body['DocumentosParaEvaluacionSePuedenA']
+    || body['DocumentosParaEvaluaciónSePuedenA']
+    || '';
+
+  if (!rawField || rawField.trim() === '-' || rawField.trim() === '') return;
+
+  const filenames = rawField.split(',').map(f => f.trim()).filter(Boolean);
+  if (filenames.length === 0) return;
+
+  console.log(`[webhook] Ingesting ${filenames.length} MachForm file(s) for applicant ${applicantId}`);
+
+  for (const filename of filenames) {
+    try {
+      // Download from MachForm
+      const url = MACHFORM_UPLOADS_BASE + encodeURIComponent(filename);
+      const response = await fetch(url);
+      if (!response.ok) {
+        console.warn(`[webhook] Could not download ${filename}: HTTP ${response.status}`);
+        continue;
+      }
+      const buffer = Buffer.from(await response.arrayBuffer());
+      const contentType = response.headers.get('content-type') || 'application/octet-stream';
+
+      // Upload to Supabase Storage
+      const safeFilename = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const storagePath = `applicants/${applicantId}/applicant_documents/${Date.now()}-${safeFilename}`;
+
+      const { error: uploadErr } = await supabaseAdmin.storage
+        .from(STORAGE_BUCKET)
+        .upload(storagePath, buffer, { contentType, upsert: false });
+
+      if (uploadErr) {
+        console.warn(`[webhook] Storage upload failed for ${filename}:`, uploadErr.message);
+        continue;
+      }
+
+      const { data: urlData } = supabaseAdmin.storage.from(STORAGE_BUCKET).getPublicUrl(storagePath);
+
+      await supabase.from('applicant_files').insert({
+        applicant_id:  applicantId,
+        file_name:     filename,
+        file_path:     storagePath,
+        file_url:      urlData?.publicUrl || null,
+        file_size:     buffer.length,
+        file_type:     contentType,
+        category:      'applicant_documents',
+        uploaded_by:   'machform',
+      });
+
+      console.log(`[webhook] Ingested ${filename} (${buffer.length} bytes)`);
+    } catch (err) {
+      console.warn(`[webhook] Failed to ingest ${filename}:`, err.message);
+    }
+  }
+}
 
 // emailService is optional — loaded lazily on first use
 let sendEmail = null;
@@ -354,6 +420,13 @@ async function handleFormSubmission(req, res, formNumber) {
     if (insertError) {
       console.error('[webhook] Form submission insert failed:', insertError);
       return res.status(500).json({ error: 'Internal error' });
+    }
+
+    // 4b. Auto-ingest files attached to Form 1 from MachForm uploads
+    if (formNumber === 1) {
+      ingestMachFormFiles(applicant.id, body).catch(err =>
+        console.warn('[webhook] ingestMachFormFiles error:', err.message)
+      );
     }
 
     // 5. Stamp the form timestamp

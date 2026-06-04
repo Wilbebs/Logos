@@ -12,7 +12,7 @@ const systemPrompt = readFileSync(
   'utf-8'
 );
 
-export async function callAIReview(applicant, formData) {
+export async function callAIReview(applicant, formData, previousAssessment = null) {
   const raw = formData?.raw_data ?? {};
 
   // Prefer enriched applicant-record fields; fall back to raw form data
@@ -55,6 +55,15 @@ IMPORTANT: The rules engine already evaluated this application deterministically
 
 === ADDITIONAL INFO ===
 Additional Notes from Applicant: ${raw.additional_notes || 'None provided'}
+${previousAssessment ? `
+=== PREVIOUS AI ASSESSMENT (for change detection) ===
+Previous recommendation: ${previousAssessment.recommendation}
+Previous reasoning: ${previousAssessment.reasoning}
+
+Compare the current applicant data against this previous assessment.
+- If nothing material has changed, you may confirm the same recommendation.
+- If documents have been added, education updated, or other criteria now met, UPDATE the recommendation accordingly and note what changed.
+- Start your reasoning with "Re-assessment:" if the recommendation changed, or "Confirmed:" if it remains the same.` : ''}
 
 Respond ONLY with a JSON object in this exact format:
 {

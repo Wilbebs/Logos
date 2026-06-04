@@ -783,7 +783,11 @@ router.post('/:id/ai-review', async (req, res) => {
     // ── Case 5: True edge case — call Gemini ───────────────────────────────────
     } else {
       const { callAIReview } = await import('../services/aiReview.js');
-      aiResult = await callAIReview(applicant, mergedSubmission);
+      // Pass previous assessment if one exists so Gemini can detect what changed
+      const previousAssessment = (applicant.ai_recommendation && applicant.ai_reasoning)
+        ? { recommendation: applicant.ai_recommendation, reasoning: applicant.ai_reasoning }
+        : null;
+      aiResult = await callAIReview(applicant, mergedSubmission, previousAssessment);
     }
 
     // Write ONLY the AI fields — never touch eligibility_status or decision
