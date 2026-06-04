@@ -31,7 +31,7 @@ function DecisionPanel({ applicant, onDecisionSubmitted, embedded = false }) {
 
   const isPending = applicant.decision === 'pending' || !applicant.decision;
   const notesRequired = selectedDecision === 'rejected' || selectedDecision === 'info_requested';
-  const showSuggestion = selectedDecision === 'info_requested';
+  const showSuggestion = !!selectedDecision; // show for all decision types
 
   async function handleGenerateSuggestion() {
     setSuggestionError('');

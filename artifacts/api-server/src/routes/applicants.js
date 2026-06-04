@@ -538,7 +538,11 @@ router.post('/:id/suggest-email', async (req, res) => {
     const program  = applicant.program_applied || 'their chosen program';
     const level    = applicant.program_level   || '';
     const aiReason = applicant.ai_reasoning    || '';
-    const formsReceived = forms?.length ?? 0;
+    const { data: allForms } = await supabase
+      .from('form_submissions').select('form_number').eq('applicant_id', id);
+    const submittedNums = (allForms || []).map(f => Number(f.form_number));
+    const missingForms = [1,2,3].filter(n => !submittedNums.includes(n))
+      .map(n => ({ 1:'Form 1 — Solicitud de Admision', 2:'Form 2 — Recomendacion Pastoral', 3:'Form 3 — Experiencia Ministerial' }[n]));
 
     const prompt = `You are an admissions coordinator at Logos Christian University writing an INTERNAL NOTE for the admissions team — NOT a message for the applicant.
 
@@ -546,16 +550,18 @@ Generate a concise internal case note that the team will use to track what's nee
 
 Applicant: ${fullName}
 Program: ${program} (${level})
-Forms received: ${formsReceived} of 3
+Decision being recorded: ${req.body?.decision_context || 'pending'}
+Forms submitted: ${submittedNums.length} of 3${missingForms.length ? '\nMissing forms: ' + missingForms.join(', ') : ''}
 AI review notes: ${aiReason || 'None.'}
-Missing docs: transcripts=${applicant.submitted_transcripts ? 'submitted' : 'MISSING'}, diploma=${applicant.submitted_diploma ? 'submitted' : 'MISSING'}
+Missing docs: transcripts=${applicant.submitted_transcripts ? 'submitted' : 'MISSING'}, diploma=${applicant.submitted_diploma ? 'submitted' : 'MISSING'}, undergrad diploma=${applicant.submitted_undergraduate_diploma ? 'submitted' : 'MISSING'}
 
-Write 2-4 bullet points (use "- " prefix). Cover:
-- What specific items are missing or need clarification
-- Recommended follow-up action (call, email, wait)
+Write 2-4 short numbered points (1. 2. 3. format). Cover:
+- What specific items are missing or need follow-up (forms AND documents)
+- Recommended next action (call, email, wait for form, etc.)
 - Any flags or context the team should note
 
-This is internal only. Use clear, direct language. No salutation, no sign-off.`;
+IMPORTANT: Plain text only. No markdown, no asterisks, no bold, no dashes as bullets. Use numbered points only.
+This is internal only. No salutation, no sign-off.`;
 
     const result = await model.generateContent(prompt);
     const suggestion = result.response.text().trim();
@@ -595,6 +601,16 @@ router.post('/:id/decision-email/generate', async (req, res) => {
     const program  = applicant.program_applied || 'the requested program';
     const notes    = applicant.decision_notes || '';
 
+    // Determine missing forms for context
+    const { data: formSubs } = await supabase
+      .from('form_submissions').select('form_number').eq('applicant_id', id);
+    const submittedFormNums = (formSubs || []).map(f => Number(f.form_number));
+    const missingFormNames = [1,2,3].filter(n => !submittedFormNums.includes(n))
+      .map(n => ({ 1:'Solicitud de Admision (Form 1)', 2:'Recomendacion Pastoral (Form 2)', 3:'Experiencia Ministerial (Form 3)' }[n]));
+    const missingFormsNote = missingFormNames.length
+      ? `\nNote: The following forms have NOT been received yet: ${missingFormNames.join(', ')}.`
+      : '';
+
     let prompt, subject;
 
     if (type === 'rejection') {
@@ -603,7 +619,7 @@ router.post('/:id/decision-email/generate', async (req, res) => {
 
 Applicant: ${fullName}
 Program applied: ${program}
-Admissions team notes: ${notes || 'Does not meet eligibility requirements.'}
+Admissions team notes: ${notes || 'Does not meet eligibility requirements.'}${missingFormsNote}
 
 Instructions:
 - Start with "Dear ${fullName},"
@@ -620,13 +636,14 @@ Instructions:
 
 Applicant: ${fullName}
 Program applied: ${program}
-What is needed (admissions notes): ${notes || 'Additional information required to complete review.'}
+What is needed (admissions notes): ${notes || 'Additional information required to complete review.'}${missingFormsNote}
 
 Instructions:
 - Start with "Dear ${fullName},"
 - Thank them for their application
 - Explain warmly that the review team needs additional information to continue
-- Be specific about what is needed based on the notes above
+- Be specific about what is needed based on the notes above (include missing forms if any)
+- If forms are missing, mention which ones and ask them to complete/submit them
 - Give them clear next steps: what to send and how
 - Keep a warm, encouraging, faith-based tone — this is not a rejection
 - Close warmly, "In His service," then a blank line for signature

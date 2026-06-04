@@ -8,6 +8,7 @@
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import AdmissionTimeline from '../components/AdmissionTimeline.jsx';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -221,7 +222,7 @@ export default function DecisionEmailPage() {
 
   // ── Compose ─────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gray-50" style={{ display: 'flex', flexDirection: 'column' }}>
+    <div className="min-h-screen bg-gray-50 pb-20" style={{ display: 'flex', flexDirection: 'column' }}>
 
       {/* Top nav */}
       <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between shrink-0">
@@ -330,6 +331,9 @@ export default function DecisionEmailPage() {
           </div>
         </div>
       </div>
+
+      {/* Sticky timeline — step 0 = application (this page is a decision step, not a numbered admission step) */}
+      {applicant && <AdmissionTimeline applicantId={id} activeStep={-1} />}
     </div>
   );
 }
