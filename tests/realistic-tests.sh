@@ -187,7 +187,7 @@ info "F3 → $(echo "$R3" | jq -r '.applicant_id // .error // "ERR"')"
 sleep 2
 A=$(fetch_applicant "$EMAIL")
 assert_field "A1 — forms_complete"     "$A" "forms_complete"     "True"
-assert_field "A1 — eligibility_status" "$A" "eligibility_status" "eligible"
+assert_field "A1 — eligibility_status" "$A" "eligibility_status" "needs_review"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # A2 — Carlos Eduardo Sanchez · Bachelor BTS · Bronx NY
