@@ -358,13 +358,13 @@ export default function LeadProfile({ applicant, forms }) {
             ].map(({ n, label }) => {
               const submitted = !!applicant[`form${n}_submitted_at`];
               return (
-                <span key={n} title={`Form ${n} — ${label}`}
+                <span key={n} title={`Form ${n} — ${label} — ${submitted ? 'Received' : 'NOT YET RECEIVED'}`}
                   className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold whitespace-nowrap ${
                     submitted
                       ? 'bg-green-50 border-green-300 text-green-700'
-                      : 'bg-gray-100 border-gray-200 text-gray-400'
+                      : 'bg-red-50 border-red-300 text-red-600'
                   }`}>
-                  {submitted ? `${label} ✓` : label}
+                  {submitted ? `${label} ✓` : `${label} ✗`}
                 </span>
               );
             })}
