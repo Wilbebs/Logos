@@ -1023,6 +1023,131 @@ assert_field "B10 — forms_complete"     "$A" "forms_complete"     "True"
 assert_field "B10 — eligibility_status" "$A" "eligibility_status" "needs_review"
 
 
+# =============================================================================
+# ███  SECTION C — 3 PARTIAL SUBMISSIONS (forms_complete = false)
+# =============================================================================
+
+# ─────────────────────────────────────────────────────────────────────────────
+# C1 — Pedro Gonzalez · only Form 1 submitted (no pastoral rec, no ministerial)
+# Master M.Div. Full academic profile but waiting on Forms 2 and 3.
+# EXPECTED: forms_complete=False, eligibility_status=pending
+# ─────────────────────────────────────────────────────────────────────────────
+title "C1: Pedro Gonzalez — Form 1 only — PENDING (incomplete)"
+EMAIL="test-c1-partial-f1only@logos.edu"
+
+R=$(post_json "$API/webhook/machform/1" "{
+  \"EmailICorreoElectronico\": \"$EMAIL\",
+  \"FirstNmeNombre\": \"Pedro\",
+  \"LastNameApellido\": \"Gonzalez\",
+  \"GenderGenero\": \"Male/Masculino\",
+  \"DateOfBirthFechaDeNacimiento\": \"Jun 10, 1980\",
+  \"BirthCountryPaisDeNacimiento\": \"Mexico\",
+  \"CountryOfCitizenshipPaisDeOrigen\": \"United States\",
+  \"MaritalStatusEstadoCivil\": \"Married / Casado(a)\",
+  \"StreetAddress\": \"410 S Spring St\",
+  \"City\": \"Los Angeles\",
+  \"StateProvinceRegion\": \"CA\",
+  \"PostalZipCode\": \"90013\",
+  \"PhoneMobileCelular\": \"2135554821\",
+  \"AQueDenominacionPertenece\": \"Evangelica\",
+  \"MinistryMinisterio\": \"Pastor\",
+  \"ChurchIglesiaMinistryMinisterio\": \"Iglesia Evangelica Luz del Mundo\",
+  \"DesdeCuandoAsisteALaIglesia\": \"10 anos\",
+  \"CuantasPersonasAsistenALaIglesia\": \"160\",
+  \"StudyLevelsNivelesDeEstudio\": \"Master - Maestria\",
+  \"DesiredProgramProramaDeseado\": \"Master of Divinity (M.Div)\",
+  \"BudgetsPresupuesto\": \"\$200\",
+  \"CompletoSuEscuelaSecundaria\": \"SI\",
+  \"Associate\": \"No tengo estudios universitarios\",
+  \"Licenciatura\": \"Si tengo\",
+  \"Maestria\": \"No tengo estudios de posgrado\",
+  \"Doctorado\": \"No tengo un doctorado todavia\",
+  \"MarqueLosDocumentosQueEstaIncluyen\": \"- diploma\\n- Transcripts - Registros oficiales de Notas de grado\",
+  \"LanguagePreferredLenguajePreferido\": \"Spanish\"
+}")
+info "F1 → $(echo "$R" | jq -r '.applicant_id // .error // "ERR"')"
+info "Forms 2 and 3 NOT submitted (intentional)"
+sleep 2
+A=$(fetch_applicant "$EMAIL")
+assert_field "C1 — forms_complete"     "$A" "forms_complete"     "False"
+assert_field "C1 — eligibility_status" "$A" "eligibility_status" "pending"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# C2 — Luisa Varela · only Form 2 submitted (pastoral rec with no Form 1)
+# Real scenario: pastor submits the rec form before the applicant submits Form 1.
+# No program or education info available yet.
+# EXPECTED: forms_complete=False, eligibility_status=pending
+# ─────────────────────────────────────────────────────────────────────────────
+title "C2: Luisa Varela — Form 2 only (pastor rec first) — PENDING (incomplete)"
+EMAIL="test-c2-partial-f2only@logos.edu"
+
+R2=$(post_json "$API/webhook/machform/2" "{
+  \"email\": \"$EMAIL\",
+  \"Nombre\": \"Luisa\",
+  \"Apellido\": \"Varela\",
+  \"NombreDelPastor\": \"Pastor Alberto Saenz\",
+  \"NombreDeLaIglesia\": \"Iglesia Bautista Central Miami\",
+  \"DireccionDeLaIglesia\": \"2200 SW 8th St Miami FL 33135\",
+  \"DenominacionPertenece\": \"Bautista\",
+  \"CuantoTiempoHaConocidoAlAplicante\": \"6 anos\",
+  \"RecomendariaAEstaPersona\": \"Si\",
+  \"ComentariosDelPastor\": \"Luisa es una lider de mujeres comprometida. Tiene un llamado genuino al ministerio y un caracter cristiano solido. La recomiendo ampliamente para cualquier programa de LOGOS.\"
+}")
+info "F2 → $(echo "$R2" | jq -r '.applicant_id // .error // "ERR"')"
+info "Forms 1 and 3 NOT submitted (intentional)"
+sleep 2
+A=$(fetch_applicant "$EMAIL")
+assert_field "C2 — forms_complete"     "$A" "forms_complete"     "False"
+assert_field "C2 — eligibility_status" "$A" "eligibility_status" "pending"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# C3 — Jorge Medina · Forms 1 and 3 submitted, missing Form 2 (pastoral rec)
+# Common scenario: applicant completed both their own forms but pastor hasn't
+# submitted the recommendation yet.
+# EXPECTED: forms_complete=False, eligibility_status=pending
+# ─────────────────────────────────────────────────────────────────────────────
+title "C3: Jorge Medina — Forms 1+3, missing Form 2 — PENDING (incomplete)"
+EMAIL="test-c3-partial-f1f3@logos.edu"
+
+R=$(post_json "$API/webhook/machform/1" "{
+  \"EmailICorreoElectronico\": \"$EMAIL\",
+  \"FirstNmeNombre\": \"Jorge\",
+  \"LastNameApellido\": \"Medina\",
+  \"GenderGenero\": \"Male/Masculino\",
+  \"DateOfBirthFechaDeNacimiento\": \"Feb 22, 1976\",
+  \"BirthCountryPaisDeNacimiento\": \"Colombia\",
+  \"CountryOfCitizenshipPaisDeOrigen\": \"United States\",
+  \"MaritalStatusEstadoCivil\": \"Married / Casado(a)\",
+  \"StreetAddress\": \"980 NW 27th Ave\",
+  \"City\": \"Miami\",
+  \"StateProvinceRegion\": \"FL\",
+  \"PostalZipCode\": \"33125\",
+  \"PhoneMobileCelular\": \"7865553092\",
+  \"AQueDenominacionPertenece\": \"Pentecostal\",
+  \"MinistryMinisterio\": \"Anciano\",
+  \"ChurchIglesiaMinistryMinisterio\": \"Iglesia Pentecostal de Hialeah\",
+  \"DesdeCuandoAsisteALaIglesia\": \"9 anos\",
+  \"CuantasPersonasAsistenALaIglesia\": \"200\",
+  \"StudyLevelsNivelesDeEstudio\": \"Bachelor - Licenciatura\",
+  \"DesiredProgramProramaDeseado\": \"Bachelor of Theological Studies\",
+  \"BudgetsPresupuesto\": \"\$100\",
+  \"CompletoSuEscuelaSecundaria\": \"SI\",
+  \"Associate\": \"Si, complete el estudio\",
+  \"Licenciatura\": \"No tengo\",
+  \"Maestria\": \"No tengo estudios de posgrado\",
+  \"Doctorado\": \"No tengo un doctorado todavia\",
+  \"MarqueLosDocumentosQueEstaIncluyen\": \"- diploma\\n- Transcripts - Registros oficiales de Notas de grado\",
+  \"LanguagePreferredLenguajePreferido\": \"Spanish\"
+}")
+info "F1 → $(echo "$R" | jq -r '.applicant_id // .error // "ERR"')"
+R3=$(submit_f3 "$EMAIL" "Iglesia Pentecostal de Hialeah" "Pastor Ernesto Reyes" "Anciano" "9 anos" 0 9 "Conductor de camion" "Conoci al Senor en Colombia a los 22 anos. Emigre a Miami en 2002. Sirvo como anciano desde 2017. Mi pastor aun no ha enviado su formulario de recomendacion.")
+info "F3 → $(echo "$R3" | jq -r '.applicant_id // .error // "ERR"')"
+info "Form 2 NOT submitted (intentional — pastor hasn't sent rec yet)"
+sleep 2
+A=$(fetch_applicant "$EMAIL")
+assert_field "C3 — forms_complete"     "$A" "forms_complete"     "False"
+assert_field "C3 — eligibility_status" "$A" "eligibility_status" "pending"
+
 # ── Summary ───────────────────────────────────────────────────────────────────
 echo ""
 echo "═══════════════════════════════════════════════════════════════"
@@ -1041,5 +1166,8 @@ echo -e "                B7 Francisco Ruiz (D.Min bachelor 10yr associated)"
 echo -e "                B8 Teresa Morales (Associate \$25 budget)"
 echo -e "                B9 Antonio Flores (D.Min Th.D. zero docs)"
 echo -e "                B10 Sofia Ramirez (Bachelor associate 10yr ministry)"
+echo -e "  ${YELLOW}PENDING${NC}       C1 Pedro Gonzalez (Form 1 only)"
+echo -e "                C2 Luisa Varela (Form 2 only — pastor rec first)"
+echo -e "                C3 Jorge Medina (Forms 1+3, missing pastoral rec)"
 echo "═══════════════════════════════════════════════════════════════"
 echo ""
