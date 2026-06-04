@@ -3,3 +3,8 @@ cmds = [
   "pnpm add -g node-gyp",
   "pnpm install --no-frozen-lockfile --prefer-offline"
 ]
+
+[phases.build]
+cmds = [
+  "pnpm --filter @workspace/api-server run build"
+]
