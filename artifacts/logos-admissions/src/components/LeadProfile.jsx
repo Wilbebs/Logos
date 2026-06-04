@@ -253,11 +253,16 @@ function FinancialColumn({ data }) {
     BudgetsPresupuesto: budgetLabel,
   });
 
-  const docChecks = [
-    { key: 'submitted_transcripts',           label: 'Transcripts' },
-    { key: 'submitted_diploma',               label: 'Diploma' },
-    { key: 'submitted_undergraduate_diploma', label: 'Undergrad Diploma' },
-  ];
+  const isGraduate = ['masters','doctorate'].includes((data.program_level || '').toLowerCase());
+  const docChecks = isGraduate
+    ? [
+        { key: 'submitted_transcripts',           label: 'Transcripts' },
+        { key: 'submitted_undergraduate_diploma', label: 'Undergrad Diploma' },
+      ]
+    : [
+        { key: 'submitted_transcripts', label: 'Transcripts' },
+        { key: 'submitted_diploma',     label: 'Diploma' },
+      ];
   const presentDocs = docChecks.filter(c => data[c.key] !== undefined);
 
   const pastEntries = buildEntries(PASTORAL_FIELDS, data);
