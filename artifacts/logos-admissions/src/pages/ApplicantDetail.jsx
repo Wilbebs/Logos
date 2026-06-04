@@ -175,7 +175,7 @@ function DecisionPanel({ applicant, onDecisionSubmitted, embedded = false }) {
               onClick={handleGenerateSuggestion}
               disabled={suggestionLoading}
               className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 disabled:text-blue-300 font-medium"
-              title="AI will draft a message explaining what the applicant needs to provide"
+              title="AI generates internal team notes — what's missing and suggested next steps (not an email to the applicant)"
             >
               {suggestionLoading ? (
                 <>
@@ -183,7 +183,7 @@ function DecisionPanel({ applicant, onDecisionSubmitted, embedded = false }) {
                   Generating…
                 </>
               ) : (
-                <>✦ Generate Suggestion</>
+                <>✦ Generate Team Notes</>
               )}
             </button>
           )}
@@ -193,7 +193,7 @@ function DecisionPanel({ applicant, onDecisionSubmitted, embedded = false }) {
           onChange={e => setNotes(e.target.value)}
           rows={4}
           className="w-full border border-gray-300 rounded px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-blue-400"
-          placeholder={showSuggestion ? 'Click "Generate Suggestion" for an AI-drafted message, or type your own…' : 'Enter notes…'}
+          placeholder={showSuggestion ? 'Internal team notes — what is missing, follow-up actions, flags. Click "Generate Team Notes" for an AI suggestion.' : 'Enter notes…'}
         />
         {suggestionError && (
           <p className="mt-1 text-xs text-red-600">{suggestionError}</p>
@@ -277,7 +277,9 @@ export default function ApplicantDetail() {
 
   if (!applicant) return null;
 
-  const isApproved = applicant.decision === 'approved';
+  const isApproved      = applicant.decision === 'approved';
+  const isRejected      = applicant.decision === 'rejected';
+  const isInfoRequested = applicant.decision === 'info_requested';
 
   return (
     <div className="min-h-screen bg-gray-100 p-6" style={{ paddingBottom: 'calc(var(--timeline-bar-height, 0px) + 1.5rem)' }}>
@@ -342,6 +344,52 @@ export default function ApplicantDetail() {
             {isApproved && (
               <div className="border-t border-gray-100 px-5 py-4">
                 <AcceptanceLetter applicant={applicant} />
+              </div>
+            )}
+
+            {/* Rejection email CTA */}
+            {isRejected && (
+              <div className="border-t border-gray-100 px-5 py-4">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Next Step</p>
+                <button
+                  onClick={() => navigate(`/applicants/${applicant.id}/email/rejection`)}
+                  className="w-full flex items-center gap-4 rounded-lg border-2 px-4 py-4 text-left transition-all hover:bg-red-700 group"
+                  style={{ borderColor: '#b91c1c', backgroundColor: '#fff5f5' }}
+                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#b91c1c'; e.currentTarget.querySelectorAll('[data-hw]').forEach(el => el.style.color = '#fff'); }}
+                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff5f5'; e.currentTarget.querySelectorAll('[data-hw]').forEach(el => el.style.color = ''); }}
+                >
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-xl bg-red-700">
+                    <span style={{ color: '#fff' }}>✉</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p data-hw className="text-sm font-bold transition-colors" style={{ color: '#b91c1c' }}>Compose Rejection Email</p>
+                    <p data-hw className="text-xs mt-0.5 transition-colors text-gray-500">Notify {applicant.full_name} of the decision</p>
+                  </div>
+                  <span data-hw className="text-lg font-light shrink-0" style={{ color: '#b91c1c' }}>→</span>
+                </button>
+              </div>
+            )}
+
+            {/* Info request email CTA */}
+            {isInfoRequested && (
+              <div className="border-t border-gray-100 px-5 py-4">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Next Step</p>
+                <button
+                  onClick={() => navigate(`/applicants/${applicant.id}/email/info-request`)}
+                  className="w-full flex items-center gap-4 rounded-lg border-2 px-4 py-4 text-left transition-all group"
+                  style={{ borderColor: '#92740a', backgroundColor: '#fffdf0' }}
+                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#92740a'; e.currentTarget.querySelectorAll('[data-hw]').forEach(el => el.style.color = '#fff'); }}
+                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fffdf0'; e.currentTarget.querySelectorAll('[data-hw]').forEach(el => el.style.color = ''); }}
+                >
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-xl" style={{ backgroundColor: '#92740a' }}>
+                    <span style={{ color: '#fff' }}>✉</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p data-hw className="text-sm font-bold transition-colors" style={{ color: '#92740a' }}>Compose Info Request Email</p>
+                    <p data-hw className="text-xs mt-0.5 transition-colors text-gray-500">Request missing info from {applicant.full_name}</p>
+                  </div>
+                  <span data-hw className="text-lg font-light shrink-0" style={{ color: '#92740a' }}>→</span>
+                </button>
               </div>
             )}
           </div>

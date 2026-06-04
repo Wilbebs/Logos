@@ -540,18 +540,22 @@ router.post('/:id/suggest-email', async (req, res) => {
     const aiReason = applicant.ai_reasoning    || '';
     const formsReceived = forms?.length ?? 0;
 
-    const prompt = `You are an admissions coordinator at Logos Christian University.
+    const prompt = `You are an admissions coordinator at Logos Christian University writing an INTERNAL NOTE for the admissions team — NOT a message for the applicant.
 
-Write a short, warm, professional email suggestion to send to an applicant requesting more information. This is NOT a rejection — it is a friendly request to help complete their application.
+Generate a concise internal case note that the team will use to track what's needed and next steps.
 
 Applicant: ${fullName}
 Program: ${program} (${level})
 Forms received: ${formsReceived} of 3
-AI review notes: ${aiReason || 'No specific AI notes.'}
-Missing docs: transcripts=${applicant.submitted_transcripts ? 'yes' : 'no'}, diploma=${applicant.submitted_diploma ? 'yes' : 'no'}
+AI review notes: ${aiReason || 'None.'}
+Missing docs: transcripts=${applicant.submitted_transcripts ? 'submitted' : 'MISSING'}, diploma=${applicant.submitted_diploma ? 'submitted' : 'MISSING'}
 
-Write 3-5 short sentences. Be specific about what they need to provide based on the information above. Warm, encouraging, faith-based tone.
-Do not include a subject line. Start directly with the salutation.`;
+Write 2-4 bullet points (use "- " prefix). Cover:
+- What specific items are missing or need clarification
+- Recommended follow-up action (call, email, wait)
+- Any flags or context the team should note
+
+This is internal only. Use clear, direct language. No salutation, no sign-off.`;
 
     const result = await model.generateContent(prompt);
     const suggestion = result.response.text().trim();
@@ -560,6 +564,137 @@ Do not include a subject line. Start directly with the salutation.`;
   } catch (err) {
     console.error('[POST /api/applicants/:id/suggest-email] Error:', err);
     return res.status(500).json({ error: 'Failed to generate email suggestion.' });
+  }
+});
+
+// ------------------------------------------------------------------
+// POST /api/applicants/:id/decision-email/generate
+// Gemini drafts a rejection or info-request email body.
+// Body: { type: 'rejection' | 'info_request' }
+// ------------------------------------------------------------------
+router.post('/:id/decision-email/generate', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { type } = req.body;
+    if (!['rejection', 'info_request'].includes(type)) {
+      return res.status(400).json({ error: 'type must be "rejection" or "info_request"' });
+    }
+
+    const { data: applicant, error: aErr } = await supabase
+      .from('applicants').select('*').eq('id', id).single();
+    if (aErr || !applicant) return res.status(404).json({ error: 'Applicant not found.' });
+
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(503).json({ error: 'AI service not configured.' });
+    }
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+    const fullName = applicant.full_name || 'Applicant';
+    const program  = applicant.program_applied || 'the requested program';
+    const notes    = applicant.decision_notes || '';
+
+    let prompt, subject;
+
+    if (type === 'rejection') {
+      subject = `Your Application to LOGOS Christian University`;
+      prompt = `You are writing a formal, compassionate rejection email from LOGOS Christian University (a Christian seminary).
+
+Applicant: ${fullName}
+Program applied: ${program}
+Admissions team notes: ${notes || 'Does not meet eligibility requirements.'}
+
+Instructions:
+- Start with "Dear ${fullName},"
+- Thank them for their application and interest in LOGOS
+- Kindly and compassionately inform them the application has not been approved for this cycle
+- Reference the notes above as the reason (briefly, without being harsh)
+- Encourage them — this is a Christian institution; offer hope and suggest they may reapply or consider other programs
+- Close warmly, "In His service," then a blank line for signature
+- Plain text only, no markdown. 3-4 short paragraphs.
+- Do NOT invent specific dates or program codes.`;
+    } else {
+      subject = `Additional Information Needed — Your LOGOS Application`;
+      prompt = `You are writing a warm, helpful email from LOGOS Christian University (a Christian seminary) requesting additional information from an applicant.
+
+Applicant: ${fullName}
+Program applied: ${program}
+What is needed (admissions notes): ${notes || 'Additional information required to complete review.'}
+
+Instructions:
+- Start with "Dear ${fullName},"
+- Thank them for their application
+- Explain warmly that the review team needs additional information to continue
+- Be specific about what is needed based on the notes above
+- Give them clear next steps: what to send and how
+- Keep a warm, encouraging, faith-based tone — this is not a rejection
+- Close warmly, "In His service," then a blank line for signature
+- Plain text only, no markdown. 3-4 short paragraphs.`;
+    }
+
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.3 },
+    });
+
+    return res.json({ subject, body: result.response.text().trim() });
+  } catch (err) {
+    console.error('[decision-email/generate]', err);
+    return res.status(500).json({ error: 'Failed to generate email: ' + err.message });
+  }
+});
+
+// ------------------------------------------------------------------
+// POST /api/applicants/:id/decision-email/send
+// Sends a rejection or info-request email via Resend (allowlist-guarded).
+// Body: { type, from, to, subject, body }
+// ------------------------------------------------------------------
+router.post('/:id/decision-email/send', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { type, from, to, subject, body } = req.body;
+    if (!to || !subject || !body) {
+      return res.status(400).json({ error: 'to, subject, and body are required.' });
+    }
+
+    const { data: applicant, error: aErr } = await supabase
+      .from('applicants').select('id, full_name, email').eq('id', id).single();
+    if (aErr || !applicant) return res.status(404).json({ error: 'Applicant not found.' });
+
+    const EMAIL_ALLOWLIST = (process.env.EMAIL_ALLOWLIST || 'hernwilbwork@gmail.com')
+      .split(',').map(e => e.trim().toLowerCase());
+    const recipientEmail = to.trim().toLowerCase();
+    const fromAddress = from?.trim() || process.env.RESEND_FROM_EMAIL || 'admissions@logos.edu';
+
+    const { logEmail } = await import('../services/emailService.js');
+
+    if (!EMAIL_ALLOWLIST.includes(recipientEmail)) {
+      await logEmail(id, type === 'rejection' ? 'rejected' : 'info_requested', 'blocked', {
+        subject, bodyText: body, fromAddress, toAddress: recipientEmail,
+      });
+      return res.json({
+        success: false, blocked: true,
+        message: `Email blocked — "${recipientEmail}" is not on the allowlist.`,
+      });
+    }
+
+    const { Resend } = await import('resend');
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const { data: sendData, error: sendError } = await resend.emails.send({
+      from: fromAddress, to: recipientEmail, subject, text: body,
+    });
+    if (sendError) throw new Error(sendError.message || JSON.stringify(sendError));
+
+    const emailType = type === 'rejection' ? 'rejected' : 'info_requested';
+    await logEmail(id, emailType, 'sent', {
+      subject, bodyText: body, fromAddress, toAddress: recipientEmail,
+    });
+
+    return res.json({ success: true, data: sendData });
+  } catch (err) {
+    console.error('[decision-email/send]', err);
+    return res.status(500).json({ error: 'Send failed: ' + err.message });
   }
 });
 
