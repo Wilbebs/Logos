@@ -723,7 +723,7 @@ info "F3 → $(echo "$R3" | jq -r '.applicant_id // .error // "ERR"')"
 sleep 2
 A=$(fetch_applicant "$EMAIL")
 assert_field "B5 — forms_complete"     "$A" "forms_complete"     "True"
-assert_field "B5 — eligibility_status" "$A" "eligibility_status" "needs_review"
+assert_field "B5 — eligibility_status" "$A" "eligibility_status" "ineligible"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # B6 — Isabel Fernanda Reyes · Master M.Div · has bachelor's but MISSING
