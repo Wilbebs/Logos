@@ -364,7 +364,7 @@ export default function LeadProfile({ applicant, forms }) {
                       ? 'bg-green-50 border-green-300 text-green-700'
                       : 'bg-gray-100 border-gray-200 text-gray-400'
                   }`}>
-                  {submitted ? `Form ${n}: ${label} ✓` : `Form ${n}: ${label}`}
+                  {submitted ? `${label} ✓` : label}
                 </span>
               );
             })}
