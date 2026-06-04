@@ -2,12 +2,15 @@
 # tests/realistic-tests.sh
 # Realistic end-to-end webhook tests — detailed form submissions modeled on
 # real MachForm payloads (Carlos Beron profile, June 2026).
+# UTF-8 locale required to prevent accented character corruption on Windows/macOS.
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
 #
 # Run from workspace root:  bash tests/realistic-tests.sh
 #
 # IMPORTANT: DesiredProgramProramaDeseado must be the EXACT display_name from
 # programs.json so eligibility.js exactMatch=true. Exact names used:
-#   "Certificado en Estudios Bíblicos"
+#   "Certificado en Estudios Biblicos"
 #   "Associate of Biblical Studies"
 #   "Bachelor of Theological Studies"
 #   "Master of Divinity (M.Div)"
@@ -47,11 +50,11 @@ submit_f2() {
     \"NombreDeLaIglesia\": \"$church_name\",
     \"DireccionDeLaIglesia\": \"$church_addr\",
     \"DenominacionPertenece\": \"$denomination\",
-    \"CuantoTiempoHaConocidoAlAplicante\": \"5 años\",
+    \"CuantoTiempoHaConocidoAlAplicante\": \"5 anos\",
     \"CuanBienConoceAlAplicante\": \"Extremadamente bien\",
-    \"EsMiembroDesuIglesia\": \"Sí\",
+    \"EsMiembroDesuIglesia\": \"Si\",
     \"NivelDeParticipacion\": \"Buen participante\",
-    \"RecomendariaAEstaPersona\": \"Sí\",
+    \"RecomendariaAEstaPersona\": \"Si\",
     \"ComentariosDelPastor\": \"$comment\"
   }"
 }
@@ -65,13 +68,13 @@ submit_f3() {
     \"EsUsted\": \"$role\",
     \"HaceCuantosAnosQueAsisteALaIglesia\": \"$years_attending\",
     \"AQueDenominacionPertenece\": \"Evangelica\",
-    \"ApoyaALaIglesiaFinancieramente\": \"Sí - Diezmo y Ofrenda\",
+    \"ApoyaALaIglesiaFinancieramente\": \"Si - Diezmo y Ofrenda\",
     \"CuantasVecesAsisteALaIglesiaEnLaSemana\": \"3\",
     \"ministerial_years_fulltime\": $ft,
     \"ministerial_years_associated\": $assoc,
     \"ProfecionUOficioEspecifique\": \"$profession\",
     \"AreaDeDesempenoProfesional\": \"Empleado\",
-    \"AnosDeExperiencia\": \"Más de 10 años\",
+    \"AnosDeExperiencia\": \"Mas de 10 anos\",
     \"ResumaSuTestimonio\": \"$testimony\",
     \"ListeLosDocumentosQueEnvia\": \"Diploma de escuela secundaria, transcripts\"
   }"
@@ -128,58 +131,58 @@ fi
 # =============================================================================
 
 # ─────────────────────────────────────────────────────────────────────────────
-# A1 — Ana Milagros Pérez · Certificate CBS · Brooklyn NY
+# A1 — Ana Milagros Perez · Certificate CBS · Brooklyn NY
 # Colombian origin · married · high school + HS diploma submitted · $25/mo
 # Open enrollment → no doc/budget gate → ELIGIBLE
 # ─────────────────────────────────────────────────────────────────────────────
-title "A1: Ana Pérez — Certificate CBS — ELIGIBLE"
+title "A1: Ana Perez — Certificate CBS — ELIGIBLE"
 EMAIL="test-a1-cert@logos.edu"
 
 R=$(post_json "$API/webhook/machform/1" "{
   \"EmailICorreoElectronico\": \"$EMAIL\",
   \"FirstNmeNombre\": \"Ana Milagros\",
-  \"LastNameApellido\": \"Pérez\",
+  \"LastNameApellido\": \"Perez\",
   \"NamePrefixPrefijoDeNombre\": \"Mrs.\",
-  \"GenderGénero\": \"Female/Femenino\",
+  \"GenderGenero\": \"Female/Femenino\",
   \"DateOfBirthFechaDeNacimiento\": \"Mar 14, 1981\",
-  \"BirthCountryPaísDeNacimiento\": \"Colombia\",
+  \"BirthCountryPaisDeNacimiento\": \"Colombia\",
   \"StateOfBirthEstadoDeNacimiento\": \"Bogota DC\",
-  \"CountryOfCitizenshipPaísDeOrigen\": \"United States\",
+  \"CountryOfCitizenshipPaisDeOrigen\": \"United States\",
   \"MaritalStatusEstadoCivil\": \"Married / Casado(a)\",
   \"StreetAddress\": \"124 Harman St Apt 3A\",
   \"City\": \"Brooklyn\",
   \"StateProvinceRegion\": \"NY\",
   \"PostalZipCode\": \"11221\",
   \"PhoneMobileCelular\": \"7188524410\",
-  \"TelNumberNúmeroDeTeléfono\": \"7189001234\",
-  \"PhoneHomeTeléfonoDeCasa\": \"7189001234\",
+  \"TelNumberNumeroDeTelefono\": \"7189001234\",
+  \"PhoneHomeTelefonoDeCasa\": \"7189001234\",
   \"LanguagePreferredLenguajePreferido\": \"Spanish\",
-  \"AQuéDenominaciónPertenece\": \"Evangelica\",
-  \"MinistryMinisterio\": \"Leader/Líder\",
-  \"ChurchIglesiaMinistryMinisterio\": \"Iglesia Evangélica Bethel\",
-  \"DesdeCuándoAsisteALaIglesia\": \"8 años\",
-  \"CuántasPersonasAsistenALaIglesia\": \"120\",
-  \"AreaOfinterestÁreaDeInteré\": \"Teología - Estudios Teológicos\",
+  \"AQueDenominacionPertenece\": \"Evangelica\",
+  \"MinistryMinisterio\": \"Leader/Lider\",
+  \"ChurchIglesiaMinistryMinisterio\": \"Iglesia Evangelica Bethel\",
+  \"DesdeCuandoAsisteALaIglesia\": \"8 anos\",
+  \"CuantasPersonasAsistenALaIglesia\": \"120\",
+  \"AreaOfinterestAreaDeIntere\": \"Teologia - Estudios Teologicos\",
   \"StudyLevelsNivelesDeEstudio\": \"Certificate - Certificado\",
-  \"DesiredProgramProramaDeseado\": \"Certificado en Estudios Bíblicos\",
+  \"DesiredProgramProramaDeseado\": \"Certificado en Estudios Biblicos\",
   \"BudgetsPresupuesto\": \"\$25\",
   \"CompletoSuEscuelaSecundaria\": \"SI\",
-  \"NameOfHighSchoolNombreDeLaEscuela\": \"Colegio Nacional Bogotá\",
-  \"GraduationYearAñoEnQueSeGraduó\": \"Dec 15, 1999\",
-  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller académico\",
+  \"NameOfHighSchoolNombreDeLaEscuela\": \"Colegio Nacional Bogota\",
+  \"GraduationYearAnoEnQueSeGraduo\": \"Dec 15, 1999\",
+  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller academico\",
   \"Associate\": \"No tengo estudios universitarios\",
   \"Licenciatura\": \"No tengo\",
-  \"Maestría\": \"No tengo estudios de posgrado\",
-  \"Doctorado\": \"No tengo un doctorado todavía\",
-  \"MarqueLosDocumentosQueEstáIncluyen\": \"- Copia del título de Secundaria\",
-  \"RealiceUnPequeñoResumenDeSuVidaE\": \"Recibí al Señor a los 17 años en Colombia. Emigré a EUA en 2005. Sirvo como líder de mujeres en mi iglesia desde hace 8 años.\",
-  \"NearestRelativeOrFriendFamiliarOAm\": \"Leonides Pérez\",
+  \"Maestria\": \"No tengo estudios de posgrado\",
+  \"Doctorado\": \"No tengo un doctorado todavia\",
+  \"MarqueLosDocumentosQueEstaIncluyen\": \"- Copia del titulo de Secundaria\",
+  \"RealiceUnPequenoResumenDeSuVidaE\": \"Recibi al Senor a los 17 anos en Colombia. Emigre a EUA en 2005. Sirvo como lider de mujeres en mi iglesia desde hace 8 anos.\",
+  \"NearestRelativeOrFriendFamiliarOAm\": \"Leonides Perez\",
   \"NotasSiNecesitaEspacioOTienePregu\": \"\"
 }")
 info "F1 → $(echo "$R" | jq -r '.applicant_id // .error // "ERR"')"
-R2=$(submit_f2 "$EMAIL" "Rev. Samuel Ortega" "Iglesia Evangélica Bethel" "Evangelica" "340 Wyckoff Ave Brooklyn NY 11237" "Ana lleva 8 años sirviendo fielmente. La recomiendo ampliamente.")
+R2=$(submit_f2 "$EMAIL" "Rev. Samuel Ortega" "Iglesia Evangelica Bethel" "Evangelica" "340 Wyckoff Ave Brooklyn NY 11237" "Ana lleva 8 anos sirviendo fielmente. La recomiendo ampliamente.")
 info "F2 → $(echo "$R2" | jq -r '.applicant_id // .error // "ERR"')"
-R3=$(submit_f3 "$EMAIL" "Iglesia Evangélica Bethel" "Rev. Samuel Ortega" "Líder" "8 años" 0 0 "Asistente Administrativa" "Recibí al Señor a los 17 años. Mi pasión es enseñar la Palabra a las mujeres de nuestra comunidad.")
+R3=$(submit_f3 "$EMAIL" "Iglesia Evangelica Bethel" "Rev. Samuel Ortega" "Lider" "8 anos" 0 0 "Asistente Administrativa" "Recibi al Senor a los 17 anos. Mi pasion es ensenar la Palabra a las mujeres de nuestra comunidad.")
 info "F3 → $(echo "$R3" | jq -r '.applicant_id // .error // "ERR"')"
 sleep 2
 A=$(fetch_applicant "$EMAIL")
@@ -187,56 +190,56 @@ assert_field "A1 — forms_complete"     "$A" "forms_complete"     "True"
 assert_field "A1 — eligibility_status" "$A" "eligibility_status" "eligible"
 
 # ─────────────────────────────────────────────────────────────────────────────
-# A2 — Carlos Eduardo Sánchez · Bachelor BTS · Bronx NY
+# A2 — Carlos Eduardo Sanchez · Bachelor BTS · Bronx NY
 # Puerto Rican · married · has associate degree + diploma + transcripts · $100/mo
 # Education ≥ some_college, docs present → ELIGIBLE
 # ─────────────────────────────────────────────────────────────────────────────
-title "A2: Carlos Sánchez — Bachelor BTS — ELIGIBLE"
+title "A2: Carlos Sanchez — Bachelor BTS — ELIGIBLE"
 EMAIL="test-a2-bach@logos.edu"
 
 R=$(post_json "$API/webhook/machform/1" "{
   \"EmailICorreoElectronico\": \"$EMAIL\",
   \"FirstNmeNombre\": \"Carlos Eduardo\",
-  \"LastNameApellido\": \"Sánchez\",
+  \"LastNameApellido\": \"Sanchez\",
   \"NamePrefixPrefijoDeNombre\": \"Mr.\",
-  \"GenderGénero\": \"Male/Masculino\",
+  \"GenderGenero\": \"Male/Masculino\",
   \"DateOfBirthFechaDeNacimiento\": \"Aug 3, 1975\",
-  \"BirthCountryPaísDeNacimiento\": \"Puerto Rico\",
+  \"BirthCountryPaisDeNacimiento\": \"Puerto Rico\",
   \"StateOfBirthEstadoDeNacimiento\": \"San Juan\",
-  \"CountryOfCitizenshipPaísDeOrigen\": \"United States\",
+  \"CountryOfCitizenshipPaisDeOrigen\": \"United States\",
   \"MaritalStatusEstadoCivil\": \"Married / Casado(a)\",
   \"StreetAddress\": \"875 Longwood Ave Apt 5C\",
   \"City\": \"Bronx\",
   \"StateProvinceRegion\": \"NY\",
   \"PostalZipCode\": \"10459\",
   \"PhoneMobileCelular\": \"7184423391\",
-  \"TelNumberNúmeroDeTeléfono\": \"7184423391\",
+  \"TelNumberNumeroDeTelefono\": \"7184423391\",
   \"LanguagePreferredLenguajePreferido\": \"Spanish\",
-  \"AQuéDenominaciónPertenece\": \"Pentecostal\",
-  \"MinistryMinisterio\": \"Diácono\",
+  \"AQueDenominacionPertenece\": \"Pentecostal\",
+  \"MinistryMinisterio\": \"Diacono\",
   \"ChurchIglesiaMinistryMinisterio\": \"Iglesia Pentecostal Cristo Rey\",
-  \"DesdeCuándoAsisteALaIglesia\": \"15 años\",
-  \"CuántasPersonasAsistenALaIglesia\": \"200\",
-  \"AreaOfinterestÁreaDeInteré\": \"Estudios Pastorales\",
+  \"DesdeCuandoAsisteALaIglesia\": \"15 anos\",
+  \"CuantasPersonasAsistenALaIglesia\": \"200\",
+  \"AreaOfinterestAreaDeIntere\": \"Estudios Pastorales\",
   \"StudyLevelsNivelesDeEstudio\": \"Bachelor - Licenciatura\",
   \"DesiredProgramProramaDeseado\": \"Bachelor of Theological Studies\",
   \"BudgetsPresupuesto\": \"\$100\",
   \"CompletoSuEscuelaSecundaria\": \"SI\",
   \"NameOfHighSchoolNombreDeLaEscuela\": \"Escuela Superior Central de San Juan\",
-  \"GraduationYearAñoEnQueSeGraduó\": \"Jun 20, 1993\",
-  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller académico\",
-  \"Associate\": \"Si, completé el estudio\",
+  \"GraduationYearAnoEnQueSeGraduo\": \"Jun 20, 1993\",
+  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller academico\",
+  \"Associate\": \"Si, complete el estudio\",
   \"Licenciatura\": \"No tengo\",
-  \"Maestría\": \"No tengo estudios de posgrado\",
-  \"Doctorado\": \"No tengo un doctorado todavía\",
-  \"MarqueLosDocumentosQueEstáIncluyen\": \"- Copia del Associate - Técnico\\n- Transcripts - Registros oficiales de Notas de grado\",
-  \"RealiceUnPequeñoResumenDeSuVidaE\": \"Soy cristiano desde los 18 años. Sirvo como diácono en nuestra iglesia pentecostal desde hace 4 años y como maestro de escuela bíblica desde hace 6 años.\",
-  \"NearestRelativeOrFriendFamiliarOAm\": \"María Sánchez\"
+  \"Maestria\": \"No tengo estudios de posgrado\",
+  \"Doctorado\": \"No tengo un doctorado todavia\",
+  \"MarqueLosDocumentosQueEstaIncluyen\": \"- Copia del Associate - Tecnico\\n- Transcripts - Registros oficiales de Notas de grado\",
+  \"RealiceUnPequenoResumenDeSuVidaE\": \"Soy cristiano desde los 18 anos. Sirvo como diacono en nuestra iglesia pentecostal desde hace 4 anos y como maestro de escuela biblica desde hace 6 anos.\",
+  \"NearestRelativeOrFriendFamiliarOAm\": \"Maria Sanchez\"
 }")
 info "F1 → $(echo "$R" | jq -r '.applicant_id // .error // "ERR"')"
-R2=$(submit_f2 "$EMAIL" "Obispo Rafael Cruz" "Iglesia Pentecostal Cristo Rey" "Pentecostal" "1201 Southern Blvd Bronx NY 10459" "Carlos es un diácono comprometido con 15 años de trayectoria ministerial. Lo recomiendo sin reservas.")
+R2=$(submit_f2 "$EMAIL" "Obispo Rafael Cruz" "Iglesia Pentecostal Cristo Rey" "Pentecostal" "1201 Southern Blvd Bronx NY 10459" "Carlos es un diacono comprometido con 15 anos de trayectoria ministerial. Lo recomiendo sin reservas.")
 info "F2 → $(echo "$R2" | jq -r '.applicant_id // .error // "ERR"')"
-R3=$(submit_f3 "$EMAIL" "Iglesia Pentecostal Cristo Rey" "Obispo Rafael Cruz" "Diácono" "15 años" 4 11 "Técnico de mantenimiento industrial" "Nací en San Juan PR. A los 18 conocí al Señor durante una campaña evangelística. Sirvo fielmente en el ministerio desde entonces.")
+R3=$(submit_f3 "$EMAIL" "Iglesia Pentecostal Cristo Rey" "Obispo Rafael Cruz" "Diacono" "15 anos" 4 11 "Tecnico de mantenimiento industrial" "Naci en San Juan PR. A los 18 conoci al Senor durante una campana evangelistica. Sirvo fielmente en el ministerio desde entonces.")
 info "F3 → $(echo "$R3" | jq -r '.applicant_id // .error // "ERR"')"
 sleep 2
 A=$(fetch_applicant "$EMAIL")
@@ -244,56 +247,56 @@ assert_field "A2 — forms_complete"     "$A" "forms_complete"     "True"
 assert_field "A2 — eligibility_status" "$A" "eligibility_status" "eligible"
 
 # ─────────────────────────────────────────────────────────────────────────────
-# A3 — María del Carmen Rosario · Associate ABS · Queens NY
+# A3 — Maria del Carmen Rosario · Associate ABS · Queens NY
 # Cuban · married · high school + HS diploma + transcripts · $75/mo
 # Open enrollment for associate → ELIGIBLE
 # ─────────────────────────────────────────────────────────────────────────────
-title "A3: María Rosario — Associate ABS — ELIGIBLE"
+title "A3: Maria Rosario — Associate ABS — ELIGIBLE"
 EMAIL="test-a3-assoc@logos.edu"
 
 R=$(post_json "$API/webhook/machform/1" "{
   \"EmailICorreoElectronico\": \"$EMAIL\",
-  \"FirstNmeNombre\": \"María del Carmen\",
+  \"FirstNmeNombre\": \"Maria del Carmen\",
   \"LastNameApellido\": \"Rosario\",
   \"NamePrefixPrefijoDeNombre\": \"Mrs.\",
-  \"GenderGénero\": \"Female/Femenino\",
+  \"GenderGenero\": \"Female/Femenino\",
   \"DateOfBirthFechaDeNacimiento\": \"Nov 28, 1968\",
-  \"BirthCountryPaísDeNacimiento\": \"Cuba\",
+  \"BirthCountryPaisDeNacimiento\": \"Cuba\",
   \"StateOfBirthEstadoDeNacimiento\": \"La Habana\",
-  \"CountryOfCitizenshipPaísDeOrigen\": \"United States\",
+  \"CountryOfCitizenshipPaisDeOrigen\": \"United States\",
   \"MaritalStatusEstadoCivil\": \"Married / Casado(a)\",
   \"StreetAddress\": \"65-40 Booth St Apt 2B\",
   \"City\": \"Rego Park\",
   \"StateProvinceRegion\": \"NY\",
   \"PostalZipCode\": \"11374\",
   \"PhoneMobileCelular\": \"9294471820\",
-  \"TelNumberNúmeroDeTeléfono\": \"9294471820\",
+  \"TelNumberNumeroDeTelefono\": \"9294471820\",
   \"LanguagePreferredLenguajePreferido\": \"Spanish\",
-  \"AQuéDenominaciónPertenece\": \"Bautista\",
-  \"MinistryMinisterio\": \"Leader/Líder\",
+  \"AQueDenominacionPertenece\": \"Bautista\",
+  \"MinistryMinisterio\": \"Leader/Lider\",
   \"ChurchIglesiaMinistryMinisterio\": \"Primera Iglesia Bautista Hispana de Queens\",
-  \"DesdeCuándoAsisteALaIglesia\": \"6 años\",
-  \"CuántasPersonasAsistenALaIglesia\": \"80\",
-  \"AreaOfinterestÁreaDeInteré\": \"Estudios Bíblicos\",
+  \"DesdeCuandoAsisteALaIglesia\": \"6 anos\",
+  \"CuantasPersonasAsistenALaIglesia\": \"80\",
+  \"AreaOfinterestAreaDeIntere\": \"Estudios Biblicos\",
   \"StudyLevelsNivelesDeEstudio\": \"Associate - Tecnico Superior\",
   \"DesiredProgramProramaDeseado\": \"Associate of Biblical Studies\",
   \"BudgetsPresupuesto\": \"\$75\",
   \"CompletoSuEscuelaSecundaria\": \"SI\",
   \"NameOfHighSchoolNombreDeLaEscuela\": \"Instituto Pre-Universitario La Habana\",
-  \"GraduationYearAñoEnQueSeGraduó\": \"Jun 1986\",
-  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller académico\",
+  \"GraduationYearAnoEnQueSeGraduo\": \"Jun 1986\",
+  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller academico\",
   \"Associate\": \"No tengo estudios universitarios\",
   \"Licenciatura\": \"No tengo\",
-  \"Maestría\": \"No tengo estudios de posgrado\",
-  \"Doctorado\": \"No tengo un doctorado todavía\",
-  \"MarqueLosDocumentosQueEstáIncluyen\": \"- Copia del título de Secundaria\\n- Transcripts - Registros oficiales de Notas de grado\",
-  \"RealiceUnPequeñoResumenDeSuVidaE\": \"Llegué a Cristo en Cuba a los 20 años. Al emigrar a Estados Unidos encontré esta iglesia bautista donde he servido por 6 años enseñando la Palabra a niños y adultos.\",
+  \"Maestria\": \"No tengo estudios de posgrado\",
+  \"Doctorado\": \"No tengo un doctorado todavia\",
+  \"MarqueLosDocumentosQueEstaIncluyen\": \"- Copia del titulo de Secundaria\\n- Transcripts - Registros oficiales de Notas de grado\",
+  \"RealiceUnPequenoResumenDeSuVidaE\": \"Llegue a Cristo en Cuba a los 20 anos. Al emigrar a Estados Unidos encontre esta iglesia bautista donde he servido por 6 anos ensenando la Palabra a ninos y adultos.\",
   \"NearestRelativeOrFriendFamiliarOAm\": \"Roberto Rosario\"
 }")
 info "F1 → $(echo "$R" | jq -r '.applicant_id // .error // "ERR"')"
-R2=$(submit_f2 "$EMAIL" "Pastor Ernesto Delgado" "Primera Iglesia Bautista Hispana de Queens" "Bautista" "89-15 Roosevelt Ave Queens NY 11372" "La hermana María tiene un hambre genuina por la Palabra de Dios. Es maestra fiel de escuela dominical desde hace 6 años.")
+R2=$(submit_f2 "$EMAIL" "Pastor Ernesto Delgado" "Primera Iglesia Bautista Hispana de Queens" "Bautista" "89-15 Roosevelt Ave Queens NY 11372" "La hermana Maria tiene un hambre genuina por la Palabra de Dios. Es maestra fiel de escuela dominical desde hace 6 anos.")
 info "F2 → $(echo "$R2" | jq -r '.applicant_id // .error // "ERR"')"
-R3=$(submit_f3 "$EMAIL" "Primera Iglesia Bautista Hispana de Queens" "Pastor Ernesto Delgado" "Maestro" "6 años" 0 6 "Costurera independiente" "Llegué a Cristo en Cuba a los 20 años. Al emigrar encontré esta iglesia donde sirvo con alegría en la escuela dominical y el ministerio de mujeres.")
+R3=$(submit_f3 "$EMAIL" "Primera Iglesia Bautista Hispana de Queens" "Pastor Ernesto Delgado" "Maestro" "6 anos" 0 6 "Costurera independiente" "Llegue a Cristo en Cuba a los 20 anos. Al emigrar encontre esta iglesia donde sirvo con alegria en la escuela dominical y el ministerio de mujeres.")
 info "F3 → $(echo "$R3" | jq -r '.applicant_id // .error // "ERR"')"
 sleep 2
 A=$(fetch_applicant "$EMAIL")
@@ -314,47 +317,47 @@ R=$(post_json "$API/webhook/machform/1" "{
   \"FirstNmeNombre\": \"Juan Pablo\",
   \"LastNameApellido\": \"Ortega\",
   \"NamePrefixPrefijoDeNombre\": \"Mr.\",
-  \"GenderGénero\": \"Male/Masculino\",
+  \"GenderGenero\": \"Male/Masculino\",
   \"DateOfBirthFechaDeNacimiento\": \"Jan 12, 1979\",
-  \"BirthCountryPaísDeNacimiento\": \"Colombia\",
-  \"StateOfBirthEstadoDeNacimiento\": \"Medellín\",
-  \"CountryOfCitizenshipPaísDeOrigen\": \"United States\",
+  \"BirthCountryPaisDeNacimiento\": \"Colombia\",
+  \"StateOfBirthEstadoDeNacimiento\": \"Medellin\",
+  \"CountryOfCitizenshipPaisDeOrigen\": \"United States\",
   \"MaritalStatusEstadoCivil\": \"Married / Casado(a)\",
   \"StreetAddress\": \"3820 NW 7th St\",
   \"City\": \"Miami\",
   \"StateProvinceRegion\": \"FL\",
   \"PostalZipCode\": \"33126\",
   \"PhoneMobileCelular\": \"3054423391\",
-  \"TelNumberNúmeroDeTeléfono\": \"3054423391\",
+  \"TelNumberNumeroDeTelefono\": \"3054423391\",
   \"DeWhatsapp\": \"+1 305 4423391\",
   \"LanguagePreferredLenguajePreferido\": \"Spanish\",
-  \"AQuéDenominaciónPertenece\": \"Iglesia de Dios\",
+  \"AQueDenominacionPertenece\": \"Iglesia de Dios\",
   \"MinistryMinisterio\": \"Pastor\",
   \"ChurchIglesiaMinistryMinisterio\": \"Iglesia de Dios Ministerio Hispano Miami\",
-  \"DesdeCuándoAsisteALaIglesia\": \"12 años\",
-  \"DesdeCuándoPastoreaEnLaIglesia\": \"5 años\",
-  \"CuántasPersonasAsistenALaIglesia\": \"150\",
-  \"AreaOfinterestÁreaDeInteré\": \"Estudios Pastorales\",
-  \"StudyLevelsNivelesDeEstudio\": \"Master - Maestría\",
+  \"DesdeCuandoAsisteALaIglesia\": \"12 anos\",
+  \"DesdeCuandoPastoreaEnLaIglesia\": \"5 anos\",
+  \"CuantasPersonasAsistenALaIglesia\": \"150\",
+  \"AreaOfinterestAreaDeIntere\": \"Estudios Pastorales\",
+  \"StudyLevelsNivelesDeEstudio\": \"Master - Maestria\",
   \"DesiredProgramProramaDeseado\": \"Master of Divinity (M.Div)\",
   \"BudgetsPresupuesto\": \"\$200\",
   \"CompletoSuEscuelaSecundaria\": \"SI\",
-  \"NameOfHighSchoolNombreDeLaEscuela\": \"Colegio San Ignacio Medellín\",
-  \"GraduationYearAñoEnQueSeGraduó\": \"Nov 25, 1997\",
-  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller académico\",
+  \"NameOfHighSchoolNombreDeLaEscuela\": \"Colegio San Ignacio Medellin\",
+  \"GraduationYearAnoEnQueSeGraduo\": \"Nov 25, 1997\",
+  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller academico\",
   \"Associate\": \"No tengo estudios universitarios\",
   \"Licenciatura\": \"Si tengo\",
-  \"Maestría\": \"No tengo estudios de posgrado\",
-  \"Doctorado\": \"No tengo un doctorado todavía\",
-  \"MarqueLosDocumentosQueEstáIncluyen\": \"- Copia de la Licenciatura\\n- Copia del título de postgrado\\n- Transcripts - Registros oficiales de Notas de grado\",
-  \"RealiceUnPequeñoResumenDeSuVidaE\": \"Conocí al Señor en Medellín a los 19 años. Llegué a Miami en 2002. Pastoreo la Iglesia de Dios Ministerio Hispano Miami desde 2019. Tengo mi licenciatura en Teología de la Universidad Bíblica Latinoamericana.\",
+  \"Maestria\": \"No tengo estudios de posgrado\",
+  \"Doctorado\": \"No tengo un doctorado todavia\",
+  \"MarqueLosDocumentosQueEstaIncluyen\": \"- Copia de la Licenciatura\\n- Copia del titulo de postgrado\\n- Transcripts - Registros oficiales de Notas de grado\",
+  \"RealiceUnPequenoResumenDeSuVidaE\": \"Conoci al Senor en Medellin a los 19 anos. Llegue a Miami en 2002. Pastoreo la Iglesia de Dios Ministerio Hispano Miami desde 2019. Tengo mi licenciatura en Teologia de la Universidad Biblica Latinoamericana.\",
   \"NearestRelativeOrFriendFamiliarOAm\": \"Elena Ortega\",
-  \"EnQueAñoFueOrdenadoComoPastor\": \"2019\"
+  \"EnQueAnoFueOrdenadoComoPastor\": \"2019\"
 }")
 info "F1 → $(echo "$R" | jq -r '.applicant_id // .error // "ERR"')"
-R2=$(submit_f2 "$EMAIL" "Obispo Héctor Montoya" "Iglesia de Dios Ministerio Hispano Miami" "Iglesia de Dios" "3820 NW 7th St Miami FL 33126" "Juan pastora nuestra iglesia desde 2019 con excelente fruto espiritual. Lo recomiendo sin reservaciones para el M.Div.")
+R2=$(submit_f2 "$EMAIL" "Obispo Hector Montoya" "Iglesia de Dios Ministerio Hispano Miami" "Iglesia de Dios" "3820 NW 7th St Miami FL 33126" "Juan pastora nuestra iglesia desde 2019 con excelente fruto espiritual. Lo recomiendo sin reservaciones para el M.Div.")
 info "F2 → $(echo "$R2" | jq -r '.applicant_id // .error // "ERR"')"
-R3=$(submit_f3 "$EMAIL" "Iglesia de Dios Ministerio Hispano Miami" "Obispo Héctor Montoya" "Pastor" "12 años" 5 7 "Pastor a tiempo completo" "Conocí al Señor en Colombia a los 19 años. Estudié teología y emigré a Miami donde planté esta congregación. Mi meta es profundizar mi formación pastoral con el M.Div.")
+R3=$(submit_f3 "$EMAIL" "Iglesia de Dios Ministerio Hispano Miami" "Obispo Hector Montoya" "Pastor" "12 anos" 5 7 "Pastor a tiempo completo" "Conoci al Senor en Colombia a los 19 anos. Estudie teologia y emigre a Miami donde plante esta congregacion. Mi meta es profundizar mi formacion pastoral con el M.Div.")
 info "F3 → $(echo "$R3" | jq -r '.applicant_id // .error // "ERR"')"
 sleep 2
 A=$(fetch_applicant "$EMAIL")
@@ -374,47 +377,47 @@ R=$(post_json "$API/webhook/machform/1" "{
   \"FirstNmeNombre\": \"Elena Patricia\",
   \"LastNameApellido\": \"Vargas\",
   \"NamePrefixPrefijoDeNombre\": \"Mrs.\",
-  \"GenderGénero\": \"Female/Femenino\",
+  \"GenderGenero\": \"Female/Femenino\",
   \"DateOfBirthFechaDeNacimiento\": \"Apr 22, 1970\",
-  \"BirthCountryPaísDeNacimiento\": \"Venezuela\",
+  \"BirthCountryPaisDeNacimiento\": \"Venezuela\",
   \"StateOfBirthEstadoDeNacimiento\": \"Caracas\",
-  \"CountryOfCitizenshipPaísDeOrigen\": \"United States\",
+  \"CountryOfCitizenshipPaisDeOrigen\": \"United States\",
   \"MaritalStatusEstadoCivil\": \"Married / Casado(a)\",
   \"StreetAddress\": \"9821 Bissonnet St Apt 104\",
   \"City\": \"Houston\",
   \"StateProvinceRegion\": \"TX\",
   \"PostalZipCode\": \"77036\",
   \"PhoneMobileCelular\": \"7133029941\",
-  \"TelNumberNúmeroDeTeléfono\": \"7133029941\",
+  \"TelNumberNumeroDeTelefono\": \"7133029941\",
   \"DeWhatsapp\": \"+1 713 3029941\",
   \"LanguagePreferredLenguajePreferido\": \"Spanish\",
-  \"AQuéDenominaciónPertenece\": \"Bautista\",
+  \"AQueDenominacionPertenece\": \"Bautista\",
   \"MinistryMinisterio\": \"Pastor\",
   \"ChurchIglesiaMinistryMinisterio\": \"Primera Iglesia Bautista Hispana de Houston\",
-  \"DesdeCuándoAsisteALaIglesia\": \"20 años\",
-  \"DesdeCuándoPastoreaEnLaIglesia\": \"12 años\",
-  \"CuántasPersonasAsistenALaIglesia\": \"350\",
-  \"AreaOfinterestÁreaDeInteré\": \"Liderazgo & Coaching\",
+  \"DesdeCuandoAsisteALaIglesia\": \"20 anos\",
+  \"DesdeCuandoPastoreaEnLaIglesia\": \"12 anos\",
+  \"CuantasPersonasAsistenALaIglesia\": \"350\",
+  \"AreaOfinterestAreaDeIntere\": \"Liderazgo & Coaching\",
   \"StudyLevelsNivelesDeEstudio\": \"Doctoral - Doctorado\",
   \"DesiredProgramProramaDeseado\": \"Doctor of Ministry (D.Min)\",
   \"BudgetsPresupuesto\": \"\$200\",
   \"CompletoSuEscuelaSecundaria\": \"SI\",
-  \"NameOfHighSchoolNombreDeLaEscuela\": \"Liceo Andrés Bello Caracas\",
-  \"GraduationYearAñoEnQueSeGraduó\": \"Jun 28, 1988\",
-  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller académico\",
+  \"NameOfHighSchoolNombreDeLaEscuela\": \"Liceo Andres Bello Caracas\",
+  \"GraduationYearAnoEnQueSeGraduo\": \"Jun 28, 1988\",
+  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller academico\",
   \"Associate\": \"No tengo estudios universitarios\",
   \"Licenciatura\": \"Si tengo\",
-  \"Maestría\": \"Si he completado estudios\",
-  \"Doctorado\": \"No tengo un doctorado todavía\",
-  \"MarqueLosDocumentosQueEstáIncluyen\": \"- Copia de la Licenciatura\\n- Copia del título de postgrado\\n- Transcripts - Registros oficiales de Notas de grado\",
-  \"RealiceUnPequeñoResumenDeSuVidaE\": \"Recibí el llamado al ministerio en Venezuela a los 28 años. Fundé la Primera Iglesia Bautista Hispana de Houston en 2013. Completé mi maestría en Liderazgo Cristiano en 2018.\",
-  \"NearestRelativeOrFriendFamiliarOAm\": \"Ramón Vargas\",
-  \"EnQueAñoFueOrdenadoComoPastor\": \"2012\"
+  \"Maestria\": \"Si he completado estudios\",
+  \"Doctorado\": \"No tengo un doctorado todavia\",
+  \"MarqueLosDocumentosQueEstaIncluyen\": \"- Copia de la Licenciatura\\n- Copia del titulo de postgrado\\n- Transcripts - Registros oficiales de Notas de grado\",
+  \"RealiceUnPequenoResumenDeSuVidaE\": \"Recibi el llamado al ministerio en Venezuela a los 28 anos. Funde la Primera Iglesia Bautista Hispana de Houston en 2013. Complete mi maestria en Liderazgo Cristiano en 2018.\",
+  \"NearestRelativeOrFriendFamiliarOAm\": \"Ramon Vargas\",
+  \"EnQueAnoFueOrdenadoComoPastor\": \"2012\"
 }")
 info "F1 → $(echo "$R" | jq -r '.applicant_id // .error // "ERR"')"
-R2=$(submit_f2 "$EMAIL" "Dr. Antonio Reyes" "Primera Iglesia Bautista Hispana de Houston" "Bautista" "9821 Bissonnet St Houston TX 77036" "La Pastora Elena lleva 12 años de ministerio pastoral fructífero. Su preparación académica y espiritual la hacen candidata ideal para el D.Min.")
+R2=$(submit_f2 "$EMAIL" "Dr. Antonio Reyes" "Primera Iglesia Bautista Hispana de Houston" "Bautista" "9821 Bissonnet St Houston TX 77036" "La Pastora Elena lleva 12 anos de ministerio pastoral fructifero. Su preparacion academica y espiritual la hacen candidata ideal para el D.Min.")
 info "F2 → $(echo "$R2" | jq -r '.applicant_id // .error // "ERR"')"
-R3=$(submit_f3 "$EMAIL" "Primera Iglesia Bautista Hispana de Houston" "Dr. Antonio Reyes" "Pastor" "20 años" 12 8 "Pastora y profesora de teología a tiempo completo" "Fundé esta congregación en 2013 con 20 familias. Hoy somos 350 miembros. El D.Min me permitirá servir con mayor impacto a nivel regional.")
+R3=$(submit_f3 "$EMAIL" "Primera Iglesia Bautista Hispana de Houston" "Dr. Antonio Reyes" "Pastor" "20 anos" 12 8 "Pastora y profesora de teologia a tiempo completo" "Funde esta congregacion en 2013 con 20 familias. Hoy somos 350 miembros. El D.Min me permitira servir con mayor impacto a nivel regional.")
 info "F3 → $(echo "$R3" | jq -r '.applicant_id // .error // "ERR"')"
 sleep 2
 A=$(fetch_applicant "$EMAIL")
@@ -440,44 +443,44 @@ R=$(post_json "$API/webhook/machform/1" "{
   \"FirstNmeNombre\": \"Luis Alberto\",
   \"LastNameApellido\": \"Mendoza\",
   \"NamePrefixPrefijoDeNombre\": \"Mr.\",
-  \"GenderGénero\": \"Male/Masculino\",
+  \"GenderGenero\": \"Male/Masculino\",
   \"DateOfBirthFechaDeNacimiento\": \"Sep 17, 1977\",
-  \"BirthCountryPaísDeNacimiento\": \"Dom. Rep.\",
+  \"BirthCountryPaisDeNacimiento\": \"Dom. Rep.\",
   \"StateOfBirthEstadoDeNacimiento\": \"Santiago\",
-  \"CountryOfCitizenshipPaísDeOrigen\": \"United States\",
+  \"CountryOfCitizenshipPaisDeOrigen\": \"United States\",
   \"MaritalStatusEstadoCivil\": \"Married / Casado(a)\",
   \"StreetAddress\": \"1640 University Ave Apt 3F\",
   \"City\": \"Bronx\",
   \"StateProvinceRegion\": \"NY\",
   \"PostalZipCode\": \"10453\",
   \"PhoneMobileCelular\": \"7184559302\",
-  \"TelNumberNúmeroDeTeléfono\": \"7184559302\",
+  \"TelNumberNumeroDeTelefono\": \"7184559302\",
   \"LanguagePreferredLenguajePreferido\": \"Spanish\",
-  \"AQuéDenominaciónPertenece\": \"Evangelica\",
+  \"AQueDenominacionPertenece\": \"Evangelica\",
   \"MinistryMinisterio\": \"Anciano\",
-  \"ChurchIglesiaMinistryMinisterio\": \"Iglesia Evangélica Emmanuel\",
-  \"DesdeCuándoAsisteALaIglesia\": \"14 años\",
-  \"CuántasPersonasAsistenALaIglesia\": \"180\",
-  \"AreaOfinterestÁreaDeInteré\": \"Teología - Estudios Teológicos\",
+  \"ChurchIglesiaMinistryMinisterio\": \"Iglesia Evangelica Emmanuel\",
+  \"DesdeCuandoAsisteALaIglesia\": \"14 anos\",
+  \"CuantasPersonasAsistenALaIglesia\": \"180\",
+  \"AreaOfinterestAreaDeIntere\": \"Teologia - Estudios Teologicos\",
   \"StudyLevelsNivelesDeEstudio\": \"Doctoral - Doctorado\",
   \"DesiredProgramProramaDeseado\": \"Doctor of Religious Philosophy (Ph.D)\",
   \"BudgetsPresupuesto\": \"\$200\",
   \"CompletoSuEscuelaSecundaria\": \"SI\",
-  \"NameOfHighSchoolNombreDeLaEscuela\": \"Liceo Santiago Rodríguez\",
-  \"GraduationYearAñoEnQueSeGraduó\": \"Jun 14, 1995\",
-  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller académico\",
+  \"NameOfHighSchoolNombreDeLaEscuela\": \"Liceo Santiago Rodriguez\",
+  \"GraduationYearAnoEnQueSeGraduo\": \"Jun 14, 1995\",
+  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller academico\",
   \"Associate\": \"No tengo estudios universitarios\",
   \"Licenciatura\": \"Si tengo\",
-  \"Maestría\": \"No tengo estudios de posgrado\",
-  \"Doctorado\": \"No tengo un doctorado todavía\",
-  \"MarqueLosDocumentosQueEstáIncluyen\": \"- Copia de la Licenciatura\\n- Transcripts - Registros oficiales de Notas de grado\",
-  \"RealiceUnPequeñoResumenDeSuVidaE\": \"Llevo 14 años sirviendo al Señor y siento un llamado claro a la investigación teológica. Quiero hacer el PhD para enseñar a nivel universitario.\",
+  \"Maestria\": \"No tengo estudios de posgrado\",
+  \"Doctorado\": \"No tengo un doctorado todavia\",
+  \"MarqueLosDocumentosQueEstaIncluyen\": \"- Copia de la Licenciatura\\n- Transcripts - Registros oficiales de Notas de grado\",
+  \"RealiceUnPequenoResumenDeSuVidaE\": \"Llevo 14 anos sirviendo al Senor y siento un llamado claro a la investigacion teologica. Quiero hacer el PhD para ensenar a nivel universitario.\",
   \"NearestRelativeOrFriendFamiliarOAm\": \"Carmen Mendoza\"
 }")
 info "F1 → $(echo "$R" | jq -r '.applicant_id // .error // "ERR"')"
-R2=$(submit_f2 "$EMAIL" "Pastor Ramón Tejeda" "Iglesia Evangélica Emmanuel" "Evangelica" "1640 University Ave Bronx NY 10453" "Luis es un anciano serio y estudioso. Aunque no tiene doctorado, sugiero comenzar por el nivel de maestría.")
+R2=$(submit_f2 "$EMAIL" "Pastor Ramon Tejeda" "Iglesia Evangelica Emmanuel" "Evangelica" "1640 University Ave Bronx NY 10453" "Luis es un anciano serio y estudioso. Aunque no tiene doctorado, sugiero comenzar por el nivel de maestria.")
 info "F2 → $(echo "$R2" | jq -r '.applicant_id // .error // "ERR"')"
-R3=$(submit_f3 "$EMAIL" "Iglesia Evangélica Emmanuel" "Pastor Ramón Tejeda" "Anciano" "14 años" 10 4 "Contador público" "Llevo 14 años sirviendo al Señor. Mi sueño es enseñar teología a nivel doctoral.")
+R3=$(submit_f3 "$EMAIL" "Iglesia Evangelica Emmanuel" "Pastor Ramon Tejeda" "Anciano" "14 anos" 10 4 "Contador publico" "Llevo 14 anos sirviendo al Senor. Mi sueno es ensenar teologia a nivel doctoral.")
 info "F3 → $(echo "$R3" | jq -r '.applicant_id // .error // "ERR"')"
 sleep 2
 A=$(fetch_applicant "$EMAIL")
@@ -485,58 +488,58 @@ assert_field "B1 — forms_complete"     "$A" "forms_complete"     "True"
 assert_field "B1 — eligibility_status" "$A" "eligibility_status" "ineligible"
 
 # ─────────────────────────────────────────────────────────────────────────────
-# B2 — Carmen Rosa López · Master M.Div · $25/mo budget
+# B2 — Carmen Rosa Lopez · Master M.Div · $25/mo budget
 # Has bachelor's + all docs. Budget = low tier. Master requires high tier.
 # Manhattan NY · Mexican · married · Sunday school director
 # EXPECTED: needs_review (financial flag)
 # ─────────────────────────────────────────────────────────────────────────────
-title "B2: Carmen López — Master \$25 budget — NEEDS_REVIEW (financial)"
+title "B2: Carmen Lopez — Master \$25 budget — NEEDS_REVIEW (financial)"
 EMAIL="test-b2-mast-budget@logos.edu"
 
 R=$(post_json "$API/webhook/machform/1" "{
   \"EmailICorreoElectronico\": \"$EMAIL\",
   \"FirstNmeNombre\": \"Carmen Rosa\",
-  \"LastNameApellido\": \"López\",
+  \"LastNameApellido\": \"Lopez\",
   \"NamePrefixPrefijoDeNombre\": \"Mrs.\",
-  \"GenderGénero\": \"Female/Femenino\",
+  \"GenderGenero\": \"Female/Femenino\",
   \"DateOfBirthFechaDeNacimiento\": \"Jul 5, 1983\",
-  \"BirthCountryPaísDeNacimiento\": \"Mexico\",
-  \"StateOfBirthEstadoDeNacimiento\": \"Ciudad de México\",
-  \"CountryOfCitizenshipPaísDeOrigen\": \"United States\",
+  \"BirthCountryPaisDeNacimiento\": \"Mexico\",
+  \"StateOfBirthEstadoDeNacimiento\": \"Ciudad de Mexico\",
+  \"CountryOfCitizenshipPaisDeOrigen\": \"United States\",
   \"MaritalStatusEstadoCivil\": \"Married / Casado(a)\",
   \"StreetAddress\": \"505 W 162nd St Apt 4D\",
   \"City\": \"New York\",
   \"StateProvinceRegion\": \"NY\",
   \"PostalZipCode\": \"10032\",
   \"PhoneMobileCelular\": \"2124889031\",
-  \"TelNumberNúmeroDeTeléfono\": \"2124889031\",
+  \"TelNumberNumeroDeTelefono\": \"2124889031\",
   \"DeWhatsapp\": \"+1 212 4889031\",
   \"LanguagePreferredLenguajePreferido\": \"Spanish\",
-  \"AQuéDenominaciónPertenece\": \"Presbiteriana\",
-  \"MinistryMinisterio\": \"Leader/Líder\",
+  \"AQueDenominacionPertenece\": \"Presbiteriana\",
+  \"MinistryMinisterio\": \"Leader/Lider\",
   \"ChurchIglesiaMinistryMinisterio\": \"Iglesia Presbiteriana Washington Heights\",
-  \"DesdeCuándoAsisteALaIglesia\": \"10 años\",
-  \"CuántasPersonasAsistenALaIglesia\": \"90\",
-  \"AreaOfinterestÁreaDeInteré\": \"Estudios Pastorales\",
-  \"StudyLevelsNivelesDeEstudio\": \"Master - Maestría\",
+  \"DesdeCuandoAsisteALaIglesia\": \"10 anos\",
+  \"CuantasPersonasAsistenALaIglesia\": \"90\",
+  \"AreaOfinterestAreaDeIntere\": \"Estudios Pastorales\",
+  \"StudyLevelsNivelesDeEstudio\": \"Master - Maestria\",
   \"DesiredProgramProramaDeseado\": \"Master of Divinity (M.Div)\",
   \"BudgetsPresupuesto\": \"\$25\",
   \"CompletoSuEscuelaSecundaria\": \"SI\",
-  \"NameOfHighSchoolNombreDeLaEscuela\": \"Colegio Secundario Benito Juárez CDMX\",
-  \"GraduationYearAñoEnQueSeGraduó\": \"Jun 18, 2001\",
-  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller académico\",
+  \"NameOfHighSchoolNombreDeLaEscuela\": \"Colegio Secundario Benito Juarez CDMX\",
+  \"GraduationYearAnoEnQueSeGraduo\": \"Jun 18, 2001\",
+  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller academico\",
   \"Associate\": \"No tengo estudios universitarios\",
   \"Licenciatura\": \"Si tengo\",
-  \"Maestría\": \"No tengo estudios de posgrado\",
-  \"Doctorado\": \"No tengo un doctorado todavía\",
-  \"MarqueLosDocumentosQueEstáIncluyen\": \"- Copia de la Licenciatura\\n- Copia del título de postgrado\\n- Transcripts - Registros oficiales de Notas de grado\",
-  \"RealiceUnPequeñoResumenDeSuVidaE\": \"Soy cristiana desde los 15 años. Trabajo como maestra pública de día y sirvo en el ministerio los fines de semana. Mi situación económica es limitada pero tengo gran deseo de crecer.\",
-  \"NearestRelativeOrFriendFamiliarOAm\": \"Jorge López\"
+  \"Maestria\": \"No tengo estudios de posgrado\",
+  \"Doctorado\": \"No tengo un doctorado todavia\",
+  \"MarqueLosDocumentosQueEstaIncluyen\": \"- Copia de la Licenciatura\\n- Copia del titulo de postgrado\\n- Transcripts - Registros oficiales de Notas de grado\",
+  \"RealiceUnPequenoResumenDeSuVidaE\": \"Soy cristiana desde los 15 anos. Trabajo como maestra publica de dia y sirvo en el ministerio los fines de semana. Mi situacion economica es limitada pero tengo gran deseo de crecer.\",
+  \"NearestRelativeOrFriendFamiliarOAm\": \"Jorge Lopez\"
 }")
 info "F1 → $(echo "$R" | jq -r '.applicant_id // .error // "ERR"')"
-R2=$(submit_f2 "$EMAIL" "Pastor James McAllister" "Iglesia Presbiteriana Washington Heights" "Presbiteriana" "505 W 162nd St New York NY 10032" "Carmen es directora de escuela dominical con excelente capacidad pedagógica. Su situación económica actual puede ser un reto para la maestría.")
+R2=$(submit_f2 "$EMAIL" "Pastor James McAllister" "Iglesia Presbiteriana Washington Heights" "Presbiteriana" "505 W 162nd St New York NY 10032" "Carmen es directora de escuela dominical con excelente capacidad pedagogica. Su situacion economica actual puede ser un reto para la maestria.")
 info "F2 → $(echo "$R2" | jq -r '.applicant_id // .error // "ERR"')"
-R3=$(submit_f3 "$EMAIL" "Iglesia Presbiteriana Washington Heights" "Pastor James McAllister" "Maestro" "10 años" 0 10 "Maestra de escuela primaria" "Soy cristiana desde los 15 años. Mi pasión es la educación cristiana. Trabajo como maestra pública y sirvo en el ministerio los fines de semana.")
+R3=$(submit_f3 "$EMAIL" "Iglesia Presbiteriana Washington Heights" "Pastor James McAllister" "Maestro" "10 anos" 0 10 "Maestra de escuela primaria" "Soy cristiana desde los 15 anos. Mi pasion es la educacion cristiana. Trabajo como maestra publica y sirvo en el ministerio los fines de semana.")
 info "F3 → $(echo "$R3" | jq -r '.applicant_id // .error // "ERR"')"
 sleep 2
 A=$(fetch_applicant "$EMAIL")
@@ -544,58 +547,58 @@ assert_field "B2 — forms_complete"     "$A" "forms_complete"     "True"
 assert_field "B2 — eligibility_status" "$A" "eligibility_status" "needs_review"
 
 # ─────────────────────────────────────────────────────────────────────────────
-# B3 — José Miguel Martínez · Bachelor BTS · NO documents submitted
+# B3 — Jose Miguel Martinez · Bachelor BTS · NO documents submitted
 # Has bachelor's education but submitted NOTHING in doc checklist.
 # Jersey City NJ · El Salvadoran · married · elder 6yr
 # EXPECTED: needs_review (document flag — missing transcripts + diploma)
 # ─────────────────────────────────────────────────────────────────────────────
-title "B3: José Martínez — Bachelor, zero docs — NEEDS_REVIEW (documents)"
+title "B3: Jose Martinez — Bachelor, zero docs — NEEDS_REVIEW (documents)"
 EMAIL="test-b3-bach-nodocs@logos.edu"
 
 R=$(post_json "$API/webhook/machform/1" "{
   \"EmailICorreoElectronico\": \"$EMAIL\",
-  \"FirstNmeNombre\": \"José Miguel\",
-  \"LastNameApellido\": \"Martínez\",
+  \"FirstNmeNombre\": \"Jose Miguel\",
+  \"LastNameApellido\": \"Martinez\",
   \"NamePrefixPrefijoDeNombre\": \"Mr.\",
-  \"GenderGénero\": \"Male/Masculino\",
+  \"GenderGenero\": \"Male/Masculino\",
   \"DateOfBirthFechaDeNacimiento\": \"Dec 1, 1980\",
-  \"BirthCountryPaísDeNacimiento\": \"El Salvador\",
+  \"BirthCountryPaisDeNacimiento\": \"El Salvador\",
   \"StateOfBirthEstadoDeNacimiento\": \"San Salvador\",
-  \"CountryOfCitizenshipPaísDeOrigen\": \"United States\",
+  \"CountryOfCitizenshipPaisDeOrigen\": \"United States\",
   \"MaritalStatusEstadoCivil\": \"Married / Casado(a)\",
   \"StreetAddress\": \"280 Newark Ave Apt 2R\",
   \"City\": \"Jersey City\",
   \"StateProvinceRegion\": \"NJ\",
   \"PostalZipCode\": \"07302\",
   \"PhoneMobileCelular\": \"2018834402\",
-  \"TelNumberNúmeroDeTeléfono\": \"2018834402\",
+  \"TelNumberNumeroDeTelefono\": \"2018834402\",
   \"LanguagePreferredLenguajePreferido\": \"Spanish\",
-  \"AQuéDenominaciónPertenece\": \"Asamblea de Dios\",
+  \"AQueDenominacionPertenece\": \"Asamblea de Dios\",
   \"MinistryMinisterio\": \"Anciano\",
   \"ChurchIglesiaMinistryMinisterio\": \"Asamblea de Dios Hispana de Jersey City\",
-  \"DesdeCuándoAsisteALaIglesia\": \"11 años\",
-  \"CuántasPersonasAsistenALaIglesia\": \"95\",
-  \"AreaOfinterestÁreaDeInteré\": \"Teología - Estudios Teológicos\",
+  \"DesdeCuandoAsisteALaIglesia\": \"11 anos\",
+  \"CuantasPersonasAsistenALaIglesia\": \"95\",
+  \"AreaOfinterestAreaDeIntere\": \"Teologia - Estudios Teologicos\",
   \"StudyLevelsNivelesDeEstudio\": \"Bachelor - Licenciatura\",
   \"DesiredProgramProramaDeseado\": \"Bachelor of Theological Studies\",
   \"BudgetsPresupuesto\": \"\$100\",
   \"CompletoSuEscuelaSecundaria\": \"SI\",
   \"NameOfHighSchoolNombreDeLaEscuela\": \"Instituto Nacional de El Salvador\",
-  \"GraduationYearAñoEnQueSeGraduó\": \"Oct 30, 1998\",
-  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller académico\",
+  \"GraduationYearAnoEnQueSeGraduo\": \"Oct 30, 1998\",
+  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller academico\",
   \"Associate\": \"No tengo estudios universitarios\",
   \"Licenciatura\": \"Si tengo\",
-  \"Maestría\": \"No tengo estudios de posgrado\",
-  \"Doctorado\": \"No tengo un doctorado todavía\",
-  \"MarqueLosDocumentosQueEstáIncluyen\": \"-\",
-  \"DocumentosParaEvaluaciónSePuedenA\": \"-\",
-  \"RealiceUnPequeñoResumenDeSuVidaE\": \"Vine a Cristo durante una crisis personal en 2008. Llevo 11 años en esta iglesia. Soy anciano desde 2018. Los documentos académicos los enviaré por correo esta semana.\",
-  \"NearestRelativeOrFriendFamiliarOAm\": \"Lucía Martínez\"
+  \"Maestria\": \"No tengo estudios de posgrado\",
+  \"Doctorado\": \"No tengo un doctorado todavia\",
+  \"MarqueLosDocumentosQueEstaIncluyen\": \"-\",
+  \"DocumentosParaEvaluacionSePuedenA\": \"-\",
+  \"RealiceUnPequenoResumenDeSuVidaE\": \"Vine a Cristo durante una crisis personal en 2008. Llevo 11 anos en esta iglesia. Soy anciano desde 2018. Los documentos academicos los enviare por correo esta semana.\",
+  \"NearestRelativeOrFriendFamiliarOAm\": \"Lucia Martinez\"
 }")
 info "F1 → $(echo "$R" | jq -r '.applicant_id // .error // "ERR"')"
-R2=$(submit_f2 "$EMAIL" "Pastor Eliseo Fuentes" "Asamblea de Dios Hispana de Jersey City" "Asamblea de Dios" "280 Newark Ave Jersey City NJ 07302" "José es un anciano comprometido. Olvidó incluir sus documentos pero puedo confirmar que tiene su licenciatura de la Universidad de El Salvador.")
+R2=$(submit_f2 "$EMAIL" "Pastor Eliseo Fuentes" "Asamblea de Dios Hispana de Jersey City" "Asamblea de Dios" "280 Newark Ave Jersey City NJ 07302" "Jose es un anciano comprometido. Olvido incluir sus documentos pero puedo confirmar que tiene su licenciatura de la Universidad de El Salvador.")
 info "F2 → $(echo "$R2" | jq -r '.applicant_id // .error // "ERR"')"
-R3=$(submit_f3 "$EMAIL" "Asamblea de Dios Hispana de Jersey City" "Pastor Eliseo Fuentes" "Anciano" "11 años" 0 11 "Electricista" "Vine a Cristo en 2008. Desde entonces me he dedicado al servicio de la iglesia como anciano y maestro de jóvenes.")
+R3=$(submit_f3 "$EMAIL" "Asamblea de Dios Hispana de Jersey City" "Pastor Eliseo Fuentes" "Anciano" "11 anos" 0 11 "Electricista" "Vine a Cristo en 2008. Desde entonces me he dedicado al servicio de la iglesia como anciano y maestro de jovenes.")
 info "F3 → $(echo "$R3" | jq -r '.applicant_id // .error // "ERR"')"
 sleep 2
 A=$(fetch_applicant "$EMAIL")
@@ -616,46 +619,46 @@ R=$(post_json "$API/webhook/machform/1" "{
   \"FirstNmeNombre\": \"Rosa Elena\",
   \"LastNameApellido\": \"Guerrero\",
   \"NamePrefixPrefijoDeNombre\": \"Mrs.\",
-  \"GenderGénero\": \"Female/Femenino\",
+  \"GenderGenero\": \"Female/Femenino\",
   \"DateOfBirthFechaDeNacimiento\": \"Jan 12, 1965\",
-  \"BirthCountryPaísDeNacimiento\": \"Guatemala\",
+  \"BirthCountryPaisDeNacimiento\": \"Guatemala\",
   \"StateOfBirthEstadoDeNacimiento\": \"Ciudad de Guatemala\",
-  \"CountryOfCitizenshipPaísDeOrigen\": \"United States\",
+  \"CountryOfCitizenshipPaisDeOrigen\": \"United States\",
   \"MaritalStatusEstadoCivil\": \"Widow/Viudo(a)\",
   \"StreetAddress\": \"45 Orient Ave\",
   \"City\": \"Newark\",
   \"StateProvinceRegion\": \"NJ\",
   \"PostalZipCode\": \"07105\",
   \"PhoneMobileCelular\": \"9732218804\",
-  \"TelNumberNúmeroDeTeléfono\": \"9732218804\",
+  \"TelNumberNumeroDeTelefono\": \"9732218804\",
   \"LanguagePreferredLenguajePreferido\": \"Spanish\",
-  \"AQuéDenominaciónPertenece\": \"Evangelica\",
+  \"AQueDenominacionPertenece\": \"Evangelica\",
   \"MinistryMinisterio\": \"Pastor\",
-  \"ChurchIglesiaMinistryMinisterio\": \"Iglesia Evangélica Ríos de Agua Viva\",
-  \"DesdeCuándoAsisteALaIglesia\": \"20 años\",
-  \"DesdeCuándoPastoreaEnLaIglesia\": \"15 años\",
-  \"CuántasPersonasAsistenALaIglesia\": \"75\",
-  \"AreaOfinterestÁreaDeInteré\": \"Estudios Pastorales\",
-  \"StudyLevelsNivelesDeEstudio\": \"Master - Maestría\",
+  \"ChurchIglesiaMinistryMinisterio\": \"Iglesia Evangelica Rios de Agua Viva\",
+  \"DesdeCuandoAsisteALaIglesia\": \"20 anos\",
+  \"DesdeCuandoPastoreaEnLaIglesia\": \"15 anos\",
+  \"CuantasPersonasAsistenALaIglesia\": \"75\",
+  \"AreaOfinterestAreaDeIntere\": \"Estudios Pastorales\",
+  \"StudyLevelsNivelesDeEstudio\": \"Master - Maestria\",
   \"DesiredProgramProramaDeseado\": \"Master of Divinity (M.Div)\",
   \"BudgetsPresupuesto\": \"\$200\",
   \"CompletoSuEscuelaSecundaria\": \"SI\",
-  \"NameOfHighSchoolNombreDeLaEscuela\": \"Instituto Normal Central para Señoritas Guatemala\",
-  \"GraduationYearAñoEnQueSeGraduó\": \"Oct 22, 1983\",
-  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller académico\",
+  \"NameOfHighSchoolNombreDeLaEscuela\": \"Instituto Normal Central para Senoritas Guatemala\",
+  \"GraduationYearAnoEnQueSeGraduo\": \"Oct 22, 1983\",
+  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller academico\",
   \"Associate\": \"No tengo estudios universitarios\",
   \"Licenciatura\": \"No tengo\",
-  \"Maestría\": \"No tengo estudios de posgrado\",
-  \"Doctorado\": \"No tengo un doctorado todavía\",
-  \"MarqueLosDocumentosQueEstáIncluyen\": \"- Copia del título de Secundaria\",
-  \"RealiceUnPequeñoResumenDeSuVidaE\": \"Fundé la Iglesia Ríos de Agua Viva en 2009 con 4 familias. Hoy somos 75 miembros activos. No tuve la oportunidad de ir a la universidad pero he estudiado la Biblia intensamente y completé 3 programas de capacitación ministerial.\",
+  \"Maestria\": \"No tengo estudios de posgrado\",
+  \"Doctorado\": \"No tengo un doctorado todavia\",
+  \"MarqueLosDocumentosQueEstaIncluyen\": \"- Copia del titulo de Secundaria\",
+  \"RealiceUnPequenoResumenDeSuVidaE\": \"Funde la Iglesia Rios de Agua Viva en 2009 con 4 familias. Hoy somos 75 miembros activos. No tuve la oportunidad de ir a la universidad pero he estudiado la Biblia intensamente y complete 3 programas de capacitacion ministerial.\",
   \"NearestRelativeOrFriendFamiliarOAm\": \"Gerardo Fuentes\",
-  \"EnQueAñoFueOrdenadoComoPastor\": \"2009\"
+  \"EnQueAnoFueOrdenadoComoPastor\": \"2009\"
 }")
 info "F1 → $(echo "$R" | jq -r '.applicant_id // .error // "ERR"')"
-R2=$(submit_f2 "$EMAIL" "Obispo Gerardo Fuentes" "Iglesia Evangélica Ríos de Agua Viva" "Evangelica" "45 Orient Ave Newark NJ 07105" "La pastora Rosa fundó su iglesia hace 15 años desde cero. No tiene estudios universitarios formales pero su conocimiento bíblico y fruto ministerial son extraordinarios. 75 almas bajo su cuidado.")
+R2=$(submit_f2 "$EMAIL" "Obispo Gerardo Fuentes" "Iglesia Evangelica Rios de Agua Viva" "Evangelica" "45 Orient Ave Newark NJ 07105" "La pastora Rosa fundo su iglesia hace 15 anos desde cero. No tiene estudios universitarios formales pero su conocimiento biblico y fruto ministerial son extraordinarios. 75 almas bajo su cuidado.")
 info "F2 → $(echo "$R2" | jq -r '.applicant_id // .error // "ERR"')"
-R3=$(submit_f3 "$EMAIL" "Iglesia Evangélica Ríos de Agua Viva" "Obispo Gerardo Fuentes" "Pastor" "20 años" 15 5 "Pastora a tiempo completo" "Fundé mi iglesia en 2009. He plantado 2 misiones desde entonces. Completé programa de formación pastoral 3 años, escuela de líderes 2 años, y entrenamiento para plantadores de iglesias 1 año.")
+R3=$(submit_f3 "$EMAIL" "Iglesia Evangelica Rios de Agua Viva" "Obispo Gerardo Fuentes" "Pastor" "20 anos" 15 5 "Pastora a tiempo completo" "Funde mi iglesia en 2009. He plantado 2 misiones desde entonces. Complete programa de formacion pastoral 3 anos, escuela de lideres 2 anos, y entrenamiento para plantadores de iglesias 1 ano.")
 info "F3 → $(echo "$R3" | jq -r '.applicant_id // .error // "ERR"')"
 sleep 2
 A=$(fetch_applicant "$EMAIL")
@@ -663,7 +666,7 @@ assert_field "B4 — forms_complete"     "$A" "forms_complete"     "True"
 assert_field "B4 — eligibility_status" "$A" "eligibility_status" "needs_review"
 
 # ─────────────────────────────────────────────────────────────────────────────
-# B5 — Miguel Ángel Torres · D.Min · associate degree · 12yr FT ministry
+# B5 — Miguel Angel Torres · D.Min · associate degree · 12yr FT ministry
 # Has associate — below master's requirement. 12yr FT is edge-of-exception.
 # Chicago IL · Puerto Rican · married · pastor of 90-person church
 # EXPECTED: needs_review (associate + 12yr FT — AI review threshold)
@@ -673,49 +676,49 @@ EMAIL="test-b5-dmin-assoc12yr@logos.edu"
 
 R=$(post_json "$API/webhook/machform/1" "{
   \"EmailICorreoElectronico\": \"$EMAIL\",
-  \"FirstNmeNombre\": \"Miguel Ángel\",
+  \"FirstNmeNombre\": \"Miguel Angel\",
   \"LastNameApellido\": \"Torres\",
   \"NamePrefixPrefijoDeNombre\": \"Mr.\",
-  \"GenderGénero\": \"Male/Masculino\",
+  \"GenderGenero\": \"Male/Masculino\",
   \"DateOfBirthFechaDeNacimiento\": \"Mar 29, 1972\",
-  \"BirthCountryPaísDeNacimiento\": \"Puerto Rico\",
+  \"BirthCountryPaisDeNacimiento\": \"Puerto Rico\",
   \"StateOfBirthEstadoDeNacimiento\": \"Ponce\",
-  \"CountryOfCitizenshipPaísDeOrigen\": \"United States\",
+  \"CountryOfCitizenshipPaisDeOrigen\": \"United States\",
   \"MaritalStatusEstadoCivil\": \"Married / Casado(a)\",
   \"StreetAddress\": \"2230 S Millard Ave\",
   \"City\": \"Chicago\",
   \"StateProvinceRegion\": \"IL\",
   \"PostalZipCode\": \"60623\",
   \"PhoneMobileCelular\": \"7732441099\",
-  \"TelNumberNúmeroDeTeléfono\": \"7732441099\",
+  \"TelNumberNumeroDeTelefono\": \"7732441099\",
   \"LanguagePreferredLenguajePreferido\": \"Spanish\",
-  \"AQuéDenominaciónPertenece\": \"Pentecostal\",
+  \"AQueDenominacionPertenece\": \"Pentecostal\",
   \"MinistryMinisterio\": \"Pastor\",
   \"ChurchIglesiaMinistryMinisterio\": \"Iglesia Pentecostal Fuente de Vida Chicago\",
-  \"DesdeCuándoAsisteALaIglesia\": \"18 años\",
-  \"DesdeCuándoPastoreaEnLaIglesia\": \"12 años\",
-  \"CuántasPersonasAsistenALaIglesia\": \"90\",
-  \"AreaOfinterestÁreaDeInteré\": \"Estudios Pastorales\",
+  \"DesdeCuandoAsisteALaIglesia\": \"18 anos\",
+  \"DesdeCuandoPastoreaEnLaIglesia\": \"12 anos\",
+  \"CuantasPersonasAsistenALaIglesia\": \"90\",
+  \"AreaOfinterestAreaDeIntere\": \"Estudios Pastorales\",
   \"StudyLevelsNivelesDeEstudio\": \"Doctoral - Doctorado\",
   \"DesiredProgramProramaDeseado\": \"Doctor of Ministry (D.Min)\",
   \"BudgetsPresupuesto\": \"\$200\",
   \"CompletoSuEscuelaSecundaria\": \"SI\",
   \"NameOfHighSchoolNombreDeLaEscuela\": \"Escuela Superior Central de Ponce\",
-  \"GraduationYearAñoEnQueSeGraduó\": \"Jun 10, 1990\",
-  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller académico\",
-  \"Associate\": \"Si, completé el estudio\",
+  \"GraduationYearAnoEnQueSeGraduo\": \"Jun 10, 1990\",
+  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller academico\",
+  \"Associate\": \"Si, complete el estudio\",
   \"Licenciatura\": \"No tengo\",
-  \"Maestría\": \"No tengo estudios de posgrado\",
-  \"Doctorado\": \"No tengo un doctorado todavía\",
-  \"MarqueLosDocumentosQueEstáIncluyen\": \"- Copia del Associate - Técnico\\n- Transcripts - Registros oficiales de Notas de grado\",
-  \"RealiceUnPequeñoResumenDeSuVidaE\": \"Nací en un hogar cristiano en Ponce PR. Comencé a pastorear a los 32 años. He plantado 2 misiones desde nuestra iglesia madre. Mi meta es completar el D.Min para enseñar en seminarios hispanos.\",
+  \"Maestria\": \"No tengo estudios de posgrado\",
+  \"Doctorado\": \"No tengo un doctorado todavia\",
+  \"MarqueLosDocumentosQueEstaIncluyen\": \"- Copia del Associate - Tecnico\\n- Transcripts - Registros oficiales de Notas de grado\",
+  \"RealiceUnPequenoResumenDeSuVidaE\": \"Naci en un hogar cristiano en Ponce PR. Comence a pastorear a los 32 anos. He plantado 2 misiones desde nuestra iglesia madre. Mi meta es completar el D.Min para ensenar en seminarios hispanos.\",
   \"NearestRelativeOrFriendFamiliarOAm\": \"Luz Torres\",
-  \"EnQueAñoFueOrdenadoComoPastor\": \"2012\"
+  \"EnQueAnoFueOrdenadoComoPastor\": \"2012\"
 }")
 info "F1 → $(echo "$R" | jq -r '.applicant_id // .error // "ERR"')"
-R2=$(submit_f2 "$EMAIL" "Obispo Luis Cardona" "Iglesia Pentecostal Fuente de Vida Chicago" "Pentecostal" "2230 S Millard Ave Chicago IL 60623" "El pastor Miguel lleva 12 años al frente de su congregación. Aunque no tiene maestría, su experiencia pastoral y madurez espiritual superan a muchos con títulos académicos.")
+R2=$(submit_f2 "$EMAIL" "Obispo Luis Cardona" "Iglesia Pentecostal Fuente de Vida Chicago" "Pentecostal" "2230 S Millard Ave Chicago IL 60623" "El pastor Miguel lleva 12 anos al frente de su congregacion. Aunque no tiene maestria, su experiencia pastoral y madurez espiritual superan a muchos con titulos academicos.")
 info "F2 → $(echo "$R2" | jq -r '.applicant_id // .error // "ERR"')"
-R3=$(submit_f3 "$EMAIL" "Iglesia Pentecostal Fuente de Vida Chicago" "Obispo Luis Cardona" "Pastor" "18 años" 12 6 "Pastor y carpintero" "Soy pastor desde los 32 años. He plantado 2 misiones. Mi associate es de LOGOS. Quiero el D.Min para servir a nivel regional.")
+R3=$(submit_f3 "$EMAIL" "Iglesia Pentecostal Fuente de Vida Chicago" "Obispo Luis Cardona" "Pastor" "18 anos" 12 6 "Pastor y carpintero" "Soy pastor desde los 32 anos. He plantado 2 misiones. Mi associate es de LOGOS. Quiero el D.Min para servir a nivel regional.")
 info "F3 → $(echo "$R3" | jq -r '.applicant_id // .error // "ERR"')"
 sleep 2
 A=$(fetch_applicant "$EMAIL")
@@ -737,44 +740,44 @@ R=$(post_json "$API/webhook/machform/1" "{
   \"FirstNmeNombre\": \"Isabel Fernanda\",
   \"LastNameApellido\": \"Reyes\",
   \"NamePrefixPrefijoDeNombre\": \"Mrs.\",
-  \"GenderGénero\": \"Female/Femenino\",
+  \"GenderGenero\": \"Female/Femenino\",
   \"DateOfBirthFechaDeNacimiento\": \"Jun 30, 1984\",
-  \"BirthCountryPaísDeNacimiento\": \"Dom. Rep.\",
+  \"BirthCountryPaisDeNacimiento\": \"Dom. Rep.\",
   \"StateOfBirthEstadoDeNacimiento\": \"Santo Domingo\",
-  \"CountryOfCitizenshipPaísDeOrigen\": \"United States\",
+  \"CountryOfCitizenshipPaisDeOrigen\": \"United States\",
   \"MaritalStatusEstadoCivil\": \"Married / Casado(a)\",
   \"StreetAddress\": \"7201 Arbor Oaks Dr Apt 201\",
   \"City\": \"Orlando\",
   \"StateProvinceRegion\": \"FL\",
   \"PostalZipCode\": \"32822\",
   \"PhoneMobileCelular\": \"4074819203\",
-  \"TelNumberNúmeroDeTeléfono\": \"4074819203\",
+  \"TelNumberNumeroDeTelefono\": \"4074819203\",
   \"LanguagePreferredLenguajePreferido\": \"Spanish\",
-  \"AQuéDenominaciónPertenece\": \"Evangelica\",
+  \"AQueDenominacionPertenece\": \"Evangelica\",
   \"MinistryMinisterio\": \"Pastor\",
   \"ChurchIglesiaMinistryMinisterio\": \"Centro Cristiano Alfa y Omega Orlando\",
-  \"DesdeCuándoAsisteALaIglesia\": \"12 años\",
-  \"CuántasPersonasAsistenALaIglesia\": \"130\",
-  \"AreaOfinterestÁreaDeInteré\": \"Estudios Pastorales\",
-  \"StudyLevelsNivelesDeEstudio\": \"Master - Maestría\",
+  \"DesdeCuandoAsisteALaIglesia\": \"12 anos\",
+  \"CuantasPersonasAsistenALaIglesia\": \"130\",
+  \"AreaOfinterestAreaDeIntere\": \"Estudios Pastorales\",
+  \"StudyLevelsNivelesDeEstudio\": \"Master - Maestria\",
   \"DesiredProgramProramaDeseado\": \"Master of Divinity (M.Div)\",
   \"BudgetsPresupuesto\": \"\$200\",
   \"CompletoSuEscuelaSecundaria\": \"SI\",
   \"NameOfHighSchoolNombreDeLaEscuela\": \"Liceo Secundario Santo Domingo\",
-  \"GraduationYearAñoEnQueSeGraduó\": \"Jun 25, 2002\",
-  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller académico\",
+  \"GraduationYearAnoEnQueSeGraduo\": \"Jun 25, 2002\",
+  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller academico\",
   \"Associate\": \"No tengo estudios universitarios\",
   \"Licenciatura\": \"Si tengo\",
-  \"Maestría\": \"No tengo estudios de posgrado\",
-  \"Doctorado\": \"No tengo un doctorado todavía\",
-  \"MarqueLosDocumentosQueEstáIncluyen\": \"- Transcripts - Registros oficiales de Notas de grado\",
-  \"RealiceUnPequeñoResumenDeSuVidaE\": \"Me gradué de la PUCMM en Rep. Dom. con licenciatura en Comunicación. Emigré en 2011. Soy pastora asociada desde 2020. Aún no he podido legalizar el diploma para los Estados Unidos pero tengo los transcripts.\",
+  \"Maestria\": \"No tengo estudios de posgrado\",
+  \"Doctorado\": \"No tengo un doctorado todavia\",
+  \"MarqueLosDocumentosQueEstaIncluyen\": \"- Transcripts - Registros oficiales de Notas de grado\",
+  \"RealiceUnPequenoResumenDeSuVidaE\": \"Me gradue de la PUCMM en Rep. Dom. con licenciatura en Comunicacion. Emigre en 2011. Soy pastora asociada desde 2020. Aun no he podido legalizar el diploma para los Estados Unidos pero tengo los transcripts.\",
   \"NearestRelativeOrFriendFamiliarOAm\": \"Lorenzo Abreu\"
 }")
 info "F1 → $(echo "$R" | jq -r '.applicant_id // .error // "ERR"')"
-R2=$(submit_f2 "$EMAIL" "Pastor Lorenzo Abreu" "Centro Cristiano Alfa y Omega Orlando" "Evangelica" "7201 Arbor Oaks Dr Orlando FL 32822" "Isabel es pastora asociada desde 2020. Tiene su licenciatura de la PUCMM en Rep. Dom. pero aún no ha podido legalizar el diploma. Tiene los transcripts.")
+R2=$(submit_f2 "$EMAIL" "Pastor Lorenzo Abreu" "Centro Cristiano Alfa y Omega Orlando" "Evangelica" "7201 Arbor Oaks Dr Orlando FL 32822" "Isabel es pastora asociada desde 2020. Tiene su licenciatura de la PUCMM en Rep. Dom. pero aun no ha podido legalizar el diploma. Tiene los transcripts.")
 info "F2 → $(echo "$R2" | jq -r '.applicant_id // .error // "ERR"')"
-R3=$(submit_f3 "$EMAIL" "Centro Cristiano Alfa y Omega Orlando" "Pastor Lorenzo Abreu" "Pastor" "12 años" 4 8 "Comunicadora y pastora" "Estudié comunicación en la PUCMM y emigré a Orlando en 2011. Soy pastora asociada y creo que el M.Div me equipará para pastorear con mayor profundidad.")
+R3=$(submit_f3 "$EMAIL" "Centro Cristiano Alfa y Omega Orlando" "Pastor Lorenzo Abreu" "Pastor" "12 anos" 4 8 "Comunicadora y pastora" "Estudie comunicacion en la PUCMM y emigre a Orlando en 2011. Soy pastora asociada y creo que el M.Div me equipara para pastorear con mayor profundidad.")
 info "F3 → $(echo "$R3" | jq -r '.applicant_id // .error // "ERR"')"
 sleep 2
 A=$(fetch_applicant "$EMAIL")
@@ -795,44 +798,44 @@ R=$(post_json "$API/webhook/machform/1" "{
   \"FirstNmeNombre\": \"Francisco Javier\",
   \"LastNameApellido\": \"Ruiz\",
   \"NamePrefixPrefijoDeNombre\": \"Mr.\",
-  \"GenderGénero\": \"Male/Masculino\",
+  \"GenderGenero\": \"Male/Masculino\",
   \"DateOfBirthFechaDeNacimiento\": \"Nov 4, 1971\",
-  \"BirthCountryPaísDeNacimiento\": \"Ecuador\",
+  \"BirthCountryPaisDeNacimiento\": \"Ecuador\",
   \"StateOfBirthEstadoDeNacimiento\": \"Quito\",
-  \"CountryOfCitizenshipPaísDeOrigen\": \"United States\",
+  \"CountryOfCitizenshipPaisDeOrigen\": \"United States\",
   \"MaritalStatusEstadoCivil\": \"Married / Casado(a)\",
   \"StreetAddress\": \"4520 Bryan St Apt 1A\",
   \"City\": \"Dallas\",
   \"StateProvinceRegion\": \"TX\",
   \"PostalZipCode\": \"75204\",
   \"PhoneMobileCelular\": \"2147710038\",
-  \"TelNumberNúmeroDeTeléfono\": \"2147710038\",
+  \"TelNumberNumeroDeTelefono\": \"2147710038\",
   \"LanguagePreferredLenguajePreferido\": \"Spanish\",
-  \"AQuéDenominaciónPertenece\": \"Iglesia de Dios\",
+  \"AQueDenominacionPertenece\": \"Iglesia de Dios\",
   \"MinistryMinisterio\": \"Anciano\",
   \"ChurchIglesiaMinistryMinisterio\": \"Iglesia de Dios Dallas Hispano\",
-  \"DesdeCuándoAsisteALaIglesia\": \"16 años\",
-  \"CuántasPersonasAsistenALaIglesia\": \"220\",
-  \"AreaOfinterestÁreaDeInteré\": \"Liderazgo & Coaching\",
+  \"DesdeCuandoAsisteALaIglesia\": \"16 anos\",
+  \"CuantasPersonasAsistenALaIglesia\": \"220\",
+  \"AreaOfinterestAreaDeIntere\": \"Liderazgo & Coaching\",
   \"StudyLevelsNivelesDeEstudio\": \"Doctoral - Doctorado\",
   \"DesiredProgramProramaDeseado\": \"Doctor of Ministry (D.Min)\",
   \"BudgetsPresupuesto\": \"\$200\",
   \"CompletoSuEscuelaSecundaria\": \"SI\",
-  \"NameOfHighSchoolNombreDeLaEscuela\": \"Colegio Nacional Mejía Quito\",
-  \"GraduationYearAñoEnQueSeGraduó\": \"Jul 15, 1989\",
-  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller académico\",
+  \"NameOfHighSchoolNombreDeLaEscuela\": \"Colegio Nacional Mejia Quito\",
+  \"GraduationYearAnoEnQueSeGraduo\": \"Jul 15, 1989\",
+  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller academico\",
   \"Associate\": \"No tengo estudios universitarios\",
   \"Licenciatura\": \"Si tengo\",
-  \"Maestría\": \"No tengo estudios de posgrado\",
-  \"Doctorado\": \"No tengo un doctorado todavía\",
-  \"MarqueLosDocumentosQueEstáIncluyen\": \"- Copia de la Licenciatura\\n- Transcripts - Registros oficiales de Notas de grado\",
-  \"RealiceUnPequeñoResumenDeSuVidaE\": \"Vine a Cristo en 2001 en Ecuador. Emigré a Dallas en 2006. Soy anciano desde 2014. Tengo licenciatura en ingeniería civil. El D.Min me llamará a un ministerio más profundo a nivel regional.\",
-  \"NearestRelativeOrFriendFamiliarOAm\": \"María Ruiz\"
+  \"Maestria\": \"No tengo estudios de posgrado\",
+  \"Doctorado\": \"No tengo un doctorado todavia\",
+  \"MarqueLosDocumentosQueEstaIncluyen\": \"- Copia de la Licenciatura\\n- Transcripts - Registros oficiales de Notas de grado\",
+  \"RealiceUnPequenoResumenDeSuVidaE\": \"Vine a Cristo en 2001 en Ecuador. Emigre a Dallas en 2006. Soy anciano desde 2014. Tengo licenciatura en ingenieria civil. El D.Min me llamara a un ministerio mas profundo a nivel regional.\",
+  \"NearestRelativeOrFriendFamiliarOAm\": \"Maria Ruiz\"
 }")
 info "F1 → $(echo "$R" | jq -r '.applicant_id // .error // "ERR"')"
-R2=$(submit_f2 "$EMAIL" "Pastor Pedro Navarro" "Iglesia de Dios Dallas Hispano" "Iglesia de Dios" "4520 Bryan St Dallas TX 75204" "Francisco lleva 10 años como anciano principal. No tiene maestría pero su preparación en la Palabra y madurez de carácter son sobresalientes.")
+R2=$(submit_f2 "$EMAIL" "Pastor Pedro Navarro" "Iglesia de Dios Dallas Hispano" "Iglesia de Dios" "4520 Bryan St Dallas TX 75204" "Francisco lleva 10 anos como anciano principal. No tiene maestria pero su preparacion en la Palabra y madurez de caracter son sobresalientes.")
 info "F2 → $(echo "$R2" | jq -r '.applicant_id // .error // "ERR"')"
-R3=$(submit_f3 "$EMAIL" "Iglesia de Dios Dallas Hispano" "Pastor Pedro Navarro" "Anciano" "16 años" 0 10 "Ingeniero civil" "Vine a Cristo en Ecuador en 2001. Emigré a Dallas en 2006. Soy anciano desde 2014. Creo que el D.Min complementará mi formación profesional con profundidad teológica.")
+R3=$(submit_f3 "$EMAIL" "Iglesia de Dios Dallas Hispano" "Pastor Pedro Navarro" "Anciano" "16 anos" 0 10 "Ingeniero civil" "Vine a Cristo en Ecuador en 2001. Emigre a Dallas en 2006. Soy anciano desde 2014. Creo que el D.Min complementara mi formacion profesional con profundidad teologica.")
 info "F3 → $(echo "$R3" | jq -r '.applicant_id // .error // "ERR"')"
 sleep 2
 A=$(fetch_applicant "$EMAIL")
@@ -840,7 +843,7 @@ assert_field "B7 — forms_complete"     "$A" "forms_complete"     "True"
 assert_field "B7 — eligibility_status" "$A" "eligibility_status" "needs_review"
 
 # ─────────────────────────────────────────────────────────────────────────────
-# B8 — Teresa María Morales · Associate ABS · $25/mo budget
+# B8 — Teresa Maria Morales · Associate ABS · $25/mo budget
 # Associate level requires medium budget ($50-$100). $25 = low tier only.
 # Los Angeles CA · Honduran · widow · Sunday school teacher
 # EXPECTED: needs_review (financial flag — associate requires $50+)
@@ -850,47 +853,47 @@ EMAIL="test-b8-assoc-budget@logos.edu"
 
 R=$(post_json "$API/webhook/machform/1" "{
   \"EmailICorreoElectronico\": \"$EMAIL\",
-  \"FirstNmeNombre\": \"Teresa María\",
+  \"FirstNmeNombre\": \"Teresa Maria\",
   \"LastNameApellido\": \"Morales\",
   \"NamePrefixPrefijoDeNombre\": \"Mrs.\",
-  \"GenderGénero\": \"Female/Femenino\",
+  \"GenderGenero\": \"Female/Femenino\",
   \"DateOfBirthFechaDeNacimiento\": \"Aug 20, 1961\",
-  \"BirthCountryPaísDeNacimiento\": \"Honduras\",
+  \"BirthCountryPaisDeNacimiento\": \"Honduras\",
   \"StateOfBirthEstadoDeNacimiento\": \"Tegucigalpa\",
-  \"CountryOfCitizenshipPaísDeOrigen\": \"United States\",
+  \"CountryOfCitizenshipPaisDeOrigen\": \"United States\",
   \"MaritalStatusEstadoCivil\": \"Widow/Viudo(a)\",
   \"StreetAddress\": \"821 S Bonnie Brae St\",
   \"City\": \"Los Angeles\",
   \"StateProvinceRegion\": \"CA\",
   \"PostalZipCode\": \"90057\",
   \"PhoneMobileCelular\": \"3232188847\",
-  \"TelNumberNúmeroDeTeléfono\": \"3232188847\",
+  \"TelNumberNumeroDeTelefono\": \"3232188847\",
   \"LanguagePreferredLenguajePreferido\": \"Spanish\",
-  \"AQuéDenominaciónPertenece\": \"Evangelica\",
-  \"MinistryMinisterio\": \"Leader/Líder\",
-  \"ChurchIglesiaMinistryMinisterio\": \"Iglesia Evangélica Roca de Salvación LA\",
-  \"DesdeCuándoAsisteALaIglesia\": \"17 años\",
-  \"CuántasPersonasAsistenALaIglesia\": \"60\",
-  \"AreaOfinterestÁreaDeInteré\": \"Estudios Bíblicos\",
+  \"AQueDenominacionPertenece\": \"Evangelica\",
+  \"MinistryMinisterio\": \"Leader/Lider\",
+  \"ChurchIglesiaMinistryMinisterio\": \"Iglesia Evangelica Roca de Salvacion LA\",
+  \"DesdeCuandoAsisteALaIglesia\": \"17 anos\",
+  \"CuantasPersonasAsistenALaIglesia\": \"60\",
+  \"AreaOfinterestAreaDeIntere\": \"Estudios Biblicos\",
   \"StudyLevelsNivelesDeEstudio\": \"Associate - Tecnico Superior\",
   \"DesiredProgramProramaDeseado\": \"Associate of Biblical Studies\",
   \"BudgetsPresupuesto\": \"\$25\",
   \"CompletoSuEscuelaSecundaria\": \"SI\",
-  \"NameOfHighSchoolNombreDeLaEscuela\": \"Instituto Central Vicente Cáceres Tegucigalpa\",
-  \"GraduationYearAñoEnQueSeGraduó\": \"Nov 12, 1979\",
+  \"NameOfHighSchoolNombreDeLaEscuela\": \"Instituto Central Vicente Caceres Tegucigalpa\",
+  \"GraduationYearAnoEnQueSeGraduo\": \"Nov 12, 1979\",
   \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller en Ciencias y Letras\",
   \"Associate\": \"No tengo estudios universitarios\",
   \"Licenciatura\": \"No tengo\",
-  \"Maestría\": \"No tengo estudios de posgrado\",
-  \"Doctorado\": \"No tengo un doctorado todavía\",
-  \"MarqueLosDocumentosQueEstáIncluyen\": \"- Copia del título de Secundaria\",
-  \"RealiceUnPequeñoResumenDeSuVidaE\": \"Enviudé en 2015 y el Señor fue mi fortaleza. Desde entonces me dediqué aún más al servicio de la iglesia. Vivo con presupuesto muy limitado pero quiero crecer en el conocimiento de la Palabra.\",
+  \"Maestria\": \"No tengo estudios de posgrado\",
+  \"Doctorado\": \"No tengo un doctorado todavia\",
+  \"MarqueLosDocumentosQueEstaIncluyen\": \"- Copia del titulo de Secundaria\",
+  \"RealiceUnPequenoResumenDeSuVidaE\": \"Enviude en 2015 y el Senor fue mi fortaleza. Desde entonces me dedique aun mas al servicio de la iglesia. Vivo con presupuesto muy limitado pero quiero crecer en el conocimiento de la Palabra.\",
   \"NearestRelativeOrFriendFamiliarOAm\": \"Julio Morales\"
 }")
 info "F1 → $(echo "$R" | jq -r '.applicant_id // .error // "ERR"')"
-R2=$(submit_f2 "$EMAIL" "Pastor Julio Espinoza" "Iglesia Evangélica Roca de Salvación LA" "Evangelica" "821 S Bonnie Brae St Los Angeles CA 90057" "Teresa es maestra fiel de escuela dominical desde hace 9 años. Es viuda con ingreso limitado. Su deseo de crecer académicamente es genuino.")
+R2=$(submit_f2 "$EMAIL" "Pastor Julio Espinoza" "Iglesia Evangelica Roca de Salvacion LA" "Evangelica" "821 S Bonnie Brae St Los Angeles CA 90057" "Teresa es maestra fiel de escuela dominical desde hace 9 anos. Es viuda con ingreso limitado. Su deseo de crecer academicamente es genuino.")
 info "F2 → $(echo "$R2" | jq -r '.applicant_id // .error // "ERR"')"
-R3=$(submit_f3 "$EMAIL" "Iglesia Evangélica Roca de Salvación LA" "Pastor Julio Espinoza" "Maestro" "17 años" 0 17 "Empleada doméstica" "Enviudé en 2015. Desde entonces me dediqué aún más al ministerio. Enseño escuela dominical desde hace 9 años y coordino el ministerio de cocina para indigentes.")
+R3=$(submit_f3 "$EMAIL" "Iglesia Evangelica Roca de Salvacion LA" "Pastor Julio Espinoza" "Maestro" "17 anos" 0 17 "Empleada domestica" "Enviude en 2015. Desde entonces me dedique aun mas al ministerio. Enseno escuela dominical desde hace 9 anos y coordino el ministerio de cocina para indigentes.")
 info "F3 → $(echo "$R3" | jq -r '.applicant_id // .error // "ERR"')"
 sleep 2
 A=$(fetch_applicant "$EMAIL")
@@ -912,47 +915,47 @@ R=$(post_json "$API/webhook/machform/1" "{
   \"FirstNmeNombre\": \"Antonio Rafael\",
   \"LastNameApellido\": \"Flores\",
   \"NamePrefixPrefijoDeNombre\": \"Dr.\",
-  \"GenderGénero\": \"Male/Masculino\",
+  \"GenderGenero\": \"Male/Masculino\",
   \"DateOfBirthFechaDeNacimiento\": \"May 18, 1963\",
-  \"BirthCountryPaísDeNacimiento\": \"Cuba\",
+  \"BirthCountryPaisDeNacimiento\": \"Cuba\",
   \"StateOfBirthEstadoDeNacimiento\": \"La Habana\",
-  \"CountryOfCitizenshipPaísDeOrigen\": \"United States\",
+  \"CountryOfCitizenshipPaisDeOrigen\": \"United States\",
   \"MaritalStatusEstadoCivil\": \"Married / Casado(a)\",
   \"StreetAddress\": \"7002 Blanco Rd\",
   \"City\": \"San Antonio\",
   \"StateProvinceRegion\": \"TX\",
   \"PostalZipCode\": \"78216\",
   \"PhoneMobileCelular\": \"2108897761\",
-  \"TelNumberNúmeroDeTeléfono\": \"2108897761\",
+  \"TelNumberNumeroDeTelefono\": \"2108897761\",
   \"LanguagePreferredLenguajePreferido\": \"Spanish\",
-  \"AQuéDenominaciónPertenece\": \"Bautista\",
+  \"AQueDenominacionPertenece\": \"Bautista\",
   \"MinistryMinisterio\": \"Pastor\",
   \"ChurchIglesiaMinistryMinisterio\": \"Primera Iglesia Bautista Hispana San Antonio\",
-  \"DesdeCuándoAsisteALaIglesia\": \"22 años\",
-  \"DesdeCuándoPastoreaEnLaIglesia\": \"8 años\",
-  \"CuántasPersonasAsistenALaIglesia\": \"280\",
-  \"AreaOfinterestÁreaDeInteré\": \"Estudios Pastorales\",
+  \"DesdeCuandoAsisteALaIglesia\": \"22 anos\",
+  \"DesdeCuandoPastoreaEnLaIglesia\": \"8 anos\",
+  \"CuantasPersonasAsistenALaIglesia\": \"280\",
+  \"AreaOfinterestAreaDeIntere\": \"Estudios Pastorales\",
   \"StudyLevelsNivelesDeEstudio\": \"Doctoral - Doctorado\",
   \"DesiredProgramProramaDeseado\": \"Doctor of Ministry (D.Min)\",
   \"BudgetsPresupuesto\": \"\$200\",
   \"CompletoSuEscuelaSecundaria\": \"SI\",
-  \"NameOfHighSchoolNombreDeLaEscuela\": \"Escuela Secundaria Básica La Habana\",
-  \"GraduationYearAñoEnQueSeGraduó\": \"Jun 10, 1981\",
-  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller académico\",
+  \"NameOfHighSchoolNombreDeLaEscuela\": \"Escuela Secundaria Basica La Habana\",
+  \"GraduationYearAnoEnQueSeGraduo\": \"Jun 10, 1981\",
+  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller academico\",
   \"Associate\": \"No tengo estudios universitarios\",
   \"Licenciatura\": \"Si tengo\",
-  \"Maestría\": \"Si he completado estudios\",
+  \"Maestria\": \"Si he completado estudios\",
   \"Doctorado\": \"Si tengo\",
-  \"MarqueLosDocumentosQueEstáIncluyen\": \"-\",
-  \"DocumentosParaEvaluaciónSePuedenA\": \"-\",
-  \"RealiceUnPequeñoResumenDeSuVidaE\": \"Emigré de Cuba en 1994. Completé mi Th.D. en 2010 en la Universidad Bautista Internacional. Sirvo como pastor principal desde 2016. Quiero el D.Min para enfatizar la práctica ministerial. Los documentos los enviaré por correo urgente.\",
-  \"NearestRelativeOrFriendFamiliarOAm\": \"Marco Hernández\",
-  \"EnQueAñoFueOrdenadoComoPastor\": \"2016\"
+  \"MarqueLosDocumentosQueEstaIncluyen\": \"-\",
+  \"DocumentosParaEvaluacionSePuedenA\": \"-\",
+  \"RealiceUnPequenoResumenDeSuVidaE\": \"Emigre de Cuba en 1994. Complete mi Th.D. en 2010 en la Universidad Bautista Internacional. Sirvo como pastor principal desde 2016. Quiero el D.Min para enfatizar la practica ministerial. Los documentos los enviare por correo urgente.\",
+  \"NearestRelativeOrFriendFamiliarOAm\": \"Marco Hernandez\",
+  \"EnQueAnoFueOrdenadoComoPastor\": \"2016\"
 }")
 info "F1 → $(echo "$R" | jq -r '.applicant_id // .error // "ERR"')"
-R2=$(submit_f2 "$EMAIL" "Dr. Marco Hernández" "Primera Iglesia Bautista Hispana San Antonio" "Bautista" "7002 Blanco Rd San Antonio TX 78216" "El Pastor Antonio tiene un Th.D. de la Universidad Bautista Internacional. Olvidó incluir sus documentos. Los tengo en archivo y puedo confirmar su autenticidad.")
+R2=$(submit_f2 "$EMAIL" "Dr. Marco Hernandez" "Primera Iglesia Bautista Hispana San Antonio" "Bautista" "7002 Blanco Rd San Antonio TX 78216" "El Pastor Antonio tiene un Th.D. de la Universidad Bautista Internacional. Olvido incluir sus documentos. Los tengo en archivo y puedo confirmar su autenticidad.")
 info "F2 → $(echo "$R2" | jq -r '.applicant_id // .error // "ERR"')"
-R3=$(submit_f3 "$EMAIL" "Primera Iglesia Bautista Hispana San Antonio" "Dr. Marco Hernández" "Pastor" "22 años" 8 14 "Pastor y profesor de teología" "Emigré de Cuba en 1994. Completé mi Th.D. en 2010. Pastoreo esta iglesia desde 2016. Los documentos académicos los enviaré por correo esta semana.")
+R3=$(submit_f3 "$EMAIL" "Primera Iglesia Bautista Hispana San Antonio" "Dr. Marco Hernandez" "Pastor" "22 anos" 8 14 "Pastor y profesor de teologia" "Emigre de Cuba en 1994. Complete mi Th.D. en 2010. Pastoreo esta iglesia desde 2016. Los documentos academicos los enviare por correo esta semana.")
 info "F3 → $(echo "$R3" | jq -r '.applicant_id // .error // "ERR"')"
 sleep 2
 A=$(fetch_applicant "$EMAIL")
@@ -960,59 +963,59 @@ assert_field "B9 — forms_complete"     "$A" "forms_complete"     "True"
 assert_field "B9 — eligibility_status" "$A" "eligibility_status" "needs_review"
 
 # ─────────────────────────────────────────────────────────────────────────────
-# B10 — Sofía Beatriz Ramírez · Bachelor BTS · has only associate · 10yr ministry
+# B10 — Sofia Beatriz Ramirez · Bachelor BTS · has only associate · 10yr ministry
 # No bachelor's degree yet. Has associate + 10yr associated ministry experience.
 # Life-credit candidate: up to 30 credits for 12+ yr ministry (bachelor level).
 # Philadelphia PA · Peruvian · married · deaconess + Bible teacher
 # EXPECTED: needs_review (associate no bachelor + life credit candidate — AI)
 # ─────────────────────────────────────────────────────────────────────────────
-title "B10: Sofía Ramírez — Bachelor, associate only + 10yr ministry — NEEDS_REVIEW"
+title "B10: Sofia Ramirez — Bachelor, associate only + 10yr ministry — NEEDS_REVIEW"
 EMAIL="test-b10-bach-assoc10yr@logos.edu"
 
 R=$(post_json "$API/webhook/machform/1" "{
   \"EmailICorreoElectronico\": \"$EMAIL\",
-  \"FirstNmeNombre\": \"Sofía Beatriz\",
-  \"LastNameApellido\": \"Ramírez\",
+  \"FirstNmeNombre\": \"Sofia Beatriz\",
+  \"LastNameApellido\": \"Ramirez\",
   \"NamePrefixPrefijoDeNombre\": \"Mrs.\",
-  \"GenderGénero\": \"Female/Femenino\",
+  \"GenderGenero\": \"Female/Femenino\",
   \"DateOfBirthFechaDeNacimiento\": \"Sep 6, 1978\",
-  \"BirthCountryPaísDeNacimiento\": \"Peru\",
+  \"BirthCountryPaisDeNacimiento\": \"Peru\",
   \"StateOfBirthEstadoDeNacimiento\": \"Lima\",
-  \"CountryOfCitizenshipPaísDeOrigen\": \"United States\",
+  \"CountryOfCitizenshipPaisDeOrigen\": \"United States\",
   \"MaritalStatusEstadoCivil\": \"Married / Casado(a)\",
   \"StreetAddress\": \"2311 N 5th St\",
   \"City\": \"Philadelphia\",
   \"StateProvinceRegion\": \"PA\",
   \"PostalZipCode\": \"19133\",
   \"PhoneMobileCelular\": \"2155819034\",
-  \"TelNumberNúmeroDeTeléfono\": \"2155819034\",
+  \"TelNumberNumeroDeTelefono\": \"2155819034\",
   \"DeWhatsapp\": \"+1 215 5819034\",
   \"LanguagePreferredLenguajePreferido\": \"Spanish\",
-  \"AQuéDenominaciónPertenece\": \"Evangelica\",
+  \"AQueDenominacionPertenece\": \"Evangelica\",
   \"MinistryMinisterio\": \"Diaconisa\",
   \"ChurchIglesiaMinistryMinisterio\": \"Iglesia Cristiana Camino de Vida Philadelphia\",
-  \"DesdeCuándoAsisteALaIglesia\": \"13 años\",
-  \"CuántasPersonasAsistenALaIglesia\": \"110\",
-  \"AreaOfinterestÁreaDeInteré\": \"Teología - Estudios Teológicos\",
+  \"DesdeCuandoAsisteALaIglesia\": \"13 anos\",
+  \"CuantasPersonasAsistenALaIglesia\": \"110\",
+  \"AreaOfinterestAreaDeIntere\": \"Teologia - Estudios Teologicos\",
   \"StudyLevelsNivelesDeEstudio\": \"Bachelor - Licenciatura\",
   \"DesiredProgramProramaDeseado\": \"Bachelor of Theological Studies\",
   \"BudgetsPresupuesto\": \"\$100\",
   \"CompletoSuEscuelaSecundaria\": \"SI\",
-  \"NameOfHighSchoolNombreDeLaEscuela\": \"Colegio Santa Úrsula Lima\",
-  \"GraduationYearAñoEnQueSeGraduó\": \"Nov 30, 1996\",
-  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller académico\",
-  \"Associate\": \"Si, completé el estudio\",
+  \"NameOfHighSchoolNombreDeLaEscuela\": \"Colegio Santa Ursula Lima\",
+  \"GraduationYearAnoEnQueSeGraduo\": \"Nov 30, 1996\",
+  \"TypeOfDiplomaTipoDeDiploma\": \"Bachiller academico\",
+  \"Associate\": \"Si, complete el estudio\",
   \"Licenciatura\": \"No tengo\",
-  \"Maestría\": \"No tengo estudios de posgrado\",
-  \"Doctorado\": \"No tengo un doctorado todavía\",
-  \"MarqueLosDocumentosQueEstáIncluyen\": \"- Copia del Associate - Técnico\\n- Transcripts - Registros oficiales de Notas de grado\",
-  \"RealiceUnPequeñoResumenDeSuVidaE\": \"Soy cristiana desde los 16 años en Lima Perú. Emigré a Philadelphia en 2005. He enseñado la Biblia por 10 años. Completé el Associate aquí en LOGOS y ahora siento que el Señor me llama a completar la licenciatura.\",
-  \"NearestRelativeOrFriendFamiliarOAm\": \"Félix Quispe\"
+  \"Maestria\": \"No tengo estudios de posgrado\",
+  \"Doctorado\": \"No tengo un doctorado todavia\",
+  \"MarqueLosDocumentosQueEstaIncluyen\": \"- Copia del Associate - Tecnico\\n- Transcripts - Registros oficiales de Notas de grado\",
+  \"RealiceUnPequenoResumenDeSuVidaE\": \"Soy cristiana desde los 16 anos en Lima Peru. Emigre a Philadelphia en 2005. He ensenado la Biblia por 10 anos. Complete el Associate aqui en LOGOS y ahora siento que el Senor me llama a completar la licenciatura.\",
+  \"NearestRelativeOrFriendFamiliarOAm\": \"Felix Quispe\"
 }")
 info "F1 → $(echo "$R" | jq -r '.applicant_id // .error // "ERR"')"
-R2=$(submit_f2 "$EMAIL" "Pastor Félix Quispe" "Iglesia Cristiana Camino de Vida Philadelphia" "Evangelica" "2311 N 5th St Philadelphia PA 19133" "Sofía es una de las maestras de Biblia más capaces que conozco. Ha enseñado la Escuela Bíblica por 10 años con gran dominio de la Escritura. Tiene Associate pero no Bachelor. Creo que califica perfectamente para la licenciatura con su experiencia ministerial.")
+R2=$(submit_f2 "$EMAIL" "Pastor Felix Quispe" "Iglesia Cristiana Camino de Vida Philadelphia" "Evangelica" "2311 N 5th St Philadelphia PA 19133" "Sofia es una de las maestras de Biblia mas capaces que conozco. Ha ensenado la Escuela Biblica por 10 anos con gran dominio de la Escritura. Tiene Associate pero no Bachelor. Creo que califica perfectamente para la licenciatura con su experiencia ministerial.")
 info "F2 → $(echo "$R2" | jq -r '.applicant_id // .error // "ERR"')"
-R3=$(submit_f3 "$EMAIL" "Iglesia Cristiana Camino de Vida Philadelphia" "Pastor Félix Quispe" "Diácono" "13 años" 0 10 "Maestra bilingüe en escuela cristiana" "Soy cristiana desde los 16 años en Lima. Emigré a Filadelfia en 2005. He enseñado la Biblia por 10 años ininterrumpidos. Completé el Associate en LOGOS y el Señor me llama a la licenciatura.")
+R3=$(submit_f3 "$EMAIL" "Iglesia Cristiana Camino de Vida Philadelphia" "Pastor Felix Quispe" "Diacono" "13 anos" 0 10 "Maestra bilingue en escuela cristiana" "Soy cristiana desde los 16 anos en Lima. Emigre a Filadelfia en 2005. He ensenado la Biblia por 10 anos ininterrumpidos. Complete el Associate en LOGOS y el Senor me llama a la licenciatura.")
 info "F3 → $(echo "$R3" | jq -r '.applicant_id // .error // "ERR"')"
 sleep 2
 A=$(fetch_applicant "$EMAIL")
@@ -1026,17 +1029,17 @@ echo "════════════════════════�
 echo -e "  Results: ${GREEN}${PASS} passed${NC}  ${RED}${FAIL} failed${NC}"
 echo ""
 echo "  Expected:"
-echo -e "  ${GREEN}ELIGIBLE${NC}      A1 Ana Pérez · A2 Carlos Sánchez · A3 María Rosario"
+echo -e "  ${GREEN}ELIGIBLE${NC}      A1 Ana Perez · A2 Carlos Sanchez · A3 Maria Rosario"
 echo -e "                A4 Juan Ortega · A5 Elena Vargas"
 echo -e "  ${RED}INELIGIBLE${NC}    B1 Luis Mendoza (PhD no existing doctorate)"
-echo -e "  ${YELLOW}NEEDS_REVIEW${NC}  B2 Carmen López (Master \$25 budget)"
-echo -e "                B3 José Martínez (Bachelor zero docs)"
+echo -e "  ${YELLOW}NEEDS_REVIEW${NC}  B2 Carmen Lopez (Master \$25 budget)"
+echo -e "                B3 Jose Martinez (Bachelor zero docs)"
 echo -e "                B4 Rosa Guerrero (Master HS-only 15yr FT)"
 echo -e "                B5 Miguel Torres (D.Min associate 12yr FT)"
 echo -e "                B6 Isabel Reyes (Master missing undergrad diploma)"
 echo -e "                B7 Francisco Ruiz (D.Min bachelor 10yr associated)"
 echo -e "                B8 Teresa Morales (Associate \$25 budget)"
 echo -e "                B9 Antonio Flores (D.Min Th.D. zero docs)"
-echo -e "                B10 Sofía Ramírez (Bachelor associate 10yr ministry)"
+echo -e "                B10 Sofia Ramirez (Bachelor associate 10yr ministry)"
 echo "═══════════════════════════════════════════════════════════════"
 echo ""
