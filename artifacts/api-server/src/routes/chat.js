@@ -147,6 +147,52 @@ function buildChecklistItems(applicant) {
   return items;
 }
 
+// ── Extract personal/contact details from Form 1 raw_data ─────────────────────
+function extractPersonalDetails(form1RawData) {
+  if (!form1RawData) return {};
+  const r = form1RawData;
+
+  // Helper: try multiple key names, return first non-empty value
+  const get = (...keys) => {
+    for (const k of keys) {
+      const v = r[k];
+      if (v !== undefined && v !== null && String(v).trim() !== '' && String(v).trim() !== '-') {
+        return String(v).trim();
+      }
+    }
+    return null;
+  };
+
+  return {
+    home_address: [
+      get('StreetAddress'),
+      get('City', 'CityCiudad'),
+      get('StateProvinceRegion', 'StateEstado'),
+      get('PostalZipCode'),
+    ].filter(Boolean).join(', ') || null,
+    country_of_birth:    get('BirthCountryPaísDeNacimiento', 'BirthCountryPaisDeNacimiento'),
+    state_of_birth:      get('StateOfBirthEstadoDeNacimiento'),
+    citizenship:         get('CountryOfCitizenshipPaísDeOrigen', 'CountryOfCitizenshipPaisDeOrigen'),
+    date_of_birth:       get('DateOfBirthFechaDeNacimiento', 'DateOfBirthFechadeNacimiento'),
+    gender:              get('GenderGénero', 'GenderGenero'),
+    marital_status:      get('MaritalStatusEstadoCivil'),
+    denomination:        get('AQuéDenominaciónPertenece', 'AQueDenominacionPertenece'),
+    church_name:         get('ChurchIglesiaMinistryMinisterio'),
+    ministry_role:       get('MinistryMinisterio'),
+    years_attending:     get('DesdeCuándoAsisteALaIglesia', 'DesdeCuandoAsisteALaIglesia'),
+    church_size:         get('CuántasPersonasAsistenALaIglesia', 'CuantasPersonasAsistenALaIglesia'),
+    whatsapp:            get('DeWhatsapp'),
+    phone_home:          get('PhoneHomeTeléfonoDeCasa', 'PhoneHomeTeléfonoDeCasa'),
+    high_school:         get('NameOfHighSchoolNombreDeLaEscuela'),
+    graduation_year:     get('GraduationYearAñoEnQueSeGraduó', 'GraduationYearAñoEnQueSeGraduo'),
+    ministry_summary:    get('RealiceUnPequeñoResumenDeSuVidaE'),
+    emergency_contact:   get('NearestRelativeOrFriendFamiliarOAm'),
+    language_preferred:  get('LanguagePreferredLenguajePreferido'),
+    area_of_interest:    get('AreaOfinterestÁreaDeInteré', 'AreaOfinterestAreaDeInteres'),
+    notes:               get('NotasSiNecesitaEspacioOTienePregu'),
+  };
+}
+
 // ── Tool: get_applicant_details ────────────────────────────────────────────────
 async function toolGetApplicantDetails({ id }) {
   if (!id) return { error: 'id is required' };
@@ -159,8 +205,11 @@ async function toolGetApplicantDetails({ id }) {
     .eq('applicant_id', id)
     .order('form_number', { ascending: true });
 
+  const form1 = (forms ?? []).find(f => Number(f.form_number) === 1);
+  const personal_details = extractPersonalDetails(form1?.raw_data);
+
   const requirements_checklist = buildChecklistItems(applicant);
-  return { applicant, forms: forms ?? [], requirements_checklist };
+  return { applicant, personal_details, forms: forms ?? [], requirements_checklist };
 }
 
 // ── Tool: update_applicant_decision ───────────────────────────────────────────
@@ -368,6 +417,8 @@ SMART SEARCH & FUZZY RECOVERY — follow this every time a search returns 0 resu
 3. When a close match IS found, open with: "Did you mean **[full name]** (email: [email])?" then continue answering about that applicant.
 4. When multiple close matches are found, list them: "I found a few possible matches — which did you mean?" with name + email for each.
 5. Only say "I can't find anyone" after at least 2–3 retry attempts all return 0 results.
+
+PERSONAL DETAILS: When get_applicant_details is called, the response includes a personal_details object extracted from Form 1. It contains: home_address, date_of_birth, gender, marital_status, country_of_birth, state_of_birth, citizenship, denomination, church_name, ministry_role, years_attending, church_size, whatsapp, phone_home, high_school, graduation_year, ministry_summary, emergency_contact, language_preferred, area_of_interest, notes. When the user asks about any of these (address, denomination, church, etc.), call get_applicant_details and read from personal_details. Never say you don't have access to this information — it's available via the tool.
 
 REQUIREMENTS CHECKLIST: When get_applicant_details returns a requirements_checklist array, always include it in your reply under a "Requirements" heading. Format each item on its own line using EXACTLY this format:
 ✓ Requirement label
