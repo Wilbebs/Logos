@@ -174,7 +174,7 @@ R=$(post_json "$API/webhook/machform/1" "{
   \"Licenciatura\": \"No tengo\",
   \"Maestria\": \"No tengo estudios de posgrado\",
   \"Doctorado\": \"No tengo un doctorado todavia\",
-  \"MarqueLosDocumentosQueEstaIncluyen\": \"- Copia del titulo de Secundaria\",
+  \"MarqueLosDocumentosQueEstaIncluyen\": \"- diploma\\n- Transcripts - Registros oficiales de Notas de grado\",
   \"RealiceUnPequenoResumenDeSuVidaE\": \"Recibi al Senor a los 17 anos en Colombia. Emigre a EUA en 2005. Sirvo como lider de mujeres en mi iglesia desde hace 8 anos.\",
   \"NearestRelativeOrFriendFamiliarOAm\": \"Leonides Perez\",
   \"NotasSiNecesitaEspacioOTienePregu\": \"\"
@@ -232,7 +232,7 @@ R=$(post_json "$API/webhook/machform/1" "{
   \"Licenciatura\": \"No tengo\",
   \"Maestria\": \"No tengo estudios de posgrado\",
   \"Doctorado\": \"No tengo un doctorado todavia\",
-  \"MarqueLosDocumentosQueEstaIncluyen\": \"- Copia del Associate - Tecnico\\n- Transcripts - Registros oficiales de Notas de grado\",
+  \"MarqueLosDocumentosQueEstaIncluyen\": \"- diploma\\n- Transcripts - Registros oficiales de Notas de grado\",
   \"RealiceUnPequenoResumenDeSuVidaE\": \"Soy cristiano desde los 18 anos. Sirvo como diacono en nuestra iglesia pentecostal desde hace 4 anos y como maestro de escuela biblica desde hace 6 anos.\",
   \"NearestRelativeOrFriendFamiliarOAm\": \"Maria Sanchez\"
 }")
@@ -289,7 +289,7 @@ R=$(post_json "$API/webhook/machform/1" "{
   \"Licenciatura\": \"No tengo\",
   \"Maestria\": \"No tengo estudios de posgrado\",
   \"Doctorado\": \"No tengo un doctorado todavia\",
-  \"MarqueLosDocumentosQueEstaIncluyen\": \"- Copia del titulo de Secundaria\\n- Transcripts - Registros oficiales de Notas de grado\",
+  \"MarqueLosDocumentosQueEstaIncluyen\": \"- diploma\\n- Transcripts - Registros oficiales de Notas de grado\",
   \"RealiceUnPequenoResumenDeSuVidaE\": \"Llegue a Cristo en Cuba a los 20 anos. Al emigrar a Estados Unidos encontre esta iglesia bautista donde he servido por 6 anos ensenando la Palabra a ninos y adultos.\",
   \"NearestRelativeOrFriendFamiliarOAm\": \"Roberto Rosario\"
 }")
