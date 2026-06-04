@@ -7,8 +7,15 @@ For Claude Code to review before picking up work on LOGOS Admissions.
 
 - **Codebase**: pnpm monorepo. Two artifacts: `artifacts/logos-admissions` (React + Vite frontend) and `artifacts/api-server` (Express 5 API).
 - **Database**: Supabase (Postgres). All access via `@supabase/supabase-js` client — NOT Drizzle, NOT Replit's built-in Postgres.
-- **Vercel deployment**: `https://logos-murex-mu.vercel.app` — this is where the live app is hosted. Environment secrets must be configured in Vercel's dashboard (not just locally). Any code changes need to be deployed there.
-- **Local dev**:
+- **Vercel deployment**: `https://logos-murex-mu.vercel.app` — this is where the live app is hosted and where Claude Code should test.
+- **Replit dev URL**: NOT usable by Claude Code — it requires Replit login to access (auth wall). Ignore it.
+- **Claude Code testing workflow**:
+  1. Edit code locally
+  2. `git push` → Vercel auto-deploys
+  3. Test against `https://logos-murex-mu.vercel.app`
+  - This is the same workflow as before. Nothing changes.
+- **Vercel env secrets**: Must be set in the Vercel dashboard (`vercel.com → project → Settings → Environment Variables`). Claude Code cannot set these itself — owner must add them manually, especially the new Gemini key.
+- **Local dev** (if needed):
   - Frontend: `pnpm --filter @workspace/logos-admissions run dev`
   - API: `pnpm --filter @workspace/api-server run dev` (port 8080)
 
