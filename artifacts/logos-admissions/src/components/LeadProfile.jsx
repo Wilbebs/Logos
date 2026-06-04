@@ -351,16 +351,20 @@ export default function LeadProfile({ applicant, forms }) {
           )}
           {/* Form completion pills */}
           <div className="flex items-center gap-1">
-            {[1, 2, 3].map(n => {
+            {[
+              { n: 1, label: 'Solicitud de Admisión' },
+              { n: 2, label: 'Recomendación Pastoral' },
+              { n: 3, label: 'Experiencia Ministerial' },
+            ].map(({ n, label }) => {
               const submitted = !!applicant[`form${n}_submitted_at`];
               return (
-                <span key={n} title={`Form ${n}`}
-                  className={`text-[10px] px-1.5 py-0.5 rounded-full border font-semibold ${
+                <span key={n} title={`Form ${n} — ${label}`}
+                  className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold whitespace-nowrap ${
                     submitted
                       ? 'bg-green-50 border-green-300 text-green-700'
                       : 'bg-gray-100 border-gray-200 text-gray-400'
                   }`}>
-                  {submitted ? `F${n} ✓` : `F${n}`}
+                  {submitted ? `Form ${n}: ${label} ✓` : `Form ${n}: ${label}`}
                 </span>
               );
             })}
