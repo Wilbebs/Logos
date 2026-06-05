@@ -509,6 +509,10 @@ Return only the letter text, no extra commentary.`;
 router.post('/:id/suggest-email', async (req, res) => {
   try {
     const { id } = req.params;
+    const { language } = req.body;
+    const notesLangNote = language === 'es'
+      ? '\nIMPORTANT: Write the ENTIRE note in Spanish (Español).'
+      : '';
 
     const { data: applicant, error: aErr } = await supabase
       .from('applicants')
@@ -561,7 +565,7 @@ Write 2-4 short numbered points (1. 2. 3. format). Cover:
 - Any flags or context the team should note
 
 IMPORTANT: Plain text only. No markdown, no asterisks, no bold, no dashes as bullets. Use numbered points only.
-This is internal only. No salutation, no sign-off.`;
+This is internal only. No salutation, no sign-off.${notesLangNote}`;
 
     const result = await model.generateContent(prompt);
     const suggestion = result.response.text().trim();
@@ -581,7 +585,10 @@ This is internal only. No salutation, no sign-off.`;
 router.post('/:id/decision-email/generate', async (req, res) => {
   try {
     const { id } = req.params;
-    const { type } = req.body;
+    const { type, language } = req.body;
+    const langNote = language === 'es'
+      ? '\nIMPORTANT: Write the ENTIRE email in Spanish (Español). Use formal, warm Spanish appropriate for a Christian university.'
+      : '';
     if (!['rejection', 'info_request'].includes(type)) {
       return res.status(400).json({ error: 'type must be "rejection" or "info_request"' });
     }
@@ -629,9 +636,11 @@ Instructions:
 - Encourage them — this is a Christian institution; offer hope and suggest they may reapply or consider other programs
 - Close warmly, "In His service," then a blank line for signature
 - Plain text only, no markdown. 3-4 short paragraphs.
-- Do NOT invent specific dates or program codes.`;
+- Do NOT invent specific dates or program codes.${langNote}`;
     } else {
-      subject = `Additional Information Needed — Your LOGOS Application`;
+      subject = language === 'es'
+        ? `Información Adicional Requerida — Su Solicitud a LOGOS`
+        : `Additional Information Needed — Your LOGOS Application`;
       prompt = `You are writing a warm, helpful email from LOGOS Christian University (a Christian seminary) requesting additional information from an applicant.
 
 Applicant: ${fullName}
@@ -647,7 +656,7 @@ Instructions:
 - Give them clear next steps: what to send and how
 - Keep a warm, encouraging, faith-based tone — this is not a rejection
 - Close warmly, "In His service," then a blank line for signature
-- Plain text only, no markdown. 3-4 short paragraphs.`;
+- Plain text only, no markdown. 3-4 short paragraphs.${langNote}`;
     }
 
     const result = await model.generateContent({
@@ -724,6 +733,7 @@ router.post('/:id/decision-email/send', async (req, res) => {
 router.post('/:id/ai-review', async (req, res) => {
   try {
     const { id } = req.params;
+    const { language } = req.body;
 
     // Fetch applicant
     const { data: applicant, error: aErr } = await supabase
@@ -804,7 +814,7 @@ router.post('/:id/ai-review', async (req, res) => {
       const previousAssessment = (applicant.ai_recommendation && applicant.ai_reasoning)
         ? { recommendation: applicant.ai_recommendation, reasoning: applicant.ai_reasoning }
         : null;
-      aiResult = await callAIReview(applicant, mergedSubmission, previousAssessment);
+      aiResult = await callAIReview(applicant, mergedSubmission, previousAssessment, language);
     }
 
     // Write ONLY the AI fields — never touch eligibility_status or decision

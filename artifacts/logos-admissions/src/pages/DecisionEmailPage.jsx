@@ -9,6 +9,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import AdmissionTimeline from '../components/AdmissionTimeline.jsx';
+import { useLanguage } from '../context/LanguageContext.jsx';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -87,6 +88,7 @@ function EmailBody({ value, onChange, placeholder, disabled }) {
 export default function DecisionEmailPage() {
   const { id, type } = useParams();   // type = 'rejection' | 'info-request'
   const navigate     = useNavigate();
+  const { lang }     = useLanguage();
 
   // Normalise URL param → internal key
   const emailType = type === 'info-request' ? 'info_request' : 'rejection';
@@ -131,7 +133,7 @@ export default function DecisionEmailPage() {
       const res  = await fetch(`${API_URL}/api/applicants/${id}/decision-email/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: emailType }),
+        body: JSON.stringify({ type: emailType, language: lang }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Generation failed');

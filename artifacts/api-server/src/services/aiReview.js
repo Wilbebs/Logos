@@ -12,7 +12,7 @@ const systemPrompt = readFileSync(
   'utf-8'
 );
 
-export async function callAIReview(applicant, formData, previousAssessment = null) {
+export async function callAIReview(applicant, formData, previousAssessment = null, language = 'en') {
   const raw = formData?.raw_data ?? {};
 
   // Prefer enriched applicant-record fields; fall back to raw form data
@@ -64,6 +64,8 @@ Compare the current applicant data against this previous assessment.
 - If nothing material has changed, you may confirm the same recommendation.
 - If documents have been added, education updated, or other criteria now met, UPDATE the recommendation accordingly and note what changed.
 - Start your reasoning with "Re-assessment:" if the recommendation changed, or "Confirmed:" if it remains the same.` : ''}
+
+${language === 'es' ? 'IMPORTANT: Write the "reasoning" field in Spanish (Español).' : ''}
 
 Respond ONLY with a JSON object in this exact format:
 {

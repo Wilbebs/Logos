@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext.jsx';
 import StatusBadge from '../components/StatusBadge.jsx';
 import AIRecommendation from '../components/AIRecommendation.jsx';
 import LeadProfile from '../components/LeadProfile.jsx';
@@ -19,6 +20,7 @@ function formatDate(dateStr) {
 // ── Decision panel ────────────────────────────────────────────────────────────
 // `embedded` = true → renders content only (no outer bordered card wrapper)
 function DecisionPanel({ applicant, onDecisionSubmitted, embedded = false }) {
+  const { lang } = useLanguage();
   const [selectedDecision, setSelectedDecision] = useState(null);
   const [notes, setNotes] = useState('');
   const [decisionBy, setDecisionBy] = useState('');
@@ -40,6 +42,7 @@ function DecisionPanel({ applicant, onDecisionSubmitted, embedded = false }) {
       const res = await fetch(`${API_URL}/api/applicants/${applicant.id}/suggest-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ language: lang, decision_context: selectedDecision }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || `Request failed: ${res.status}`);

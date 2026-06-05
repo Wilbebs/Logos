@@ -31,10 +31,18 @@ function getResend() {
 const EMAIL_ALLOWLIST = (process.env.EMAIL_ALLOWLIST || 'hernwilbwork@gmail.com')
   .split(',').map(e => e.trim().toLowerCase());
 
+// ── Language instruction helper ───────────────────────────────────────────────
+function langInstruction(language) {
+  return language === 'es'
+    ? '\nIMPORTANT: Write the ENTIRE response in Spanish (Español). Use formal Spanish appropriate for a Christian university.'
+    : '';
+}
+
 // ── Generate letter with Gemini ────────────────────────────────────────────────
 router.post('/:id/acceptance/generate', async (req, res) => {
   try {
     const { id } = req.params;
+    const { language } = req.body;
     const { data: applicant, error } = await supabase
       .from('applicants').select('*').eq('id', id).single();
     if (error || !applicant) return res.status(404).json({ error: 'Applicant not found' });
@@ -50,8 +58,8 @@ router.post('/:id/acceptance/generate', async (req, res) => {
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     const prompt = `You are drafting a formal acceptance letter for LOGOS Christian University.
-Write a professional, warm acceptance letter in English for the following applicant.
-The letter should feel personal and encouraging — this is a Christian seminary.
+Write a professional, warm acceptance letter for the following applicant.
+The letter should feel personal and encouraging — this is a Christian seminary.${langInstruction(language)}
 
 Applicant details:
 - Full name: ${applicant.full_name || 'Applicant'}

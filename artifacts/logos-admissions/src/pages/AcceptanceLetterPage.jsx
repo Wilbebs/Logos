@@ -17,6 +17,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import AdmissionTimeline from '../components/AdmissionTimeline.jsx';
+import { useLanguage } from '../context/LanguageContext.jsx';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -121,6 +122,7 @@ function DocShell({ value, onChange, placeholder, disabled }) {
 export default function AcceptanceLetterPage() {
   const { id }   = useParams();
   const navigate = useNavigate();
+  const { lang } = useLanguage();
 
   const [applicant, setApplicant] = useState(null);
   const [loading,   setLoading]   = useState(true);
@@ -178,6 +180,7 @@ export default function AcceptanceLetterPage() {
       const res  = await fetch(`${API_URL}/api/applicants/${id}/acceptance/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ language: lang }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Generation failed');

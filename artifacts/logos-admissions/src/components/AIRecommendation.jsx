@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext.jsx';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -146,6 +147,7 @@ function RequirementsChecklist({ applicant }) {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function AIRecommendation({ applicant, onReviewComplete }) {
+  const { lang } = useLanguage();
   // eligibility_status breakdown:
   //   eligible   → rules engine approved; AI review optional but useful
   //   ineligible → rules engine hard-rejected; AI review not applicable, show reason
@@ -173,6 +175,7 @@ export default function AIRecommendation({ applicant, onReviewComplete }) {
       const res = await fetch(`${API_URL}/api/applicants/${applicant.id}/ai-review`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ language: lang }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || `Request failed: ${res.status}`);
