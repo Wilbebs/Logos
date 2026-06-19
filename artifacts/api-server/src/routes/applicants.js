@@ -845,4 +845,49 @@ router.post('/:id/ai-review', async (req, res) => {
   }
 });
 
+// POST /api/applicants/backfill-names
+// One-time admin endpoint: finds all applicants with no full_name and derives
+// the name from their form_submissions raw_data.
+router.post('/backfill-names', async (req, res) => {
+  function pickName(raw, ...keys) {
+    for (const k of keys) {
+      const v = raw[k];
+      if (v && String(v).trim() && String(v).trim() !== '-') return String(v).trim();
+    }
+    return null;
+  }
+
+  try {
+    const { data: applicants, error } = await supabase
+      .from('applicants')
+      .select('id, full_name')
+      .or('full_name.is.null,full_name.eq.');
+    if (error) return res.status(500).json({ error: error.message });
+
+    let updated = 0;
+    for (const a of applicants) {
+      const { data: forms } = await supabase
+        .from('form_submissions')
+        .select('raw_data')
+        .eq('applicant_id', a.id);
+
+      const merged = {};
+      for (const f of (forms || [])) Object.assign(merged, f.raw_data || {});
+
+      const first = pickName(merged, 'FirstNmeNombre', 'Nombre', 'nombre', 'first_name', 'FirstName', 'NombreDelPastor');
+      const last  = pickName(merged, 'LastNameApellido', 'Apellido', 'apellido', 'last_name', 'LastName', 'ApellidoPastor');
+      const derived = [first, last].filter(Boolean).join(' ') || null;
+
+      if (derived) {
+        await supabase.from('applicants').update({ full_name: derived }).eq('id', a.id);
+        updated++;
+      }
+    }
+
+    return res.json({ total_missing: applicants.length, updated });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;
