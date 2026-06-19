@@ -394,7 +394,7 @@ export default function Dashboard() {
                             </div>
                             <div>
                               <div className="font-medium text-gray-900">
-                                {applicant.full_name || '(no name)'}
+                                {applicant.full_name || <span className="text-gray-400 italic text-xs">No name</span>}
                               </div>
                               <div className="text-xs text-gray-500 truncate max-w-[180px]">
                                 {applicant.email || '—'}

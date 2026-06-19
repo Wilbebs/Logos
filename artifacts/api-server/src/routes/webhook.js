@@ -356,6 +356,10 @@ async function handleFormSubmission(req, res, formNumber) {
         'email', 'Email I - Correo Electrónico I', 'email_i',
         'Email', 'correo', 'Correo Electrónico'
       );
+      // Also try to extract name from Forms 2 & 3 — used to backfill if Form 1 missed it
+      const firstName2 = pick(body, 'FirstNmeNombre', 'first_name', 'Nombre', 'nombre', 'First Name', 'FirstName');
+      const lastName2  = pick(body, 'LastNameApellido', 'last_name', 'Apellido', 'apellido', 'Last Name', 'LastName');
+      full_name = [firstName2, lastName2].filter(Boolean).join(' ') || null;
       enriched = {};
     }
 
@@ -367,8 +371,12 @@ async function handleFormSubmission(req, res, formNumber) {
     }
 
     // 3. Upsert applicant by email
+    // For Forms 2 & 3, only write full_name if the applicant doesn't have one yet
+    const existingApplicant = formNumber !== 1 ? (await supabase.from('applicants').select('full_name').eq('email', email).single()).data : null;
+    const shouldWriteName = full_name && (formNumber === 1 || !existingApplicant?.full_name);
+
     const applicantPayload = { email };
-    if (full_name)       applicantPayload.full_name       = full_name;
+    if (shouldWriteName)  applicantPayload.full_name       = full_name;
     if (phone)           applicantPayload.phone           = phone;
     if (program_level)   applicantPayload.program_level   = program_level;
     if (program_applied) applicantPayload.program_applied = program_applied;

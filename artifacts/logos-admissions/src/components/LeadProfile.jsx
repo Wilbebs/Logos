@@ -147,8 +147,8 @@ function budgetLabel(val) {
   return s;
 }
 
-function buildNarrative(merged, applicant) {
-  const name   = applicant.full_name || merged.full_name || 'This applicant';
+function buildNarrative(merged, applicant, displayName) {
+  const name   = displayName || 'This applicant';
   const ftYrs  = parseInt(merged.ministerial_years_fulltime   || applicant.ministerial_years_fulltime  || 0);
   const asYrs  = parseInt(merged.ministerial_years_associated || applicant.ministerial_years_associated || 0);
   const edu    = merged.highest_education || applicant.highest_education;
@@ -316,6 +316,13 @@ function FinancialColumn({ data }) {
   );
 }
 
+// ── Derive display name from form raw_data when applicant.full_name is missing ──
+function deriveNameFromForms(merged) {
+  const firstName = merged.FirstNmeNombre || merged.Nombre || merged.nombre || merged.first_name || merged.FirstName || '';
+  const lastName  = merged.LastNameApellido || merged.Apellido || merged.apellido || merged.last_name || merged.LastName || '';
+  return [firstName, lastName].filter(Boolean).join(' ') || null;
+}
+
 // ── Main component ─────────────────────────────────────────────────────────────
 export default function LeadProfile({ applicant, forms }) {
   const merged = {};
@@ -324,7 +331,10 @@ export default function LeadProfile({ applicant, forms }) {
   });
   const data = { ...merged, ...applicant };
 
-  const narrative = buildNarrative(merged, applicant);
+  // Fallback: if full_name is missing on the applicant row, derive from form data
+  const displayName = applicant.full_name || deriveNameFromForms(merged);
+
+  const narrative = buildNarrative(merged, applicant, displayName);
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
@@ -334,11 +344,11 @@ export default function LeadProfile({ applicant, forms }) {
         {/* Brand-color avatar */}
         <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
           style={{ backgroundColor: '#7B2D3E' }}>
-          <span className="text-white font-bold text-xs">{initials(applicant.full_name)}</span>
+          <span className="text-white font-bold text-xs">{initials(displayName)}</span>
         </div>
 
         <div className="flex-1 min-w-0">
-          <h2 className="text-sm font-bold text-gray-900 leading-tight">{applicant.full_name || '(no name)'}</h2>
+          <h2 className="text-sm font-bold text-gray-900 leading-tight">{displayName || '(no name)'}</h2>
           <p className="text-xs text-gray-500">{applicant.email || '—'}{applicant.phone ? ` · ${applicant.phone}` : ''}</p>
         </div>
 
