@@ -7,6 +7,21 @@ const primary   = '#7B2335';
 const primaryDk = '#6A1B2A';
 const navy      = '#1B3272';
 
+// Render inline markdown: **bold**, *italic*, plain text
+function InlineMarkdown({ text }) {
+  const parts = [];
+  const re = /(\*\*(.+?)\*\*|\*(.+?)\*)/g;
+  let last = 0, m;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) parts.push(<span key={last}>{text.slice(last, m.index)}</span>);
+    if (m[2] !== undefined) parts.push(<strong key={m.index}>{m[2]}</strong>);
+    else if (m[3] !== undefined) parts.push(<em key={m.index}>{m[3]}</em>);
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) parts.push(<span key={last}>{text.slice(last)}</span>);
+  return <>{parts}</>;
+}
+
 function MessageContent({ text }) {
   const raw = text.split('\n');
   const lines = [];
@@ -33,7 +48,7 @@ function MessageContent({ text }) {
           return (
             <span key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 4 }}>
               <span style={{ fontWeight: 700, color: '#16a34a', flexShrink: 0 }}>✓</span>
-              <span style={{ color: '#374151' }}>{label}</span>
+              <span style={{ color: '#374151' }}><InlineMarkdown text={label} /></span>
               {!isLast && '\n'}
             </span>
           );
@@ -42,12 +57,12 @@ function MessageContent({ text }) {
           return (
             <span key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 4 }}>
               <span style={{ fontWeight: 700, color: '#ef4444', flexShrink: 0 }}>✗</span>
-              <span style={{ color: '#b91c1c', fontWeight: 500 }}>{label}</span>
+              <span style={{ color: '#b91c1c', fontWeight: 500 }}><InlineMarkdown text={label} /></span>
               {!isLast && '\n'}
             </span>
           );
         }
-        return <span key={i}>{line}{!isLast && '\n'}</span>;
+        return <span key={i}><InlineMarkdown text={line} />{!isLast && '\n'}</span>;
       })}
     </span>
   );
@@ -58,10 +73,16 @@ const API_URL = import.meta.env.VITE_API_URL || '';
 export default function ChatBot() {
   const { t, lang } = useLanguage();
   const [open, setOpen]         = useState(false);
-  const greeting = lang === 'es'
-    ? "¡Hola! Soy tu asistente de admisiones. Puedes preguntarme:\n• \"Muéstrame la solicitud de Fernando Mendes\"\n• \"¿Cuántos solicitantes necesitan revisión?\"\n• \"¿Es María elegible para la Maestría?\""
-    : "Hi! I'm your admissions assistant. You can ask me things like:\n• \"Show me Fernando Mendes's application\"\n• \"How many applicants need review?\"\n• \"Is Maria eligible for the Master's program?\"";
-  const [messages, setMessages] = useState([{ role: 'assistant', content: greeting }]);
+  function makeGreeting(l) {
+    return l === 'es'
+      ? "¡Hola! Soy tu asistente de admisiones. Puedes preguntarme:\n• \"Muéstrame la solicitud de Fernando Mendes\"\n• \"¿Cuántos solicitantes necesitan revisión?\"\n• \"¿Es María elegible para la Maestría?\""
+      : "Hi! I'm your admissions assistant. You can ask me things like:\n• \"Show me Fernando Mendes's application\"\n• \"How many applicants need review?\"\n• \"Is Maria eligible for the Master's program?\"";
+  }
+  const [messages, setMessages] = useState([{ role: 'assistant', content: makeGreeting(lang) }]);
+
+  useEffect(() => {
+    setMessages([{ role: 'assistant', content: makeGreeting(lang) }]);
+  }, [lang]);
   const [input, setInput]   = useState('');
   const [loading, setLoading] = useState(false);
   const bottomRef             = useRef(null);
@@ -182,7 +203,7 @@ export default function ChatBot() {
                       className="block mt-2 text-xs font-semibold underline"
                       style={{ color: navy }}
                     >
-                      Open Application →
+                      {lang === 'es' ? 'Abrir Solicitud →' : 'Open Application →'}
                     </Link>
                   )}
                 </div>
