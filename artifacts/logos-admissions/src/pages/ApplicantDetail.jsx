@@ -20,7 +20,7 @@ function formatDate(dateStr) {
 // ── Decision panel ────────────────────────────────────────────────────────────
 // `embedded` = true → renders content only (no outer bordered card wrapper)
 function DecisionPanel({ applicant, onDecisionSubmitted, embedded = false }) {
-  const { lang } = useLanguage();
+  const { lang, t } = useLanguage();
   const [selectedDecision, setSelectedDecision] = useState(null);
   const [notes, setNotes] = useState('');
   const [decisionBy, setDecisionBy] = useState('');
@@ -110,19 +110,19 @@ function DecisionPanel({ applicant, onDecisionSubmitted, embedded = false }) {
     const inner = (
       <>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-bold text-gray-700">Decision</h3>
+          <h3 className="text-sm font-bold text-gray-700">{t('review.decision.title')}</h3>
           <button
             onClick={handleRevoke}
             disabled={revoking}
             className="text-xs text-gray-400 hover:text-red-500 disabled:opacity-50 transition-colors"
             title="Revoke decision and return to pending"
           >
-            {revoking ? 'Revoking…' : 'Revoke'}
+            {revoking ? t('review.decision.revoking') : t('review.decision.revoke')}
           </button>
         </div>
         {submitted && (
           <div className="mb-3 p-2 bg-green-50 border border-green-200 text-green-700 text-sm rounded">
-            Decision recorded.
+            {t('review.decision.recorded')}
           </div>
         )}
         <div className="flex items-center gap-2 mb-2">
@@ -147,13 +147,13 @@ function DecisionPanel({ applicant, onDecisionSubmitted, embedded = false }) {
   // ── Pending decision ────────────────────────────────────────────────────────
   const inner = (
     <>
-      <h3 className="text-sm font-bold text-gray-700 mb-3">Decision</h3>
+      <h3 className="text-sm font-bold text-gray-700 mb-3">{t('review.decision.title')}</h3>
 
       <div className="flex gap-2 mb-4 flex-wrap">
         {[
-          { val: 'approved',      label: 'Approve',      active: 'border-green-600 bg-green-50 text-green-700',   hover: 'hover:border-green-400' },
-          { val: 'rejected',      label: 'Reject',       active: 'border-red-600 bg-red-50 text-red-700',         hover: 'hover:border-red-400' },
-          { val: 'info_requested',label: 'Request Info', active: 'border-yellow-500 bg-yellow-50 text-yellow-700',hover: 'hover:border-yellow-400' },
+          { val: 'approved',      label: t('review.decision.approve'), active: 'border-green-600 bg-green-50 text-green-700',   hover: 'hover:border-green-400' },
+          { val: 'rejected',      label: t('review.decision.reject'),  active: 'border-red-600 bg-red-50 text-red-700',         hover: 'hover:border-red-400' },
+          { val: 'info_requested',label: t('review.decision.info'),    active: 'border-yellow-500 bg-yellow-50 text-yellow-700',hover: 'hover:border-yellow-400' },
         ].map(({ val, label, active, hover }) => (
           <button
             key={val}
@@ -170,7 +170,7 @@ function DecisionPanel({ applicant, onDecisionSubmitted, embedded = false }) {
       <div className="mb-3">
         <div className="flex items-center justify-between mb-1">
           <label className="block text-xs font-medium text-gray-600">
-            Notes{notesRequired ? ' (required)' : ''}
+            {notesRequired ? t('review.decision.notes_required') : t('review.decision.notes')}
           </label>
           {showSuggestion && (
             <button
@@ -183,10 +183,10 @@ function DecisionPanel({ applicant, onDecisionSubmitted, embedded = false }) {
               {suggestionLoading ? (
                 <>
                   <span className="animate-spin inline-block w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full" />
-                  Generating…
+                  {t('review.decision.generating')}
                 </>
               ) : (
-                <>✦ Generate Team Notes</>
+                <>{t('review.decision.generate_notes')}</>
               )}
             </button>
           )}
@@ -196,7 +196,7 @@ function DecisionPanel({ applicant, onDecisionSubmitted, embedded = false }) {
           onChange={e => setNotes(e.target.value)}
           rows={4}
           className="w-full border border-gray-300 rounded px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-blue-400"
-          placeholder={showSuggestion ? 'Internal team notes — what is missing, follow-up actions, flags. Click "Generate Team Notes" for an AI suggestion.' : 'Enter notes…'}
+          placeholder={showSuggestion ? 'Internal team notes — what is missing, follow-up actions, flags.' : 'Enter notes…'}
         />
         {suggestionError && (
           <p className="mt-1 text-xs text-red-600">{suggestionError}</p>
@@ -204,7 +204,7 @@ function DecisionPanel({ applicant, onDecisionSubmitted, embedded = false }) {
       </div>
 
       <div className="mb-4">
-        <label className="block text-xs font-medium text-gray-600 mb-1">Your name</label>
+        <label className="block text-xs font-medium text-gray-600 mb-1">{t('review.decision.your_name')}</label>
         <input
           type="text"
           value={decisionBy}
@@ -226,7 +226,7 @@ function DecisionPanel({ applicant, onDecisionSubmitted, embedded = false }) {
         onMouseEnter={e => { if (!submitting) e.currentTarget.style.backgroundColor = '#6a2535'; }}
         onMouseLeave={e => { if (!submitting) e.currentTarget.style.backgroundColor = '#7B2D3E'; }}
       >
-        {submitting ? 'Submitting…' : 'Submit Decision'}
+        {submitting ? t('review.decision.submitting') : t('review.decision.submit')}
       </button>
     </>
   );
@@ -238,6 +238,7 @@ function DecisionPanel({ applicant, onDecisionSubmitted, embedded = false }) {
 export default function ApplicantDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [applicant, setApplicant] = useState(null);
   const [forms, setForms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -292,7 +293,7 @@ export default function ApplicantDetail() {
         onClick={() => navigate('/')}
         className="mb-5 text-sm font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:text-gray-800 transition-colors shadow-sm"
       >
-        ← Back to Dashboard
+        {t('applicant.back')}
       </button>
 
       {/* ── Lead Profile (full width) ── */}
@@ -311,10 +312,8 @@ export default function ApplicantDetail() {
 
           {/* Files & Documents */}
           <div className="bg-white border border-gray-200 rounded-lg p-5">
-            <h3 className="text-sm font-bold text-gray-700 mb-1">Files & Documents</h3>
-            <p className="text-xs text-gray-400 mb-4">
-              Transcripts, diplomas, and any supporting documents for this applicant.
-            </p>
+            <h3 className="text-sm font-bold text-gray-700 mb-1">{t('files.title')}</h3>
+            <p className="text-xs text-gray-400 mb-4">{t('files.subtitle')}</p>
             <FileAttachments applicantId={applicant.id} />
           </div>
         </div>
@@ -325,7 +324,7 @@ export default function ApplicantDetail() {
 
             {/* Card header: title + eligibility badge */}
             <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="text-sm font-bold text-gray-700">Review & Decision</h3>
+              <h3 className="text-sm font-bold text-gray-700">{t('review.title')}</h3>
               <StatusBadge status={applicant.eligibility_status} type="eligibility" />
             </div>
 
@@ -365,7 +364,7 @@ export default function ApplicantDetail() {
                     <span style={{ color: '#fff' }}>✉</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p data-hw className="text-sm font-bold transition-colors" style={{ color: '#b91c1c' }}>Compose Rejection Email</p>
+                    <p data-hw className="text-sm font-bold transition-colors" style={{ color: '#b91c1c' }}>{t('next.compose_rejection')}</p>
                     <p data-hw className="text-xs mt-0.5 transition-colors text-gray-500">Notify {applicant.full_name} of the decision</p>
                   </div>
                   <span data-hw className="text-lg font-light shrink-0" style={{ color: '#b91c1c' }}>→</span>
@@ -388,7 +387,7 @@ export default function ApplicantDetail() {
                     <span style={{ color: '#fff' }}>✉</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p data-hw className="text-sm font-bold transition-colors" style={{ color: '#92740a' }}>Compose Info Request Email</p>
+                    <p data-hw className="text-sm font-bold transition-colors" style={{ color: '#92740a' }}>{t('next.compose_info')}</p>
                     <p data-hw className="text-xs mt-0.5 transition-colors text-gray-500">Request missing info from {applicant.full_name}</p>
                   </div>
                   <span data-hw className="text-lg font-light shrink-0" style={{ color: '#92740a' }}>→</span>

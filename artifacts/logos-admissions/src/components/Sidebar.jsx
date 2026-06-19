@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Settings, LogOut } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext.jsx';
 
 const primary   = '#7B2335';
 const primaryLt = '#F5E8EA';
@@ -10,15 +11,16 @@ const sidebarBg = '#F3F4F8';
 const COLLAPSED_W = 68;
 const EXPANDED_W  = 236;
 
-const NAV_ITEMS = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-  { icon: Settings,        label: 'Settings',  path: '/settings' },
-];
-
 export default function Sidebar() {
   const location  = useLocation();
   const navigate  = useNavigate();
+  const { t } = useLanguage();
   const [hovered, setHovered] = useState(false);
+
+  const NAV_ITEMS = [
+    { icon: LayoutDashboard, label: t('nav.dashboard'), path: '/' },
+    { icon: Settings,        label: t('nav.settings'),  path: '/settings' },
+  ];
 
   function isActive(path) {
     return path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);

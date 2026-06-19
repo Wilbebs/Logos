@@ -22,7 +22,10 @@ export const translations = {
     'settings.language.saved':  'Language saved.',
 
     // Dashboard
-    'dashboard.title':          'Admissions Dashboard',
+    'dashboard.title':          'Admissions Overview',
+    'dashboard.subtitle':       'Manage and review university applications',
+    'dashboard.search':         'Search name, email, program…',
+    'dashboard.clear':          'Clear all',
     'dashboard.stats.total':    'Total',
     'dashboard.stats.complete': 'Forms Complete',
     'dashboard.stats.review':   'Needs Review',
@@ -181,6 +184,9 @@ export const translations = {
 
     // Dashboard
     'dashboard.title':          'Panel de Admisiones',
+    'dashboard.subtitle':       'Gestiona y revisa las solicitudes universitarias',
+    'dashboard.search':         'Buscar nombre, correo, programa…',
+    'dashboard.clear':          'Limpiar todo',
     'dashboard.stats.total':    'Total',
     'dashboard.stats.complete': 'Formularios Completos',
     'dashboard.stats.review':   'En Revisión',

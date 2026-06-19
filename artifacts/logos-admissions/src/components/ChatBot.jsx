@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Sparkles, X, Send } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext.jsx';
 
 const primary   = '#7B2335';
 const primaryDk = '#6A1B2A';
@@ -55,13 +56,12 @@ function MessageContent({ text }) {
 const API_URL = import.meta.env.VITE_API_URL || '';
 
 export default function ChatBot() {
+  const { t, lang } = useLanguage();
   const [open, setOpen]         = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      role: 'assistant',
-      content: "Hi! I'm your admissions assistant. You can ask me things like:\n• \"Show me Fernando Mendes's application\"\n• \"How many applicants need review?\"\n• \"Is Maria eligible for the Master's program?\"",
-    },
-  ]);
+  const greeting = lang === 'es'
+    ? "¡Hola! Soy tu asistente de admisiones. Puedes preguntarme:\n• \"Muéstrame la solicitud de Fernando Mendes\"\n• \"¿Cuántos solicitantes necesitan revisión?\"\n• \"¿Es María elegible para la Maestría?\""
+    : "Hi! I'm your admissions assistant. You can ask me things like:\n• \"Show me Fernando Mendes's application\"\n• \"How many applicants need review?\"\n• \"Is Maria eligible for the Master's program?\"";
+  const [messages, setMessages] = useState([{ role: 'assistant', content: greeting }]);
   const [input, setInput]   = useState('');
   const [loading, setLoading] = useState(false);
   const bottomRef             = useRef(null);
@@ -92,6 +92,7 @@ export default function ChatBot() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [...messages, userMsg].map(m => ({ role: m.role, content: m.content })),
+          language: lang,
         }),
       });
       const data = await res.json();
@@ -144,9 +145,9 @@ export default function ChatBot() {
                 <Sparkles size={16} className="text-white" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-white">Admissions Assistant</p>
+                <p className="text-sm font-semibold text-white">{t('chat.title')}</p>
                 <p className="text-xs" style={{ color: 'rgba(255,255,255,0.65)' }}>
-                  Ask about any applicant or stat
+                  {t('chat.subtitle')}
                 </p>
               </div>
             </div>
@@ -214,7 +215,7 @@ export default function ChatBot() {
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKey}
               rows={1}
-              placeholder="Ask anything…"
+              placeholder={t('chat.placeholder')}
               className="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-800 resize-none focus:outline-none transition-colors"
               style={{ maxHeight: 96 }}
               onFocus={e => e.target.style.borderColor = primary}
@@ -236,7 +237,7 @@ export default function ChatBot() {
           {/* Footer */}
           <div className="px-3 py-2 bg-white border-t border-gray-100">
             <p className="text-xs text-gray-400 text-center">
-              AI assistant — verify important info in the dashboard
+              {t('chat.disclaimer')}
             </p>
           </div>
         </div>

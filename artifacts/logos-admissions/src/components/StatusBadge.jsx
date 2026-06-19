@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '../context/LanguageContext.jsx';
 
 const ELIGIBILITY_STYLES = {
   pending:      { bg: '#F3F4F6', text: '#374151', border: '#D1D5DB' },
@@ -14,17 +15,27 @@ const DECISION_STYLES = {
   info_requested:{ bg: '#FEF3C7', text: '#92400E', border: '#FCD34D' },
 };
 
-function formatLabel(status) {
+const STATUS_KEYS = {
+  pending:        'status.pending',
+  eligible:       'status.eligible',
+  ineligible:     'status.ineligible',
+  needs_review:   'status.needs_review',
+  approved:       'status.approved',
+  rejected:       'status.rejected',
+  info_requested: 'status.info_requested',
+};
+
+function fallbackLabel(status) {
   if (!status) return '—';
   if (status === 'info_requested') return 'Info Requested';
-  return status
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+  return status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 export default function StatusBadge({ status, type = 'eligibility', large = false }) {
+  const { t } = useLanguage();
   const styleMap = type === 'decision' ? DECISION_STYLES : ELIGIBILITY_STYLES;
   const s = styleMap[status] || { bg: '#F3F4F6', text: '#374151', border: '#D1D5DB' };
+  const label = STATUS_KEYS[status] ? t(STATUS_KEYS[status]) : fallbackLabel(status);
 
   return (
     <span
@@ -39,7 +50,7 @@ export default function StatusBadge({ status, type = 'eligibility', large = fals
         padding: large ? '4px 12px' : '2px 8px',
       }}
     >
-      {formatLabel(status)}
+      {label}
     </span>
   );
 }

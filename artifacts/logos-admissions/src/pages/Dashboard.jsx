@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Calendar } from 'lucide-react';
 import StatusBadge from '../components/StatusBadge.jsx';
+import { useLanguage } from '../context/LanguageContext.jsx';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -10,15 +11,6 @@ const primary = '#7B2335';
 const secondary = '#1B3272';
 const hover = '#FDF5F5';
 const textDark = '#1B2340';
-
-const TABS = [
-  { label: 'All',              key: 'all' },
-  { label: 'Needs Review',     key: 'needs_review' },
-  { label: 'Forms Complete',   key: 'forms_complete' },
-  { label: 'Pending Decision', key: 'pending_decision' },
-  { label: 'Approved',         key: 'approved' },
-  { label: 'Rejected',         key: 'rejected' },
-];
 
 function formatDate(dateStr) {
   if (!dateStr) return '—';
@@ -118,6 +110,17 @@ function tabCount(applicants, key) {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
+
+  const TABS = [
+    { label: t('dashboard.filter.all'),            key: 'all' },
+    { label: t('dashboard.filter.needs_review'),   key: 'needs_review' },
+    { label: t('dashboard.filter.forms_complete'), key: 'forms_complete' },
+    { label: t('dashboard.filter.pending'),        key: 'pending_decision' },
+    { label: t('dashboard.filter.approved'),       key: 'approved' },
+    { label: t('dashboard.filter.rejected'),       key: 'rejected' },
+  ];
+
   const [applicants, setApplicants] = useState([]);
   const [stats, setStats] = useState(null);
   const [activeFilter, setActiveFilter] = useState('all');
@@ -176,11 +179,11 @@ export default function Dashboard() {
 
   const STAT_CARDS = stats
     ? [
-        { label: 'Total',          value: stats.total,          filterKey: 'all',            color: secondary },
-        { label: 'Needs Review',   value: stats.needs_review,   filterKey: 'needs_review',   color: secondary },
-        { label: 'Forms Complete', value: stats.forms_complete, filterKey: 'forms_complete', color: secondary },
-        { label: 'Approved',       value: stats.approved,       filterKey: 'approved',       color: '#16a34a' },
-        { label: 'Rejected',       value: stats.rejected,       filterKey: 'rejected',       color: '#dc2626' },
+        { label: t('dashboard.stats.total'),    value: stats.total,          filterKey: 'all',            color: secondary },
+        { label: t('dashboard.stats.review'),   value: stats.needs_review,   filterKey: 'needs_review',   color: secondary },
+        { label: t('dashboard.stats.complete'), value: stats.forms_complete, filterKey: 'forms_complete', color: secondary },
+        { label: t('dashboard.stats.approved'), value: stats.approved,       filterKey: 'approved',       color: '#16a34a' },
+        { label: t('dashboard.stats.rejected'), value: stats.rejected,       filterKey: 'rejected',       color: '#dc2626' },
       ]
     : [];
 
@@ -190,8 +193,8 @@ export default function Dashboard() {
       {/* Top header — title + inline stat chips */}
       <header className="px-6 py-3 flex items-center justify-between gap-4 border-b border-gray-200 bg-white flex-shrink-0 flex-wrap">
         <div>
-          <h1 className="text-lg font-semibold leading-tight" style={{ color: secondary }}>Admissions Overview</h1>
-          <p className="text-xs text-gray-400 mt-0.5">Manage and review university applications</p>
+          <h1 className="text-lg font-semibold leading-tight" style={{ color: secondary }}>{t('dashboard.title')}</h1>
+          <p className="text-xs text-gray-400 mt-0.5">{t('dashboard.subtitle') || 'Manage and review university applications'}</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {loading && !stats
@@ -238,7 +241,7 @@ export default function Dashboard() {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search name, email, program…"
+                placeholder={t('dashboard.search') || 'Search name, email, program…'}
                 className="pl-9 pr-7 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-700 w-64 focus:outline-none"
               />
               {search && (
@@ -320,13 +323,13 @@ export default function Dashboard() {
             <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
               <input type="checkbox" checked={formsCompleteOnly} onChange={(e) => setFormsCompleteOnly(e.target.checked)}
                 className="rounded border-gray-300" style={{ accentColor: primary }} />
-              Forms complete
+              {t('dashboard.filter.forms_complete')}
             </label>
 
             {/* Count + clear */}
             <div className="flex items-center gap-3 ml-auto">
               {hasActiveFilters && (
-                <button onClick={clearFilters} className="text-xs hover:underline" style={{ color: primary }}>Clear all</button>
+                <button onClick={clearFilters} className="text-xs hover:underline" style={{ color: primary }}>{t('dashboard.clear') || 'Clear all'}</button>
               )}
               <span className="text-xs text-gray-400">
                 {loading ? '…' : `${filtered.length} result${filtered.length !== 1 ? 's' : ''}`}
@@ -339,14 +342,14 @@ export default function Dashboard() {
             <table className="w-full text-sm text-left">
               <thead className="border-b border-gray-200 bg-gray-50/80">
                 <tr>
-                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Applicant</th>
-                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Program</th>
-                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Level</th>
-                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Forms</th>
-                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Eligibility</th>
-                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">AI Rec</th>
-                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Decision</th>
-                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Submitted</th>
+                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('dashboard.col.name')}</th>
+                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('dashboard.col.program')}</th>
+                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('dashboard.col.level')}</th>
+                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('dashboard.col.forms')}</th>
+                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('dashboard.col.eligibility')}</th>
+                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('dashboard.col.ai')}</th>
+                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('dashboard.col.decision')}</th>
+                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('dashboard.col.date')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">

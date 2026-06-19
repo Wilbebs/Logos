@@ -434,7 +434,10 @@ TONE: Professional, concise, helpful. Format lists clearly. Never fabricate data
 // ── Route ──────────────────────────────────────────────────────────────────────
 router.post('/', async (req, res) => {
   try {
-    const { messages } = req.body;
+    const { messages, language } = req.body;
+    const langNote = language === 'es'
+      ? '\n\nIMPORTANT: Respond ENTIRELY in Spanish (Español). Use formal Spanish appropriate for a university admissions office.'
+      : '';
     if (!Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({ error: 'messages array is required.' });
     }
@@ -445,7 +448,7 @@ router.post('/', async (req, res) => {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({
       model: 'gemini-2.5-flash',
-      systemInstruction: SYSTEM_INSTRUCTION,
+      systemInstruction: SYSTEM_INSTRUCTION + langNote,
       tools: TOOL_DECLARATIONS,
     });
 

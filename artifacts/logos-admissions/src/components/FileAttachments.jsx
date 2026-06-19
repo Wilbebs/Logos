@@ -7,6 +7,7 @@
  *   Communications — email log with subject, status, date, and expandable body
  */
 import React, { useState, useEffect, useRef } from 'react';
+import { useLanguage } from '../context/LanguageContext.jsx';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -237,12 +238,12 @@ function CommunicationsList({ applicantId }) {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-const TABS = [
-  { key: 'documents',      label: 'Documents',      icon: '📄' },
-  { key: 'communications', label: 'Communications', icon: '✉'  },
-];
-
 export default function FileAttachments({ applicantId }) {
+  const { t } = useLanguage();
+  const TABS = [
+    { key: 'documents',      label: t('files.tab.documents'),      icon: '📄' },
+    { key: 'communications', label: t('files.tab.communications'), icon: '✉'  },
+  ];
   const [activeTab,    setActiveTab]    = useState('documents');
   const [files,        setFiles]        = useState([]);
   const [loadingFiles, setLoadingFiles] = useState(true);
