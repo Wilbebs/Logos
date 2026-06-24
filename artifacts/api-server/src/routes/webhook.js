@@ -456,140 +456,135 @@ async function handleFormSubmission(req, res, formNumber) {
       return res.status(500).json({ error: 'Internal error' });
     }
 
-    // 7. If all 3 forms are now complete, run eligibility pipeline
-    const allFormsComplete =
-      freshApplicant.form1_submitted_at &&
-      freshApplicant.form2_submitted_at &&
-      freshApplicant.form3_submitted_at;
+    // 7. Respond immediately so MachForm shows its confirmation page.
+    //    The eligibility pipeline (DB queries + optional Gemini AI call) runs
+    //    in the background after the response is already sent.
+    res.json({ success: true, applicant_id: applicant.id });
 
-    if (allFormsComplete && !freshApplicant.forms_complete) {
-      await supabase
-        .from('applicants')
-        .update({ forms_complete: true })
-        .eq('id', applicant.id);
+    // ── Background pipeline ───────────────────────────────────────────────────
+    (async () => {
+      try {
+        const allFormsComplete =
+          freshApplicant.form1_submitted_at &&
+          freshApplicant.form2_submitted_at &&
+          freshApplicant.form3_submitted_at;
 
-      // Always evaluate eligibility against Form 1 — it holds the document
-      // checklist, budget, and education fields that the engine needs.
-      const { data: allSubmissions, error: subFetchError } = await supabase
-        .from('form_submissions')
-        .select('*')
-        .eq('applicant_id', applicant.id)
-        .order('submitted_at', { ascending: true });
-
-      console.log(`[webhook] form_submissions fetch: count=${allSubmissions?.length ?? 'null'} error=${subFetchError?.message ?? 'none'}`);
-
-      const form1Submission = (allSubmissions || []).find(s => Number(s.form_number) === 1) ?? null;
-      const form3Submission = (allSubmissions || []).find(s => Number(s.form_number) === 3) ?? null;
-
-      if (!form1Submission) {
-        console.warn(`[webhook] WARNING: No Form 1 submission found for applicant ${applicant.id}`);
-        console.log(`[webhook] All submission form_numbers:`, (allSubmissions || []).map(s => s.form_number));
-      } else {
-        console.log(`[webhook] Form 1 found — highest_education=${form1Submission.raw_data?.highest_education}, submitted_transcripts=${form1Submission.raw_data?.submitted_transcripts}`);
-      }
-
-      // Merge all form raw_data so the eligibility engine has a complete picture.
-      // Form 1 is the base (academic/doc/budget fields). Form 3 adds ministerial
-      // experience fields (ministerial_years_fulltime, etc.) which Form 1 doesn't have.
-      const baseSubmission = form1Submission ?? formSubmission;
-      const mergedRawData = {
-        ...(form1Submission?.raw_data || {}),
-        ...(form3Submission?.raw_data || {}),
-      };
-      // Re-apply Form 1 fields so they always take precedence over Form 3 for academic fields
-      Object.assign(mergedRawData, form1Submission?.raw_data || {});
-      const mergedSubmission = { ...baseSubmission, raw_data: mergedRawData };
-
-      console.log(`[webhook] ministerial_years_fulltime (merged): ${mergedRawData.ministerial_years_fulltime}`);
-
-      const eligResult = evaluateEligibility(freshApplicant, mergedSubmission);
-
-      if (eligResult.document_flag) {
-        await supabase
-          .from('applicants')
-          .update({
-            eligibility_status: 'needs_review',
-            ai_recommendation: 'escalate',
-            ai_reasoning:
-              eligResult.document_note ||
-              `Missing required documents: ${(eligResult.missing_documents || []).join(', ')}.`,
-          })
-          .eq('id', applicant.id);
-
-        console.log(`[webhook] Missing docs for ${applicant.id}:`, eligResult.missing_documents);
-
-      } else if (eligResult.financial_flag) {
-        await supabase
-          .from('applicants')
-          .update({
-            eligibility_status: 'needs_review',
-            ai_recommendation: 'escalate',
-            ai_reasoning:
-              eligResult.financial_note ||
-              `Budget does not support requested program. Suggested alternative: ${eligResult.suggested_alternative || 'discuss with applicant.'}`,
-          })
-          .eq('id', applicant.id);
-
-        console.log(`[webhook] Financial flag for ${applicant.id}:`, eligResult.suggested_alternative);
-
-      } else {
-        // For ineligible applicants, save a detailed rejection reason so the
-        // dashboard can explain exactly which requirement was not met.
-        const baseUpdate = { eligibility_status: eligResult.status };
-        if (eligResult.status === 'ineligible') {
-          // The last entry in reasons[] is always the specific auto-reject message
-          const coreReason =
-            eligResult.reasons?.[eligResult.reasons.length - 1] ||
-            eligResult.recommended_action ||
-            'Application does not meet eligibility requirements.';
-
-          // Separately note any missing documents (the doc check never runs for
-          // hard-ineligible applicants because the engine returns early).
-          const programLevel = (freshApplicant.program_level || '').toLowerCase();
-          const missingDocs = [];
-          if (!freshApplicant.submitted_transcripts) missingDocs.push('transcripts');
-          if (programLevel === 'masters' || programLevel === 'doctorate') {
-            if (!freshApplicant.submitted_undergraduate_diploma) missingDocs.push('undergraduate diploma');
-          } else {
-            if (!freshApplicant.submitted_diploma) missingDocs.push('diploma');
-          }
-          const docNote = missingDocs.length > 0
-            ? ` Additionally, required documents have not been submitted: ${missingDocs.join(', ')}.`
-            : '';
-
-          baseUpdate.ai_reasoning = coreReason + docNote;
-        }
-        await supabase
-          .from('applicants')
-          .update(baseUpdate)
-          .eq('id', applicant.id);
-
-        if (eligResult.confidence === 'low' || eligResult.status === 'needs_review') {
-          const aiResult = await callAIReview(freshApplicant, form1Submission ?? formSubmission);
+        if (allFormsComplete && !freshApplicant.forms_complete) {
           await supabase
             .from('applicants')
-            .update({
-              ai_recommendation: aiResult.recommendation,
-              ai_reasoning: aiResult.reasoning,
-              eligibility_status: 'needs_review',
-            })
+            .update({ forms_complete: true })
             .eq('id', applicant.id);
-        }
-      }
-    }
 
-    // 8. Send stage email
-    if (sendEmail) {
-      try {
-        const emailType = `form${formNumber}_received`;
-        await sendEmail(emailType, freshApplicant);
-      } catch (emailErr) {
-        console.error('[webhook] Email trigger failed:', emailErr);
+          const { data: allSubmissions, error: subFetchError } = await supabase
+            .from('form_submissions')
+            .select('*')
+            .eq('applicant_id', applicant.id)
+            .order('submitted_at', { ascending: true });
+
+          console.log(`[webhook] form_submissions fetch: count=${allSubmissions?.length ?? 'null'} error=${subFetchError?.message ?? 'none'}`);
+
+          const form1Submission = (allSubmissions || []).find(s => Number(s.form_number) === 1) ?? null;
+          const form3Submission = (allSubmissions || []).find(s => Number(s.form_number) === 3) ?? null;
+
+          if (!form1Submission) {
+            console.warn(`[webhook] WARNING: No Form 1 submission found for applicant ${applicant.id}`);
+            console.log(`[webhook] All submission form_numbers:`, (allSubmissions || []).map(s => s.form_number));
+          } else {
+            console.log(`[webhook] Form 1 found — highest_education=${form1Submission.raw_data?.highest_education}, submitted_transcripts=${form1Submission.raw_data?.submitted_transcripts}`);
+          }
+
+          const baseSubmission = form1Submission ?? formSubmission;
+          const mergedRawData = {
+            ...(form1Submission?.raw_data || {}),
+            ...(form3Submission?.raw_data || {}),
+          };
+          Object.assign(mergedRawData, form1Submission?.raw_data || {});
+          const mergedSubmission = { ...baseSubmission, raw_data: mergedRawData };
+
+          console.log(`[webhook] ministerial_years_fulltime (merged): ${mergedRawData.ministerial_years_fulltime}`);
+
+          const eligResult = evaluateEligibility(freshApplicant, mergedSubmission);
+
+          if (eligResult.document_flag) {
+            await supabase
+              .from('applicants')
+              .update({
+                eligibility_status: 'needs_review',
+                ai_recommendation: 'escalate',
+                ai_reasoning:
+                  eligResult.document_note ||
+                  `Missing required documents: ${(eligResult.missing_documents || []).join(', ')}.`,
+              })
+              .eq('id', applicant.id);
+
+            console.log(`[webhook] Missing docs for ${applicant.id}:`, eligResult.missing_documents);
+
+          } else if (eligResult.financial_flag) {
+            await supabase
+              .from('applicants')
+              .update({
+                eligibility_status: 'needs_review',
+                ai_recommendation: 'escalate',
+                ai_reasoning:
+                  eligResult.financial_note ||
+                  `Budget does not support requested program. Suggested alternative: ${eligResult.suggested_alternative || 'discuss with applicant.'}`,
+              })
+              .eq('id', applicant.id);
+
+            console.log(`[webhook] Financial flag for ${applicant.id}:`, eligResult.suggested_alternative);
+
+          } else {
+            const baseUpdate = { eligibility_status: eligResult.status };
+            if (eligResult.status === 'ineligible') {
+              const coreReason =
+                eligResult.reasons?.[eligResult.reasons.length - 1] ||
+                eligResult.recommended_action ||
+                'Application does not meet eligibility requirements.';
+
+              const programLevel = (freshApplicant.program_level || '').toLowerCase();
+              const missingDocs = [];
+              if (!freshApplicant.submitted_transcripts) missingDocs.push('transcripts');
+              if (programLevel === 'masters' || programLevel === 'doctorate') {
+                if (!freshApplicant.submitted_undergraduate_diploma) missingDocs.push('undergraduate diploma');
+              } else {
+                if (!freshApplicant.submitted_diploma) missingDocs.push('diploma');
+              }
+              const docNote = missingDocs.length > 0
+                ? ` Additionally, required documents have not been submitted: ${missingDocs.join(', ')}.`
+                : '';
+
+              baseUpdate.ai_reasoning = coreReason + docNote;
+            }
+            await supabase
+              .from('applicants')
+              .update(baseUpdate)
+              .eq('id', applicant.id);
+
+            if (eligResult.confidence === 'low' || eligResult.status === 'needs_review') {
+              const aiResult = await callAIReview(freshApplicant, form1Submission ?? formSubmission);
+              await supabase
+                .from('applicants')
+                .update({
+                  ai_recommendation: aiResult.recommendation,
+                  ai_reasoning: aiResult.reasoning,
+                  eligibility_status: 'needs_review',
+                })
+                .eq('id', applicant.id);
+            }
+          }
+        }
+      } catch (bgErr) {
+        console.error('[webhook] Background pipeline error:', bgErr);
       }
+    })();
+
+    if (sendEmail) {
+      sendEmail(`form${formNumber}_received`, freshApplicant).catch(emailErr =>
+        console.error('[webhook] Email trigger failed:', emailErr)
+      );
     }
 
     console.log(`[webhook] Form ${formNumber} processed for applicant ${applicant.id} (${email})`);
-    return res.json({ success: true, applicant_id: applicant.id });
 
   } catch (err) {
     console.error('[webhook] Unhandled error:', err);
